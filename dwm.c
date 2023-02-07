@@ -2545,14 +2545,14 @@ main(int argc, char *argv[])
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
-	checkotherwm();
-	setup();
+	checkotherwm(); 		// check if another wm is running
+	setup();				// init systray, bars, screens, etc.
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec", NULL) == -1)
 		die("pledge");
 #endif /* __OpenBSD__ */
 	scan();
-	run();
+	run();					// event loop
 	if (restart) {
 		execvp(argv[0], argv);
 	}
