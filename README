@@ -54,4 +54,5 @@ PepperDWM
 - Patched Systray
 - Patched Fullscreen mode (Super+Shift+f)
 - Patched border transparency
+- Patched gaps (Super+Plus / Super+Minus / Super+Equal)
 - Implemented alternative terminal (Super+Shift+Backspace)
