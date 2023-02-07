@@ -46,3 +46,11 @@ Configuration
 -------------
 The configuration of dwm is done by creating a custom config.h
 and (re)compiling the source code.
+
+
+PepperDWM
+-------------
+- Added install scripts
+- Patched Systray
+- Patched Fullscreen mode (Super+Shift+f)
+- Patched border transparency
