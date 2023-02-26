@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const unsigned int borderpx  = 1;        /* border pixel of windows */
+static const unsigned int borderpx  = 3;        /* border pixel of windows */
 static const unsigned int gappx     = 15;        /* gaps between windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const unsigned int systraypinning = 2;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
@@ -19,7 +19,7 @@ static const char col_green[]       = "#4f772d";
 static const char col_light_green[] = "#90a955";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
-	[SchemeNorm] = { col_green, col_gray, col_green },
+	[SchemeNorm] = { col_green, col_gray, col_gray},
 	[SchemeSel]  = { col_light_green, col_gray,  col_light_green  },
 };
 
