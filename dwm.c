@@ -189,8 +189,7 @@ struct Systray {
 
 /* function declarations */
 static void applyrules(Client *c);
-static int applysizehints(Client *c, int *x, int *y, int *w, int *h,
-                          int interact);
+static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
 static void attach(Client *c);
@@ -246,8 +245,7 @@ static void resizerequest(XEvent *e);
 static void restack(Monitor *m);
 static void run(void);
 static void scan(void);
-static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2,
-                     long d3, long d4);
+static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
 static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
@@ -841,7 +839,7 @@ Monitor *dirtomon(int dir) {
 }
 
 void drawbar(Monitor *m) {
-  int x, w, tw = 0, stw = 0;
+  int x, w, tw = 0, trayWidth = 0;
   int boxs = drw->fonts->h / 9;
   int boxw = drw->fonts->h / 6 + 2;
   unsigned int i, occ = 0, urg = 0;
@@ -852,39 +850,54 @@ void drawbar(Monitor *m) {
   }
 
   if (showsystray && m == systraytomon(m) && !systrayonleft){
-    stw = getsystraywidth();
+    trayWidth = getsystraywidth();
   }
 
   /* draw status first so it can be overdrawn by tags later */
   drw_setscheme(drw, scheme[SchemeNorm]);
   tw = TEXTW(stext) - lrpad / 2 + 2; /* 2px extra right padding */
-  drw_text(drw, m->ww - tw - stw, 0, tw, bh, lrpad / 2 - 2, stext, 0);
+  drw_text(drw, m->ww - tw - trayWidth, 0, tw, bh, lrpad / 2 - 2, stext, 0);
 
   resizebarwin(m);
+
+  // mark urgent tags
   for (c = m->clients; c; c = c->next) {
     occ |= c->tags;
     if (c->isurgent){
       urg |= c->tags;
-	}
+	  }
   }
+
+  // render tags
   x = 0;
   for (i = 0; i < LENGTH(tags); i++) {
     w = TEXTW(tags[i]);
+
+    // render the tag
     drw_setscheme(drw, scheme[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
     drw_text(drw, x, 0, w, bh, lrpad / 2, tags[i], urg & 1 << i);
+
+    // invert tag if urgent
     if (occ & 1 << i) {
       drw_rect(drw, x + boxs, boxs, boxw, boxw, m == selmon && selmon->sel && selmon->sel->tags & 1 << i, urg & 1 << i);
 	  }
+
+    // set position for next tag
     x += w;
   }
+
+  // render layout
   w = TEXTW(m->ltsymbol);
   drw_setscheme(drw, scheme[SchemeNorm]);
   x = drw_text(drw, x, 0, w, bh, lrpad / 2, m->ltsymbol, 0);
 
-  if ((w = m->ww - tw - stw - x) > bh) {
+  // render title of last highlighted client
+  if ((w = m->ww - tw - trayWidth - x) > bh) {
     if (m->sel) {
       drw_setscheme(drw, scheme[m == selmon ? SchemeSel : SchemeNorm]);
       drw_text(drw, x, 0, w, bh, lrpad / 2, m->sel->name, 0);
+
+      // render the small indicator when client is floating
       if (m->sel->isfloating){
         drw_rect(drw, x + boxs, boxs, boxw, boxw, m->sel->isfixed, 0);
 	    }
@@ -893,7 +906,9 @@ void drawbar(Monitor *m) {
       drw_rect(drw, x, 0, w, bh, 1, 1);
     }
   }
-  drw_map(drw, m->barwin, 0, 0, m->ww - stw, bh);
+
+  // not sure what this does...
+  drw_map(drw, m->barwin, 0, 0, m->ww - trayWidth, bh);
 }
 
 void drawbars(void) {
@@ -1512,9 +1527,11 @@ void resize(Client *c, int x, int y, int w, int h, int interact) {
 
 void resizebarwin(Monitor *m) {
   unsigned int w = m->ww;
+
   if (showsystray && m == systraytomon(m) && !systrayonleft) {
     w -= getsystraywidth();
   }
+
   XMoveResizeWindow(dpy, m->barwin, m->wx, m->by, w, bh);
 }
 
@@ -2408,21 +2425,25 @@ void updatesystray(void) {
   if (systrayonleft) {
     x -= sw + lrpad / 2;
   }
+
+  // init systray
   if (!systray) {
-    /* init systray */
     if (!(systray = (Systray *)calloc(1, sizeof(Systray)))) {
       die("fatal: could not malloc() %u bytes\n", sizeof(Systray));
 	  }
 
+    // create tray window
     systray->win = XCreateSimpleWindow(dpy, root, x, m->by, w, bh, 0, 0, scheme[SchemeSel][ColBg].pixel);
     wa.event_mask = ButtonPressMask | ExposureMask;
     wa.override_redirect = True;
     wa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
+
     XSelectInput(dpy, systray->win, SubstructureNotifyMask);
     XChangeProperty(dpy, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&netatom[NetSystemTrayOrientationHorz], 1);
     XChangeWindowAttributes(dpy, systray->win, CWEventMask | CWOverrideRedirect | CWBackPixel, &wa);
     XMapRaised(dpy, systray->win);
     XSetSelectionOwner(dpy, netatom[NetSystemTray], systray->win, CurrentTime);
+
     if (XGetSelectionOwner(dpy, netatom[NetSystemTray]) == systray->win) {
       sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
       XSync(dpy, False);
@@ -2433,9 +2454,11 @@ void updatesystray(void) {
       return;
     }
   }
+
   for (w = 0, i = systray->icons; i; i = i->next) {
     /* make sure the background color stays the same */
     wa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
+
     XChangeWindowAttributes(dpy, i->win, CWBackPixel, &wa);
     XMapRaised(dpy, i->win);
     w += systrayspacing;
@@ -2459,6 +2482,7 @@ void updatesystray(void) {
   XConfigureWindow(dpy, systray->win, CWX | CWY | CWWidth | CWHeight | CWSibling | CWStackMode, &wc);
   XMapWindow(dpy, systray->win);
   XMapSubwindows(dpy, systray->win);
+
   /* redraw background */
   XSetForeground(dpy, drw->gc, scheme[SchemeNorm][ColBg].pixel);
   XFillRectangle(dpy, systray->win, drw->gc, 0, 0, w, bh);
@@ -2608,6 +2632,7 @@ int xerrorstart(Display *dpy, XErrorEvent *ee) {
 Monitor *systraytomon(Monitor *m) {
   Monitor *t;
   int i, n;
+
   if (!systraypinning) {
     if (!m) {
       return selmon;
