@@ -2438,6 +2438,10 @@ void updatesystray(void) {
     wa.override_redirect = True;
     wa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
 
+    // add class to systray
+    XClassHint ch = { .res_class="dwm_tray", .res_name="dwm_tray"};
+    XSetClassHint(dpy, systray->win, &ch);
+
     XSelectInput(dpy, systray->win, SubstructureNotifyMask);
     XChangeProperty(dpy, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&netatom[NetSystemTrayOrientationHorz], 1);
     XChangeWindowAttributes(dpy, systray->win, CWEventMask | CWOverrideRedirect | CWBackPixel, &wa);
