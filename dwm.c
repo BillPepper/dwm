@@ -123,6 +123,8 @@ typedef struct {
 
 typedef struct Monitor Monitor;
 typedef struct Client Client;
+
+// dwm uses clients instead of windows
 struct Client {
   char name[256];
   float mina, maxa;
@@ -151,7 +153,7 @@ typedef struct {
 } Layout;
 
 struct Monitor {
-  char ltsymbol[16];
+  char ltsymbol[16];  /* layout symbol */
   float mfact;
   int nmaster;
   int num;
