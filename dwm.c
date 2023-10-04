@@ -573,7 +573,7 @@ void cleanup(void) {
   for (i = 0; i < CurLast; i++){
     drw_cur_free(drw, cursor[i]);
   }
-  
+
   for (i = 0; i < LENGTH(colors); i++){
     free(scheme[i]);
   }
@@ -1011,7 +1011,7 @@ void focusstack(const Arg *arg) {
   if (!selmon->sel || (selmon->sel->isfullscreen && lockfullscreen)) {
     return;
   }
-  
+
   if (arg->i > 0) {
     for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
     if (!c){
@@ -1508,7 +1508,6 @@ Monitor *recttomon(int x, int y, int w, int h) {
   return r;
 }
 
-<<<<<<< Updated upstream
 void removesystrayicon(Client *i) {
   Client **ii;
 
@@ -1520,19 +1519,6 @@ void removesystrayicon(Client *i) {
     *ii = i->next;
   }
   free(i);
-=======
-void monocle(Monitor *m) {
-  unsigned int n = 0;
-  Client *c;
-
-  for (c = m->clients; c; c = c->next)
-    if (ISVISIBLE(c))
-      n++;
-  if (n > 0) /* override layout symbol */
-    snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
-  for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-    resize(c, m->wx, m->wy, m->ww - 2 * c->bw, m->wh - 2 * c->bw, 0);
->>>>>>> Stashed changes
 }
 
 void resize(Client *c, int x, int y, int w, int h, int interact) {
@@ -1627,7 +1613,7 @@ void resizemouse(const Arg *arg) {
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
 				resize(c, c->x, c->y, nw, nh, 1);
 			}
-			
+
 			break;
     }
   } while (ev.type != ButtonRelease);
@@ -1650,7 +1636,7 @@ void restack(Monitor *m) {
   if (!m->sel){
     return;
   }
-  
+
   if (m->sel->isfloating || !m->lt[m->sellt]->arrange){
     XRaiseWindow(dpy, m->sel->win);
   }
@@ -1693,9 +1679,9 @@ void scan(void) {
         manage(wins[i], &wa);
 	    }
     }
-    
+
     /* now the transients */
-    for (i = 0; i < num; i++) { 
+    for (i = 0; i < num; i++) {
       if (!XGetWindowAttributes(dpy, wins[i], &wa)) {
         continue;
 	    }
@@ -1863,7 +1849,7 @@ void setup(void) {
   sh = DisplayHeight(dpy, screen);
   root = RootWindow(dpy, screen);
   drw = drw_create(dpy, screen, root, sw, sh);
-  
+
   if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
     die("no fonts could be loaded.");
   }
@@ -2513,7 +2499,7 @@ void updatetitle(Client *c) {
   if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name)) {
     gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
   }
-  
+
   /* hack to mark broken clients */
   if (c->name[0] == '\0') {
     strcpy(c->name, broken);
@@ -2689,11 +2675,11 @@ int main(int argc, char *argv[]) {
   if (argc == 2 && !strcmp("-v", argv[1])) {
     die("dwm-" VERSION);
   }
-  
+
   if (argc != 1) {
     die("usage: dwm [-v]");
   }
-  
+
   if (!setlocale(LC_CTYPE, "") || !XSupportsLocale()) {
     fputs("warning: no locale support\n", stderr);
   }
