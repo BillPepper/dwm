@@ -66,7 +66,7 @@ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont,
 static const char *termcmd[]  = { "alacritty", NULL };
 static const char *termaltcmd[]  = { "urxvt", NULL };
 
-#include "exitdwm.c"
+#include "src/exitdwm.c"
 
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
