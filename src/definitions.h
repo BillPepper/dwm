@@ -122,7 +122,7 @@ struct Monitor {
 };
 
 typedef struct {
-  const char *class;
+  const char *class_name;
   const char *instance;
   const char *title;
   unsigned int tags;

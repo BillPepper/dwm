@@ -111,7 +111,7 @@ void applyrules(Client *c) {
 
   for (i = 0; i < LENGTH(rules); i++) {
     r = &rules[i];
-    if ((!r->title || strstr(c->name, r->title)) && (!r->class || strstr(class, r->class)) && (!r->instance || strstr(instance, r->instance))) {
+    if ((!r->title || strstr(c->name, r->title)) && (!r->class_name || strstr(class, r->class_name)) && (!r->instance || strstr(instance, r->instance))) {
       c->isfloating = r->isfloating;
       c->tags |= r->tags;
       for (m = mons; m && m->num != r->monitor; m = m->next);
