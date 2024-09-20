@@ -1,6 +1,9 @@
 #ifndef DWM_H
 #define DWM_H
 
+#include "definitions.h"
+#include <X11/Xlib.h>
+
 /* function declarations */
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
