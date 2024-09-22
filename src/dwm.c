@@ -2392,7 +2392,9 @@ void zoom(const Arg *arg) {
   pop(c);
 }
 
-
+void _debug(){
+  printf("debug\n");
+}
 
 int main(int argc, char *argv[]) {
   // check args
