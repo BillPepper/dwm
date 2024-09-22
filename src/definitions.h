@@ -3,6 +3,11 @@
 
 #include <X11/X.h>
 
+// VERSION is defined in makefile.mk, but my editor does not know that.
+#ifndef VERSION
+#define VERSION
+#endif
+
 #define SYSTEM_TRAY_REQUEST_DOCK 0
 /* XEMBED messages */
 #define XEMBED_EMBEDDED_NOTIFY 0
