@@ -2416,10 +2416,12 @@ int main(int argc, char *argv[]) {
   scan();
   run(); 			    // event loop
 
+  // relaunch dwm
   if (restart) {
     execvp(argv[0], argv);
   }
 
+  // exit
   cleanup();
   XCloseDisplay(dpy);
 
