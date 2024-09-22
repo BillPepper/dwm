@@ -2,6 +2,8 @@
 
 #include "src/definitions.h"
 #include "src/dwm.h"
+#include <X11/keysym.h>
+#include "src/exitdwm.c"
 
 /* appearance */
 static const unsigned int borderpx  = 3;        /* border pixel of windows */
