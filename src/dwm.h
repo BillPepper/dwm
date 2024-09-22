@@ -113,5 +113,6 @@ static void zoom(const Arg *arg);
 // --
 
 static void _debug();
+static void parse_args(int argc, char *argv[]);
 
 #endif

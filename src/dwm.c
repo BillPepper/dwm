@@ -2396,14 +2396,17 @@ void _debug(){
   printf("debug\n");
 }
 
-int main(int argc, char *argv[]) {
-  // check args
+void parse_args(int argc, char *argv[]){
   if (argc == 2 && !strcmp("-v", argv[1])) {
     die("dwm-" VERSION);
   }
   if (argc != 1) {
     die("usage: dwm [-v]");
   }
+}
+
+int main(int argc, char *argv[]) {
+  parse_args(argc, argv);
 
   // locale
   if (!setlocale(LC_CTYPE, "") || !XSupportsLocale()) {
