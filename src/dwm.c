@@ -2088,19 +2088,25 @@ void updatesizehints(Client *c) {
 }
 
 void updatestatus(void) {
+  // default status text
   if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext))) {
     strcpy(stext, "dwm-" VERSION);
   }
 
+  // show status on all screens
   if (showstatuson) {
     Monitor *m;
 
     for (m = mons; m; m = m->next) {
       drawbar(m);
     }
-  } else {
+  }
+
+  // show bar on selected screen
+  else {
     drawbar(selmon);
   }
+
   updatesystray();
 }
 
