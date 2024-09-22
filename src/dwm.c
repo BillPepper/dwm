@@ -500,19 +500,20 @@ void configurerequest(XEvent *e) {
 }
 
 Monitor *createmon(void) {
-  Monitor *m;
+  Monitor *monitor;
 
-  m = ecalloc(1, sizeof(Monitor));
-  m->tagset[0] = m->tagset[1] = 1;
-  m->mfact = mfact;
-  m->nmaster = nmaster;
-  m->showbar = showbar;
-  m->topbar = topbar;
-  m->gappx = gappx;
-  m->lt[0] = &layouts[0];
-  m->lt[1] = &layouts[1 % LENGTH(layouts)];
-  strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
-  return m;
+  monitor = ecalloc(1, sizeof(Monitor));
+  monitor->tagset[0] = monitor->tagset[1] = 1;
+  monitor->mfact = mfact;
+  monitor->nmaster = nmaster;
+  monitor->showbar = showbar;
+  monitor->topbar = topbar;
+  monitor->gappx = gappx;
+  monitor->lt[0] = &layouts[0];
+  monitor->lt[1] = &layouts[1 % LENGTH(layouts)];
+  strncpy(monitor->ltsymbol, layouts[0].symbol, sizeof monitor->ltsymbol);
+
+  return monitor;
 }
 
 void destroynotify(XEvent *e) {
@@ -1521,6 +1522,7 @@ void setlayout(const Arg *arg) {
   if (arg && arg->v) {
     selmon->lt[selmon->sellt] = (Layout *)arg->v;
   }
+
   strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
   if (selmon->sel) {
     arrange(selmon);
@@ -1571,6 +1573,7 @@ void setup(void) {
   root = RootWindow(dpy, screen);
   drw = drw_create(dpy, screen, root, sw, sh);
 
+  // font stuff
   if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
     die("no fonts could be loaded.");
   }
@@ -1578,12 +1581,14 @@ void setup(void) {
   lrpad = drw->fonts->h;
   bh = drw->fonts->h + 2;
   updategeom();
+
   /* init atoms */
   utf8string = XInternAtom(dpy, "UTF8_STRING", False);
   wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
   wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
   wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
   wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
+
   netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
   netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
   netatom[NetSystemTray] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_S0", False);
@@ -1597,31 +1602,39 @@ void setup(void) {
   netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
   netatom[NetWMWindowTypeDialog] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DIALOG", False);
   netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+
   xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
   xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
   xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
+
   /* init cursors */
   cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
   cursor[CurResize] = drw_cur_create(drw, XC_sizing);
   cursor[CurMove] = drw_cur_create(drw, XC_fleur);
+
   /* init appearance */
   scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
   for (i = 0; i < LENGTH(colors); i++){
     scheme[i] = drw_scm_create(drw, colors[i], 3);
   }
+
   /* init system tray */
   updatesystray();
+
   /* init bars */
   updatebars();
   updatestatus();
+
   /* supporting window for NetWMCheck */
   wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
   XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
   XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
   XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
+
   /* EWMH support per view */
   XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)netatom, NetLast);
   XDeleteProperty(dpy, root, netatom[NetClientList]);
+
   /* select events */
   wa.cursor = cursor[CurNormal]->cursor;
   wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask | ButtonPressMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PropertyChangeMask;
@@ -1863,29 +1876,38 @@ void unmapnotify(XEvent *e) {
 }
 
 void updatebars(void) {
-  unsigned int w;
-  Monitor *m;
-  XSetWindowAttributes wa = {.override_redirect = True, .background_pixmap = ParentRelative, .event_mask = ButtonPressMask | ExposureMask};
-  XClassHint ch = {"dwm", "dwm"};
+  unsigned int width;
+  Monitor *monitor;
+  XSetWindowAttributes window_attributes = {.override_redirect = True, .background_pixmap = ParentRelative, .event_mask = ButtonPressMask | ExposureMask};
+  XClassHint class_hint = {"dwm", "dwm"};
 
-  for (m = mons; m; m = m->next) {
-    if (m->barwin){
+  // loop monitors
+  for (monitor = mons; monitor; monitor = monitor->next) {
+
+    // check if monitor has bar
+    if (monitor->barwin){
       continue;
 	  }
 
-    w = m->ww;
-    if (showsystray && m == systraytomon(m)){
-      w -= getsystraywidth();
+    // calculate how long the bar is without the systray
+    width = monitor->ww;
+    if (showsystray && monitor == systraytomon(monitor)){
+      width -= getsystraywidth();
 	  }
 
-    m->barwin = XCreateWindow(dpy, root, m->wx, m->by, w, bh, 0, DefaultDepth(dpy, screen), CopyFromParent, DefaultVisual(dpy, screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &wa);
-    XDefineCursor(dpy, m->barwin, cursor[CurNormal]->cursor);
-    if (showsystray && m == systraytomon(m)){
+    // create bar
+    monitor->barwin = XCreateWindow(dpy, root, monitor->wx, monitor->by, width, bh, 0, DefaultDepth(dpy, screen), CopyFromParent, DefaultVisual(dpy, screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &window_attributes);
+
+    // set cursor
+    XDefineCursor(dpy, monitor->barwin, cursor[CurNormal]->cursor);
+
+    // raise bar parts
+    if (showsystray && monitor == systraytomon(monitor)){
       XMapRaised(dpy, systray->win);
 	  }
+    XMapRaised(dpy, monitor->barwin);
 
-    XMapRaised(dpy, m->barwin);
-    XSetClassHint(dpy, m->barwin, &ch);
+    XSetClassHint(dpy, monitor->barwin, &class_hint);
   }
 }
 
