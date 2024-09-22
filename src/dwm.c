@@ -2395,18 +2395,20 @@ void zoom(const Arg *arg) {
 
 
 int main(int argc, char *argv[]) {
+  // check args
   if (argc == 2 && !strcmp("-v", argv[1])) {
     die("dwm-" VERSION);
   }
-
   if (argc != 1) {
     die("usage: dwm [-v]");
   }
 
+  // locale
   if (!setlocale(LC_CTYPE, "") || !XSupportsLocale()) {
     fputs("warning: no locale support\n", stderr);
   }
 
+  // open display
   if (!(dpy = XOpenDisplay(NULL))) {
     die("dwm: cannot open display");
   }
