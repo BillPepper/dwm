@@ -64,146 +64,151 @@ struct NumTags {
   char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
 };
 
-/* function implementations */
-void applyrules(Client *c) {
+/* -- function implementations -- */
+
+// apply the rules in config to client
+void applyrules(Client *client) {
   const char *class, *instance;
   unsigned int i;
-  const Rule *r;
-  Monitor *m;
-  XClassHint ch = {NULL, NULL};
+  const Rule *rule;
+  Monitor *monitor;
+  XClassHint class_hint = {NULL, NULL};
 
   /* rule matching */
-  c->isfloating = 0;
-  c->tags = 0;
-  XGetClassHint(dpy, c->win, &ch);
-  class = ch.res_class ? ch.res_class : broken;
-  instance = ch.res_name ? ch.res_name : broken;
+  client->isfloating = 0;
+  client->tags = 0;
+  XGetClassHint(dpy, client->win, &class_hint);
+  class = class_hint.res_class ? class_hint.res_class : broken;
+  instance = class_hint.res_name ? class_hint.res_name : broken;
 
   for (i = 0; i < LENGTH(rules); i++) {
-    r = &rules[i];
-    if ((!r->title || strstr(c->name, r->title)) && (!r->class_name || strstr(class, r->class_name)) && (!r->instance || strstr(instance, r->instance))) {
-      c->isfloating = r->isfloating;
-      c->tags |= r->tags;
-      for (m = mons; m && m->num != r->monitor; m = m->next);
-      if (m){
-        c->mon = m;
+    rule = &rules[i];
+    if ((!rule->title || strstr(client->name, rule->title)) && (!rule->class_name || strstr(class, rule->class_name)) && (!rule->instance || strstr(instance, rule->instance))) {
+      client->isfloating = rule->isfloating;
+      client->tags |= rule->tags;
+      for (monitor = mons; monitor && monitor->num != rule->monitor; monitor = monitor->next);
+      if (monitor){
+        client->mon = monitor;
 	    }
     }
   }
-  if (ch.res_class){
-    XFree(ch.res_class);
+  if (class_hint.res_class){
+    XFree(class_hint.res_class);
   }
-  if (ch.res_name){
-    XFree(ch.res_name);
+  if (class_hint.res_name){
+    XFree(class_hint.res_name);
   }
-  c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
+  client->tags = client->tags & TAGMASK ? client->tags & TAGMASK : client->mon->tagset[client->mon->seltags];
 }
 
-int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact) {
+// apply size hints to client
+int applysizehints(Client *client, int *x, int *y, int *width, int *height, int interact) {
   int baseismin;
-  Monitor *m = c->mon;
+  Monitor *m = client->mon;
 
   /* set minimum possible */
-  *w = MAX(1, *w);
-  *h = MAX(1, *h);
+  *width = MAX(1, *width);
+  *height = MAX(1, *height);
   if (interact) {
     if (*x > sw){
-      *x = sw - WIDTH(c);
+      *x = sw - WIDTH(client);
 	  }
     if (*y > sh){
-      *y = sh - HEIGHT(c);
+      *y = sh - HEIGHT(client);
 	  }
-    if (*x + *w + 2 * c->bw < 0){
+    if (*x + *width + 2 * client->bw < 0){
       *x = 0;
 	  }
-    if (*y + *h + 2 * c->bw < 0){
+    if (*y + *height + 2 * client->bw < 0){
       *y = 0;
 	  }
   } else {
     if (*x >= m->wx + m->ww){
-      *x = m->wx + m->ww - WIDTH(c);
+      *x = m->wx + m->ww - WIDTH(client);
 	  }
     if (*y >= m->wy + m->wh){
-      *y = m->wy + m->wh - HEIGHT(c);
+      *y = m->wy + m->wh - HEIGHT(client);
 	  }
-    if (*x + *w + 2 * c->bw <= m->wx){
+    if (*x + *width + 2 * client->bw <= m->wx){
       *x = m->wx;
 	  }
-    if (*y + *h + 2 * c->bw <= m->wy){
+    if (*y + *height + 2 * client->bw <= m->wy){
       *y = m->wy;
 	  }
   }
-  if (*h < bh){
-    *h = bh;
+  if (*height < bh){
+    *height = bh;
   }
-  if (*w < bh){
-    *w = bh;
+  if (*width < bh){
+    *width = bh;
   }
-  if (resizehints || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange) {
-    if (!c->hintsvalid){
-      updatesizehints(c);
+  if (resizehints || client->isfloating || !client->mon->lt[client->mon->sellt]->arrange) {
+    if (!client->hintsvalid){
+      updatesizehints(client);
 	  }
     /* see last two sentences in ICCCM 4.1.2.3 */
-    baseismin = c->basew == c->minw && c->baseh == c->minh;
+    baseismin = client->basew == client->minw && client->baseh == client->minh;
 
     /* temporarily remove base dimensions */
     if (!baseismin) {
-      *w -= c->basew;
-      *h -= c->baseh;
+      *width -= client->basew;
+      *height -= client->baseh;
     }
     /* adjust for aspect limits */
-    if (c->mina > 0 && c->maxa > 0) {
-      if (c->maxa < (float)*w / *h)
-        *w = *h * c->maxa + 0.5;
-      else if (c->mina < (float)*h / *w)
-        *h = *w * c->mina + 0.5;
+    if (client->mina > 0 && client->maxa > 0) {
+      if (client->maxa < (float)*width / *height)
+        *width = *height * client->maxa + 0.5;
+      else if (client->mina < (float)*height / *width)
+        *height = *width * client->mina + 0.5;
     }
     if (baseismin) { /* increment calculation requires this */
-      *w -= c->basew;
-      *h -= c->baseh;
+      *width -= client->basew;
+      *height -= client->baseh;
     }
     /* adjust for increment value */
-    if (c->incw){
-      *w -= *w % c->incw;
+    if (client->incw){
+      *width -= *width % client->incw;
 	  }
-    if (c->inch){
-      *h -= *h % c->inch;
+    if (client->inch){
+      *height -= *height % client->inch;
 	  }
     /* restore base dimensions */
-    *w = MAX(*w + c->basew, c->minw);
-    *h = MAX(*h + c->baseh, c->minh);
-    if (c->maxw){
-      *w = MIN(*w, c->maxw);
+    *width = MAX(*width + client->basew, client->minw);
+    *height = MAX(*height + client->baseh, client->minh);
+    if (client->maxw){
+      *width = MIN(*width, client->maxw);
 	  }
-    if (c->maxh){
-      *h = MIN(*h, c->maxh);
+    if (client->maxh){
+      *height = MIN(*height, client->maxh);
 	  }
   }
-  return *x != c->x || *y != c->y || *w != c->w || *h != c->h;
+  return *x != client->x || *y != client->y || *width != client->w || *height != client->h;
 }
 
-void arrange(Monitor *m) {
-  if (m){
-    showhide(m->stack);
+void arrange(Monitor *monitor) {
+  if (monitor){
+    showhide(monitor->stack);
   } else {
-    for (m = mons; m; m = m->next){
-      showhide(m->stack);
+    for (monitor = mons; monitor; monitor = monitor->next){
+      showhide(monitor->stack);
 	  }
   }
-  if (m) {
-    arrangemon(m);
-    restack(m);
+
+
+  if (monitor) {
+    arrangemon(monitor);
+    restack(monitor);
   } else {
-    for (m = mons; m; m = m->next){
-      arrangemon(m);
+    for (monitor = mons; monitor; monitor = monitor->next){
+      arrangemon(monitor);
 	  }
   }
 }
 
-void arrangemon(Monitor *m) {
-  strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
-  if (m->lt[m->sellt]->arrange){
-    m->lt[m->sellt]->arrange(m);
+void arrangemon(Monitor *monitor) {
+  strncpy(monitor->ltsymbol, monitor->lt[monitor->sellt]->symbol, sizeof monitor->ltsymbol);
+  if (monitor->lt[monitor->sellt]->arrange){
+    monitor->lt[monitor->sellt]->arrange(monitor);
   }
 }
 
