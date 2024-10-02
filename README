@@ -56,3 +56,8 @@ PepperDWM
 - Patched border transparency
 - Patched gaps (Super+Plus / Super+Minus / Super+Equal)
 - Implemented alternative terminal (Super+Shift+Backspace)
+
+--------------
+To develop, it's best to run something like 'xnest :2 -geometry 1280x720+0+0'
+to launch a new x session, then 'export DISPLAY=:2' to make the terminal target
+the new x session. Then just run dwm.
