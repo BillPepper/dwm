@@ -6,8 +6,8 @@ static Systray *systray = NULL;
 static const char broken[] = "broken";
 static char stext[256];
 static int screen;
-static int sw, sh; /* X display screen geometry width, height */
-static int bh;     /* bar height */
+static int screen_width, screen_height; /* X display screen geometry width, height */
+static int bar_height;     /* bar height */
 static int lrpad;  /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
@@ -33,7 +33,7 @@ static int restart = 0;
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
-static Display *dpy;
+static Display *display;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;

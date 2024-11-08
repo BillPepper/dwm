@@ -21,9 +21,23 @@
 #define VERSION_MINOR 0
 #define XEMBED_EMBEDDED_VERSION (VERSION_MAJOR << 16) | VERSION_MINOR
 
-/* enums */
-enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
-enum { SchemeNorm, SchemeSel };                  /* color schemes */
+/* -- enums -- */
+
+/* cursor */
+enum {
+  CurNormal,
+  CurResize,
+  CurMove,
+  CurLast
+};
+
+/* color schemes */
+enum {
+  SchemeNorm,
+  SchemeSel
+};
+
+/* EWMH atoms */
 enum {
   NetSupported,
   NetWMName,
@@ -39,15 +53,26 @@ enum {
   NetWMWindowTypeDialog,
   NetClientList,
   NetLast
-};                                           /* EWMH atoms */
-enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
+};
+
+/* Xembed atoms */
+enum {
+  Manager,
+  Xembed,
+  XembedInfo,
+  XLast
+};
+
+/* default atoms */
 enum {
   WMProtocols,
   WMDelete,
   WMState,
   WMTakeFocus,
   WMLast
-}; /* default atoms */
+};
+
+/* clicks */
 enum {
   ClkTagBar,
   ClkLtSymbol,
@@ -56,7 +81,9 @@ enum {
   ClkClientWin,
   ClkRootWin,
   ClkLast
-}; /* clicks */
+};
+
+// -- Types --
 
 typedef union {
   int i;
@@ -76,20 +103,31 @@ typedef struct {
 typedef struct Monitor Monitor;
 typedef struct Client Client;
 
-// dwm uses clients instead of windows
+// a client is a 'window'
 struct Client {
   char name[256];
   float mina, maxa;
-  int x, y, w, h;
-  int oldx, oldy, oldw, oldh;
-  int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
+  int x, y;
+  int w, h;
+  int oldx, oldy;
+  int oldw, oldh;
+  int basew, baseh;
+  int incw, inch;
+  int maxw, maxh;
+  int minw, minh;
+  int hintsvalid;
   int bw, oldbw;
   unsigned int tags;
-  int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+  int isfixed;
+  int isfloating;
+  int isurgent;
+  int neverfocus;
+  int oldstate;
+  int isfullscreen;
   Client *next;
   Client *snext;
-  Monitor *mon;
-  Window win;
+  Monitor *monitor;
+  Window window;
 };
 
 typedef struct {
