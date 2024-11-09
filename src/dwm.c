@@ -61,7 +61,7 @@ void applyrules(Client *client) {
   for (i = 0; i < LENGTH(rules); i++) {
     rule = &rules[i];
     if ((!rule->title || strstr(client->name, rule->title)) && (!rule->class_name || strstr(class, rule->class_name)) && (!rule->instance || strstr(instance, rule->instance))) {
-      client->isfloating = rule->isfloating;
+      client->isfloating = rule->is_floating;
       client->tags |= rule->tags;
       for (monitor = monitors; monitor && monitor->num != rule->monitor; monitor = monitor->next);
       if (monitor){
@@ -275,8 +275,8 @@ void cleanup(void) {
   }
 
   if (showsystray) {
-    XUnmapWindow(display, systray->win);
-    XDestroyWindow(display, systray->win);
+    XUnmapWindow(display, systray->window);
+    XDestroyWindow(display, systray->window);
     free(systray);
   }
 
@@ -317,7 +317,7 @@ void clientmessage(XEvent *e) {
   XClientMessageEvent *cme = &e->xclient;
   Client *c = wintoclient(cme->window);
 
-  if (showsystray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
+  if (showsystray && cme->window == systray->window && cme->message_type == netatom[NetSystemTrayOP]) {
     /* add systray icons */
     if (cme->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
       if (!(c = (Client *)calloc(1, sizeof(Client)))){
@@ -348,15 +348,15 @@ void clientmessage(XEvent *e) {
       updatesystrayicongeom(c, wa.width, wa.height);
       XAddToSaveSet(display, c->window);
       XSelectInput(display, c->window, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-      XReparentWindow(display, c->window, systray->win, 0, 0);
+      XReparentWindow(display, c->window, systray->window, 0, 0);
       /* use parents background color */
       swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
       XChangeWindowAttributes(display, c->window, CWBackPixel, &swa);
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       /* FIXME not sure if I have to send these events, too */
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_FOCUS_IN, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->win, XEMBED_EMBEDDED_VERSION);
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_FOCUS_IN, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       XSync(display, False);
       resizebarwin(selected_monitor);
       updatesystray();
@@ -491,8 +491,8 @@ Monitor *createmon(void) {
   monitor->tag_set[0] = monitor->tag_set[1] = 1;
   monitor->master_factor = mfact;
   monitor->master_count = nmaster;
-  monitor->showbar = showbar;
-  monitor->topbar = topbar;
+  monitor->bar_enabled = bar_enabled;
+  monitor->is_topbar = topbar;
   monitor->gap = gappx;
   monitor->layout[0] = &layouts[0];
   monitor->layout[1] = &layouts[1 % LENGTH(layouts)];
@@ -558,7 +558,7 @@ void drawbar(Monitor *m) {
   unsigned int i, occ = 0, urg = 0;
   Client *c;
 
-  if (!m->showbar){
+  if (!m->bar_enabled){
     return;
   }
 
@@ -1014,7 +1014,7 @@ void maprequest(XEvent *e) {
 
   Client *i;
   if ((i = wintosystrayicon(ev->window))) {
-    sendevent(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+    sendevent(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
     resizebarwin(selected_monitor);
     updatesystray();
   }
@@ -1735,22 +1735,22 @@ void tile(Monitor *m) {
 }
 
 void togglebar(const Arg *arg) {
-  selected_monitor->showbar = !selected_monitor->showbar;
+  selected_monitor->bar_enabled = !selected_monitor->bar_enabled;
   updatebarpos(selected_monitor);
   resizebarwin(selected_monitor);
 
   if (showsystray) {
     XWindowChanges wc;
-    if (!selected_monitor->showbar) {
+    if (!selected_monitor->bar_enabled) {
       wc.y = -bar_height;
 	  }
-    else if (selected_monitor->showbar) {
+    else if (selected_monitor->bar_enabled) {
       wc.y = 0;
-      if (!selected_monitor->topbar){
+      if (!selected_monitor->is_topbar){
         wc.y = selected_monitor->monitor_area.size.h - bar_height;
 	    }
     }
-    XConfigureWindow(display, systray->win, CWY, &wc);
+    XConfigureWindow(display, systray->window, CWY, &wc);
   }
   arrange(selected_monitor);
 }
@@ -1888,7 +1888,7 @@ void updatebars(void) {
 
     // raise bar parts
     if (showsystray && monitor == systraytomon(monitor)){
-      XMapRaised(display, systray->win);
+      XMapRaised(display, systray->window);
 	  }
     XMapRaised(display, monitor->bar_window);
 
@@ -1900,10 +1900,10 @@ void updatebarpos(Monitor *m) {
   m->window_area.position.y = m->monitor_area.position.y;
   m->window_area.size.h = m->monitor_area.size.h;
 
-  if (m->showbar) {
+  if (m->bar_enabled) {
     m->window_area.size.h -= bar_height;
-    m->bar_y = m->topbar ? m->window_area.position.y : m->window_area.position.y + m->window_area.size.h;
-    m->window_area.position.y = m->topbar ? m->window_area.position.y + bar_height : m->window_area.position.y;
+    m->bar_y = m->is_topbar ? m->window_area.position.y : m->window_area.position.y + m->window_area.size.h;
+    m->window_area.position.y = m->is_topbar ? m->window_area.position.y + bar_height : m->window_area.position.y;
   } else {
     m->bar_y = -bar_height;
   }
@@ -2142,7 +2142,7 @@ void updatesystrayiconstate(Client *i, XPropertyEvent *ev) {
     return;
   }
 
-  sendevent(i->window, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0, systray->win, XEMBED_EMBEDDED_VERSION);
+  sendevent(i->window, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0, systray->window, XEMBED_EMBEDDED_VERSION);
 }
 
 void updatesystray(void) {
@@ -2169,23 +2169,23 @@ void updatesystray(void) {
 	  }
 
     // create tray window
-    systray->win = XCreateSimpleWindow(display, root, x, m->bar_y, w, bar_height, 0, 0, scheme[SchemeSel][ColBg].pixel);
+    systray->window = XCreateSimpleWindow(display, root, x, m->bar_y, w, bar_height, 0, 0, scheme[SchemeSel][ColBg].pixel);
     wa.event_mask = ButtonPressMask | ExposureMask;
     wa.override_redirect = True;
     wa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
 
     // add class to systray
     XClassHint ch = { .res_class="dwm_tray", .res_name="dwm_tray"};
-    XSetClassHint(display, systray->win, &ch);
+    XSetClassHint(display, systray->window, &ch);
 
-    XSelectInput(display, systray->win, SubstructureNotifyMask);
-    XChangeProperty(display, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&netatom[NetSystemTrayOrientationHorz], 1);
-    XChangeWindowAttributes(display, systray->win, CWEventMask | CWOverrideRedirect | CWBackPixel, &wa);
-    XMapRaised(display, systray->win);
-    XSetSelectionOwner(display, netatom[NetSystemTray], systray->win, CurrentTime);
+    XSelectInput(display, systray->window, SubstructureNotifyMask);
+    XChangeProperty(display, systray->window, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&netatom[NetSystemTrayOrientationHorz], 1);
+    XChangeWindowAttributes(display, systray->window, CWEventMask | CWOverrideRedirect | CWBackPixel, &wa);
+    XMapRaised(display, systray->window);
+    XSetSelectionOwner(display, netatom[NetSystemTray], systray->window, CurrentTime);
 
-    if (XGetSelectionOwner(display, netatom[NetSystemTray]) == systray->win) {
-      sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
+    if (XGetSelectionOwner(display, netatom[NetSystemTray]) == systray->window) {
+      sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->window, 0, 0);
       XSync(display, False);
     } else {
       fprintf(stderr, "dwm: unable to obtain system tray.\n");
@@ -2212,20 +2212,20 @@ void updatesystray(void) {
 
   w = w ? w + systrayspacing : 1;
   x -= w;
-  XMoveResizeWindow(display, systray->win, x, m->bar_y, w, bar_height);
+  XMoveResizeWindow(display, systray->window, x, m->bar_y, w, bar_height);
   wc.x = x;
   wc.y = m->bar_y;
   wc.width = w;
   wc.height = bar_height;
   wc.stack_mode = Above;
   wc.sibling = m->bar_window;
-  XConfigureWindow(display, systray->win, CWX | CWY | CWWidth | CWHeight | CWSibling | CWStackMode, &wc);
-  XMapWindow(display, systray->win);
-  XMapSubwindows(display, systray->win);
+  XConfigureWindow(display, systray->window, CWX | CWY | CWWidth | CWHeight | CWSibling | CWStackMode, &wc);
+  XMapWindow(display, systray->window);
+  XMapSubwindows(display, systray->window);
 
   /* redraw background */
   XSetForeground(display, drw->gc, scheme[SchemeNorm][ColBg].pixel);
-  XFillRectangle(display, systray->win, drw->gc, 0, 0, w, bar_height);
+  XFillRectangle(display, systray->window, drw->gc, 0, 0, w, bar_height);
   XSync(display, False);
 }
 

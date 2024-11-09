@@ -9,6 +9,7 @@
 #endif
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0
+
 /* XEMBED messages */
 #define XEMBED_EMBEDDED_NOTIFY 0
 #define XEMBED_WINDOW_ACTIVATE 1
@@ -163,18 +164,18 @@ typedef struct {
 
 struct Monitor {
   char layout_symbol[16];
-  float master_factor;      // size of master
-  int master_count;         // clients in master
-  int num;                  // monitor index?
+  float master_factor;            // size of master
+  int master_count;               // clients in master
+  int num;                        // monitor index?
   int bar_y;
   Area monitor_area;
   Area window_area;
   int gap;
-  unsigned int selected_tags;
-  unsigned int selected_layout;
+  unsigned int selected_tags;     // mask of seleted tags?
+  unsigned int selected_layout;   // index of current layout
   unsigned int tag_set[2];
-  int showbar;
-  int topbar;
+  int bar_enabled;
+  int is_topbar;
   Client *clients;
   Client *selected;
   Client *stack;
@@ -188,13 +189,13 @@ typedef struct {
   const char *instance;
   const char *title;
   unsigned int tags;
-  int isfloating;
+  int is_floating;
   int monitor;
 } Rule;
 
 typedef struct Systray Systray;
 struct Systray {
-  Window win;
+  Window window;
   Client *icons;
 };
 
