@@ -124,8 +124,9 @@ struct Client {
   float min_aspect;
   float max_aspect;
   Area area;
-  int oldx, oldy;
-  int oldw, oldh;
+  Area old_area;
+  // int oldx, oldy;
+  // int oldw, oldh;
   int basew, baseh;
   int incw, inch;
   int maxw, maxh;

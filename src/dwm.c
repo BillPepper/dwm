@@ -336,9 +336,9 @@ void clientmessage(XEvent *e) {
         wa.height = bar_height;
         wa.border_width = 0;
       }
-      c->area.position.x = c->oldx = c->area.position.y = c->oldy = 0;
-      c->area.size.w = c->oldw = wa.width;
-      c->area.size.h = c->oldh = wa.height;
+      c->area.position.x = c->old_area.position.x = c->area.position.y = c->old_area.position.y = 0;
+      c->area.size.w = c->old_area.size.w = wa.width;
+      c->area.size.h = c->old_area.size.h = wa.height;
       c->oldbw = wa.border_width;
       c->bw = 0;
       c->isfloating = True;
@@ -441,19 +441,19 @@ void configurerequest(XEvent *e) {
     else if (c->isfloating || !selected_monitor->layout[selected_monitor->sellt]->arrange) {
       m = c->monitor;
       if (ev->value_mask & CWX) {
-        c->oldx = c->area.position.x;
+        c->old_area.position.x = c->area.position.x;
         c->area.position.x = m->monitor_area_x + ev->x;
       }
       if (ev->value_mask & CWY) {
-        c->oldy = c->area.position.y;
+        c->old_area.position.y = c->area.position.y;
         c->area.position.y = m->monitor_area_y + ev->y;
       }
       if (ev->value_mask & CWWidth) {
-        c->oldw = c->area.size.w;
+        c->old_area.size.w = c->area.size.w;
         c->area.size.w = ev->width;
       }
       if (ev->value_mask & CWHeight) {
-        c->oldh = c->area.size.h;
+        c->old_area.size.h = c->area.size.h;
         c->area.size.h = ev->height;
       }
       if ((c->area.position.x + c->area.size.w) > m->monitor_area_x + m->monitor_area_w && c->isfloating){
@@ -940,10 +940,10 @@ void manage(Window w, XWindowAttributes *wa) {
   c = ecalloc(1, sizeof(Client));
   c->window = w;
   /* geometry */
-  c->area.position.x = c->oldx = wa->x;
-  c->area.position.y = c->oldy = wa->y;
-  c->area.size.w = c->oldw = wa->width;
-  c->area.size.h = c->oldh = wa->height;
+  c->area.position.x = c->old_area.position.x = wa->x;
+  c->area.position.y = c->old_area.position.y = wa->y;
+  c->area.size.w = c->old_area.size.w = wa->width;
+  c->area.size.h = c->old_area.size.h = wa->height;
   c->oldbw = wa->border_width;
 
   updatetitle(c);
@@ -1247,13 +1247,13 @@ void resizebarwin(Monitor *m) {
 void resizeclient(Client *c, int x, int y, int w, int h) {
   XWindowChanges wc;
 
-  c->oldx = c->area.position.x;
+  c->old_area.position.x = c->area.position.x;
   c->area.position.x = wc.x = x;
-  c->oldy = c->area.position.y;
+  c->old_area.position.y = c->area.position.y;
   c->area.position.y = wc.y = y;
-  c->oldw = c->area.size.w;
+  c->old_area.size.w = c->area.size.w;
   c->area.size.w = wc.width = w;
-  c->oldh = c->area.size.h;
+  c->old_area.size.h = c->area.size.h;
   c->area.size.h = wc.height = h;
   wc.border_width = c->bw;
   XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
@@ -1481,10 +1481,10 @@ void setfullscreen(Client *c, int fullscreen) {
     c->isfullscreen = 0;
     c->isfloating = c->oldstate;
     c->bw = c->oldbw;
-    c->area.position.x = c->oldx;
-    c->area.position.y = c->oldy;
-    c->area.size.w = c->oldw;
-    c->area.size.h = c->oldh;
+    c->area.position.x = c->old_area.position.x;
+    c->area.position.y = c->old_area.position.y;
+    c->area.size.w = c->old_area.size.w;
+    c->area.size.h = c->old_area.size.h;
     resizeclient(c, c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h);
     arrange(c->monitor);
   }
