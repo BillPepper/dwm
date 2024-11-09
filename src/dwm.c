@@ -135,11 +135,11 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *height -= client->baseh;
     }
     /* adjust for aspect limits */
-    if (client->min_aspect > 0 && client->max_aspect > 0) {
-      if (client->max_aspect < (float)*width / *height)
-        *width = *height * client->max_aspect + 0.5;
-      else if (client->min_aspect < (float)*height / *width)
-        *height = *width * client->min_aspect + 0.5;
+    if (client->aspect.min > 0 && client->aspect.max > 0) {
+      if (client->aspect.max < (float)*width / *height)
+        *width = *height * client->aspect.max + 0.5;
+      else if (client->aspect.min < (float)*height / *width)
+        *height = *width * client->aspect.min + 0.5;
     }
     if (baseismin) { /* increment calculation requires this */
       *width -= client->basew;
@@ -2062,10 +2062,10 @@ void updatesizehints(Client *c) {
     c->minw = c->minh = 0;
   }
   if (size.flags & PAspect) {
-    c->min_aspect = (float)size.min_aspect.y / size.min_aspect.x;
-    c->max_aspect = (float)size.max_aspect.x / size.max_aspect.y;
+    c->aspect.min = (float)size.min_aspect.y / size.min_aspect.x;
+    c->aspect.max = (float)size.max_aspect.x / size.max_aspect.y;
   } else {
-    c->max_aspect = c->min_aspect = 0.0;
+    c->aspect.max = c->aspect.min = 0.0;
   }
 
   c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
