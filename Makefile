@@ -15,7 +15,7 @@ options:
 	@echo "CC       = ${CC}"
 
 .c.o:
-	${CC} -c ${CFLAGS} $< -o $@
+	${CC} -g -c ${CFLAGS} $< -o $@
 
 ${OBJ}: config.h config.mk
 
@@ -24,7 +24,7 @@ config.h:
 
 dwm: ${OBJ}
 	@echo "DEBUG: ${OBJ}"
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
+	${CC} -g -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
 	rm -f dwm ${OBJ} dwm-${VERSION}.tar.gz
