@@ -129,7 +129,7 @@ struct Client {
   fMinMax aspect;
   Area area;
   Area old_area;
-  int basew, baseh;
+  Size base;
   int incw, inch;
   int maxw, maxh;
   int minw, minh;

@@ -127,12 +127,12 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       updatesizehints(client);
 	  }
     /* see last two sentences in ICCCM 4.1.2.3 */
-    baseismin = client->basew == client->minw && client->baseh == client->minh;
+    baseismin = client->base.w == client->minw && client->base.h == client->minh;
 
     /* temporarily remove base dimensions */
     if (!baseismin) {
-      *width -= client->basew;
-      *height -= client->baseh;
+      *width -= client->base.w;
+      *height -= client->base.h;
     }
     /* adjust for aspect limits */
     if (client->aspect.min > 0 && client->aspect.max > 0) {
@@ -142,8 +142,8 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
         *height = *width * client->aspect.min + 0.5;
     }
     if (baseismin) { /* increment calculation requires this */
-      *width -= client->basew;
-      *height -= client->baseh;
+      *width -= client->base.w;
+      *height -= client->base.h;
     }
     /* adjust for increment value */
     if (client->incw){
@@ -153,8 +153,8 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *height -= *height % client->inch;
 	  }
     /* restore base dimensions */
-    *width = MAX(*width + client->basew, client->minw);
-    *height = MAX(*height + client->baseh, client->minh);
+    *width = MAX(*width + client->base.w, client->minw);
+    *height = MAX(*height + client->base.h, client->minh);
     if (client->maxw){
       *width = MIN(*width, client->maxw);
 	  }
@@ -2032,13 +2032,13 @@ void updatesizehints(Client *c) {
     size.flags = PSize;
   }
   if (size.flags & PBaseSize) {
-    c->basew = size.base_width;
-    c->baseh = size.base_height;
+    c->base.w = size.base_width;
+    c->base.h = size.base_height;
   } else if (size.flags & PMinSize) {
-    c->basew = size.min_width;
-    c->baseh = size.min_height;
+    c->base.w = size.min_width;
+    c->base.h = size.min_height;
   } else {
-    c->basew = c->baseh = 0;
+    c->base.w = c->base.h = 0;
   }
   if (size.flags & PResizeInc) {
     c->incw = size.width_inc;
