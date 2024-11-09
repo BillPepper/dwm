@@ -122,7 +122,7 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
   if (*width < bar_height){
     *width = bar_height;
   }
-  if (resizehints || client->isfloating || !client->monitor->layout[client->monitor->selected_layout]->arrange) {
+  if (resize_hints_enabled || client->isfloating || !client->monitor->layout[client->monitor->selected_layout]->arrange) {
     if (!client->hintsvalid){
       updatesizehints(client);
 	  }
@@ -274,7 +274,7 @@ void cleanup(void) {
     cleanupmon(monitors);
   }
 
-  if (showsystray) {
+  if (systray_enabled) {
     XUnmapWindow(display, systray->window);
     XDestroyWindow(display, systray->window);
     free(systray);
@@ -317,7 +317,7 @@ void clientmessage(XEvent *e) {
   XClientMessageEvent *cme = &e->xclient;
   Client *c = wintoclient(cme->window);
 
-  if (showsystray && cme->window == systray->window && cme->message_type == netatom[NetSystemTrayOP]) {
+  if (systray_enabled && cme->window == systray->window && cme->message_type == netatom[NetSystemTrayOP]) {
     /* add systray icons */
     if (cme->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
       if (!(c = (Client *)calloc(1, sizeof(Client)))){
@@ -491,9 +491,9 @@ Monitor *createmon(void) {
   monitor->tag_set[0] = monitor->tag_set[1] = 1;
   monitor->master_factor = mfact;
   monitor->master_count = nmaster;
-  monitor->bar_enabled = bar_enabled;
-  monitor->is_topbar = topbar;
-  monitor->gap = gappx;
+  monitor->bar_enabled = is_bar_enabled;
+  monitor->is_topbar = is_top_bar;
+  monitor->gap = gap;
   monitor->layout[0] = &layouts[0];
   monitor->layout[1] = &layouts[1 % LENGTH(layouts)];
   strncpy(monitor->layout_symbol, layouts[0].symbol, sizeof monitor->layout_symbol);
@@ -562,7 +562,7 @@ void drawbar(Monitor *m) {
     return;
   }
 
-  if (showsystray && m == systraytomon(m) && !systrayonleft){
+  if (systray_enabled && m == systraytomon(m) && !systray_on_left){
     trayWidth = getsystraywidth();
   }
 
@@ -719,7 +719,7 @@ void focusmon(const Arg *arg) {
 void focusstack(const Arg *arg) {
   Client *c = NULL, *i;
 
-  if (!selected_monitor->selected || (selected_monitor->selected->isfullscreen && lockfullscreen)) {
+  if (!selected_monitor->selected || (selected_monitor->selected->isfullscreen && is_fullscreen_locked)) {
     return;
   }
 
@@ -777,11 +777,11 @@ unsigned int getsystraywidth() {
   unsigned int w = 0;
   Client *i;
 
-  if (showsystray) {
-    for (i = systray->icons; i; w += i->area.size.w + systrayspacing, i = i->next);
+  if (systray_enabled) {
+    for (i = systray->icons; i; w += i->area.size.w + systray_spacing, i = i->next);
   }
 
-  return w ? w + systrayspacing : 1;
+  return w ? w + systray_spacing : 1;
 }
 
 int getrootptr(int *x, int *y) {
@@ -963,7 +963,7 @@ void manage(Window w, XWindowAttributes *wa) {
   }
   c->area.position.x = MAX(c->area.position.x, c->monitor->window_area.position.x);
   c->area.position.y = MAX(c->area.position.y, c->monitor->window_area.position.y);
-  c->bw = borderpx;
+  c->bw = border_width;
 
   wc.border_width = c->bw;
   XConfigureWindow(display, w, CWBorderWidth, &wc);
@@ -1218,7 +1218,7 @@ Monitor *recttomon(int x, int y, int w, int h) {
 void removesystrayicon(Client *i) {
   Client **ii;
 
-  if (!showsystray || !i) {
+  if (!systray_enabled || !i) {
     return;
   }
   for (ii = &systray->icons; *ii && *ii != i; ii = &(*ii)->next);
@@ -1237,7 +1237,7 @@ void resize(Client *c, int x, int y, int w, int h, int interact) {
 void resizebarwin(Monitor *m) {
   unsigned int w = m->window_area.size.w;
 
-  if (showsystray && m == systraytomon(m) && !systrayonleft) {
+  if (systray_enabled && m == systraytomon(m) && !systray_on_left) {
     w -= getsystraywidth();
   }
 
@@ -1739,7 +1739,7 @@ void togglebar(const Arg *arg) {
   updatebarpos(selected_monitor);
   resizebarwin(selected_monitor);
 
-  if (showsystray) {
+  if (systray_enabled) {
     XWindowChanges wc;
     if (!selected_monitor->bar_enabled) {
       wc.y = -bar_height;
@@ -1876,7 +1876,7 @@ void updatebars(void) {
 
     // calculate how long the bar is without the systray
     width = monitor->window_area.size.w;
-    if (showsystray && monitor == systraytomon(monitor)){
+    if (systray_enabled && monitor == systraytomon(monitor)){
       width -= getsystraywidth();
 	  }
 
@@ -1887,7 +1887,7 @@ void updatebars(void) {
     XDefineCursor(display, monitor->bar_window, cursor[CurNormal]->cursor);
 
     // raise bar parts
-    if (showsystray && monitor == systraytomon(monitor)){
+    if (systray_enabled && monitor == systraytomon(monitor)){
       XMapRaised(display, systray->window);
 	  }
     XMapRaised(display, monitor->bar_window);
@@ -2079,7 +2079,7 @@ void updatestatus(void) {
   }
 
   // show status on all screens
-  if (showstatuson) {
+  if (status_monitor) {
     Monitor *m;
 
     for (m = monitors; m; m = m->next) {
@@ -2124,7 +2124,7 @@ void updatesystrayiconstate(Client *i, XPropertyEvent *ev) {
   long flags;
   int code = 0;
 
-  if (!showsystray || !i || ev->atom != xatom[XembedInfo] || !(flags = getatomprop(i, xatom[XembedInfo]))) {
+  if (!systray_enabled || !i || ev->atom != xatom[XembedInfo] || !(flags = getatomprop(i, xatom[XembedInfo]))) {
     return;
   }
 
@@ -2151,14 +2151,14 @@ void updatesystray(void) {
   Client *i;
   Monitor *m = systraytomon(NULL);
   unsigned int x = m->monitor_area.position.x + m->monitor_area.size.w;
-  unsigned int sw = TEXTW(status_text) - padding + systrayspacing;
+  unsigned int sw = TEXTW(status_text) - padding + systray_spacing;
   unsigned int w = 1;
 
-  if (!showsystray) {
+  if (!systray_enabled) {
     return;
   }
 
-  if (systrayonleft) {
+  if (systray_on_left) {
     x -= sw + padding / 2;
   }
 
@@ -2201,7 +2201,7 @@ void updatesystray(void) {
 
     XChangeWindowAttributes(display, i->window, CWBackPixel, &wa);
     XMapRaised(display, i->window);
-    w += systrayspacing;
+    w += systray_spacing;
     i->area.position.x = w;
     XMoveResizeWindow(display, i->window, i->area.position.x, 0, i->area.size.w, i->area.size.h);
     w += i->area.size.w;
@@ -2210,7 +2210,7 @@ void updatesystray(void) {
 	  }
   }
 
-  w = w ? w + systrayspacing : 1;
+  w = w ? w + systray_spacing : 1;
   x -= w;
   XMoveResizeWindow(display, systray->window, x, m->bar_y, w, bar_height);
   wc.x = x;
@@ -2306,7 +2306,7 @@ Client *wintoclient(Window w) {
 Client *wintosystrayicon(Window w) {
   Client *i = NULL;
 
-  if (!showsystray || !w) {
+  if (!systray_enabled || !w) {
     return i;
   }
 
@@ -2373,7 +2373,7 @@ Monitor *systraytomon(Monitor *m) {
   Monitor *t;
   int i, n;
 
-  if (!systraypinning) {
+  if (!systray_pinned) {
     if (!m) {
       return selected_monitor;
 	  }
@@ -2382,9 +2382,9 @@ Monitor *systraytomon(Monitor *m) {
   }
 
   for (n = 1, t = monitors; t && t->next; n++, t = t->next);
-  for (i = 1, t = monitors; t && t->next && i < systraypinning; i++, t = t->next);
+  for (i = 1, t = monitors; t && t->next && i < systray_pinned; i++, t = t->next);
 
-  if (systraypinningfailfirst && n < systraypinning) {
+  if (systray_pinning_fail_first && n < systray_pinned) {
     return monitors;
   }
 
