@@ -5,13 +5,13 @@
 #include <X11/Xlib.h>
 
 /* function declarations */
-static Monitor *createmon(void);
-static Monitor *dirtomon(int dir);
-static Monitor *recttomon(int x, int y, int w, int h);
+static Monitor *createmon(void); // create Monitor struct
+static Monitor *dirtomon(int dir); // get monitor in direction?
+static Monitor *recttomon(int x, int y, int w, int h); // which monitor is rect on?
 
 // layout
-static void monocle(Monitor *m);
-static void tile(Monitor *m);
+static void monocle(Monitor *m);  // monocle layout callback
+static void tile(Monitor *m);     // tile layout callback
 
 static void arrange(Monitor *m);
 static void arrangemon(Monitor *m);
@@ -20,8 +20,6 @@ static void drawbar(Monitor *m);
 static void resizebarwin(Monitor *m);
 static void restack(Monitor *m);
 static void updatebarpos(Monitor *m);
-
-
 
 static void buttonpress(XEvent *e);
 static void clientmessage(XEvent *e);

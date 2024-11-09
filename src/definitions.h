@@ -143,14 +143,20 @@ typedef struct {
 } Layout;
 
 struct Monitor {
-  char ltsymbol[16];  /* layout symbol */
-  float mfact;
-  int nmaster;
-  int num;
-  int by;             /* bar geometry */
-  int mx, my, mw, mh; /* screen size */
-  int wx, wy, ww, wh; /* window area  */
-  int gappx;          /* gaps between windows */
+  char layout_symbol[16];
+  float master_factor;      // size of master
+  int master_count;         // clients in master
+  int num;                  // monitor index?
+  int bar_y;
+  int monitor_area_x;
+  int monitor_area_y;
+  int monitor_area_w;
+  int monitor_area_h;
+  int window_area_x;
+  int window_area_y;
+  int window_area_w;
+  int window_area_h;
+  int gap;
   unsigned int seltags;
   unsigned int sellt;
   unsigned int tagset[2];
@@ -160,8 +166,8 @@ struct Monitor {
   Client *sel;
   Client *stack;
   Monitor *next;
-  Window barwin;
-  const Layout *lt[2];
+  Window bar_window;
+  const Layout *layout[2];
 };
 
 typedef struct {

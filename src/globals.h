@@ -8,7 +8,7 @@ static char status_text[256];
 static int screen;
 static int screen_width, screen_height; /* X display screen geometry width, height */
 static int bar_height;     /* bar height */
-static int lr_padding;  /* sum of left and right padding for text */
+static int padding;  /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 
