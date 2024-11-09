@@ -130,11 +130,12 @@ struct Client {
   Area area;
   Area old_area;
   Size base;
-  int incw, inch;
-  int maxw, maxh;
-  int minw, minh;
+  Size inc;
+  Size max;
+  Size min;
   int hintsvalid;
-  int bw, oldbw;
+  int bw;
+  int oldbw;
   unsigned int tags;
   int isfixed;
   int isfloating;

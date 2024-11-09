@@ -127,7 +127,7 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       updatesizehints(client);
 	  }
     /* see last two sentences in ICCCM 4.1.2.3 */
-    baseismin = client->base.w == client->minw && client->base.h == client->minh;
+    baseismin = client->base.w == client->min.w && client->base.h == client->min.h;
 
     /* temporarily remove base dimensions */
     if (!baseismin) {
@@ -146,20 +146,20 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *height -= client->base.h;
     }
     /* adjust for increment value */
-    if (client->incw){
-      *width -= *width % client->incw;
+    if (client->inc.w){
+      *width -= *width % client->inc.w;
 	  }
-    if (client->inch){
-      *height -= *height % client->inch;
+    if (client->inc.h){
+      *height -= *height % client->inc.h;
 	  }
     /* restore base dimensions */
-    *width = MAX(*width + client->base.w, client->minw);
-    *height = MAX(*height + client->base.h, client->minh);
-    if (client->maxw){
-      *width = MIN(*width, client->maxw);
+    *width = MAX(*width + client->base.w, client->min.w);
+    *height = MAX(*height + client->base.h, client->min.h);
+    if (client->max.w){
+      *width = MIN(*width, client->max.w);
 	  }
-    if (client->maxh){
-      *height = MIN(*height, client->maxh);
+    if (client->max.h){
+      *height = MIN(*height, client->max.h);
 	  }
   }
   return *x != client->area.position.x || *y != client->area.position.y || *width != client->area.size.w || *height != client->area.size.h;
@@ -2041,25 +2041,25 @@ void updatesizehints(Client *c) {
     c->base.w = c->base.h = 0;
   }
   if (size.flags & PResizeInc) {
-    c->incw = size.width_inc;
-    c->inch = size.height_inc;
+    c->inc.w = size.width_inc;
+    c->inc.h = size.height_inc;
   } else {
-    c->incw = c->inch = 0;
+    c->inc.w = c->inc.h = 0;
   }
   if (size.flags & PMaxSize) {
-    c->maxw = size.max_width;
-    c->maxh = size.max_height;
+    c->max.w = size.max_width;
+    c->max.h = size.max_height;
   } else {
-    c->maxw = c->maxh = 0;
+    c->max.w = c->max.h = 0;
   }
   if (size.flags & PMinSize) {
-    c->minw = size.min_width;
-    c->minh = size.min_height;
+    c->min.w = size.min_width;
+    c->min.h = size.min_height;
   } else if (size.flags & PBaseSize) {
-    c->minw = size.base_width;
-    c->minh = size.base_height;
+    c->min.w = size.base_width;
+    c->min.h = size.base_height;
   } else {
-    c->minw = c->minh = 0;
+    c->min.w = c->min.h = 0;
   }
   if (size.flags & PAspect) {
     c->aspect.min = (float)size.min_aspect.y / size.min_aspect.x;
@@ -2068,7 +2068,7 @@ void updatesizehints(Client *c) {
     c->aspect.max = c->aspect.min = 0.0;
   }
 
-  c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
+  c->isfixed = (c->max.w && c->max.h && c->max.w == c->min.w && c->max.h == c->min.h);
   c->hintsvalid = 1;
 }
 
