@@ -103,17 +103,17 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *y = 0;
 	  }
   } else {
-    if (*x >= m->window_area_x + m->window_area_w){
-      *x = m->window_area_x + m->window_area_w - WIDTH(client);
+    if (*x >= m->window_area.position.x + m->window_area.size.w){
+      *x = m->window_area.position.x + m->window_area.size.w - WIDTH(client);
 	  }
-    if (*y >= m->window_area_y + m->window_area_h){
-      *y = m->window_area_y + m->window_area_h - HEIGHT(client);
+    if (*y >= m->window_area.position.y + m->window_area.size.h){
+      *y = m->window_area.position.y + m->window_area.size.h - HEIGHT(client);
 	  }
-    if (*x + *width + 2 * client->bw <= m->window_area_x){
-      *x = m->window_area_x;
+    if (*x + *width + 2 * client->bw <= m->window_area.position.x){
+      *x = m->window_area.position.x;
 	  }
-    if (*y + *height + 2 * client->bw <= m->window_area_y){
-      *y = m->window_area_y;
+    if (*y + *height + 2 * client->bw <= m->window_area.position.y){
+      *y = m->window_area.position.y;
 	  }
   }
   if (*height < bar_height){
@@ -229,7 +229,7 @@ void buttonpress(XEvent *e) {
     } else if (ev->x < x + TEXTW(selected_monitor->layout_symbol)){
       click = ClkLtSymbol;
 	}
-    else if (ev->x > selected_monitor->window_area_w - (int)TEXTW(status_text) - getsystraywidth()){
+    else if (ev->x > selected_monitor->window_area.size.w - (int)TEXTW(status_text) - getsystraywidth()){
       click = ClkStatusText;
 	} else {
       click = ClkWinTitle;
@@ -415,7 +415,7 @@ void configurenotify(XEvent *e) {
       for (m = monitors; m; m = m->next) {
         for (c = m->clients; c; c = c->next){
           if (c->isfullscreen){
-            resizeclient(c, m->monitor_area_x, m->monitor_area_y, m->monitor_area_w, m->monitor_area_h);
+            resizeclient(c, m->monitor_area.position.x, m->monitor_area.position.y, m->monitor_area.size.w, m->monitor_area.size.h);
 		      }
 		    }
 
@@ -442,11 +442,11 @@ void configurerequest(XEvent *e) {
       m = c->monitor;
       if (ev->value_mask & CWX) {
         c->old_area.position.x = c->area.position.x;
-        c->area.position.x = m->monitor_area_x + ev->x;
+        c->area.position.x = m->monitor_area.position.x + ev->x;
       }
       if (ev->value_mask & CWY) {
         c->old_area.position.y = c->area.position.y;
-        c->area.position.y = m->monitor_area_y + ev->y;
+        c->area.position.y = m->monitor_area.position.y + ev->y;
       }
       if (ev->value_mask & CWWidth) {
         c->old_area.size.w = c->area.size.w;
@@ -456,11 +456,11 @@ void configurerequest(XEvent *e) {
         c->old_area.size.h = c->area.size.h;
         c->area.size.h = ev->height;
       }
-      if ((c->area.position.x + c->area.size.w) > m->monitor_area_x + m->monitor_area_w && c->isfloating){
-        c->area.position.x = m->monitor_area_x + (m->monitor_area_w / 2 - WIDTH(c) / 2); /* center in x direction */
+      if ((c->area.position.x + c->area.size.w) > m->monitor_area.position.x + m->monitor_area.size.w && c->isfloating){
+        c->area.position.x = m->monitor_area.position.x + (m->monitor_area.size.w / 2 - WIDTH(c) / 2); /* center in x direction */
 	  }
-      if ((c->area.position.y + c->area.size.h) > m->monitor_area_y + m->monitor_area_h && c->isfloating){
-        c->area.position.y = m->monitor_area_y + (m->monitor_area_h / 2 - HEIGHT(c) / 2); /* center in y direction */
+      if ((c->area.position.y + c->area.size.h) > m->monitor_area.position.y + m->monitor_area.size.h && c->isfloating){
+        c->area.position.y = m->monitor_area.position.y + (m->monitor_area.size.h / 2 - HEIGHT(c) / 2); /* center in y direction */
 	  }
       if ((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight))){
         configure(c);
@@ -569,7 +569,7 @@ void drawbar(Monitor *m) {
   /* draw status first so it can be overdrawn by tags later */
   drw_setscheme(drw, scheme[SchemeNorm]);
   tw = TEXTW(status_text) - padding / 2 + 2; /* 2px extra right padding */
-  drw_text(drw, m->window_area_w - tw - trayWidth, 0, tw, bar_height, padding / 2 - 2, status_text, 0);
+  drw_text(drw, m->window_area.size.w - tw - trayWidth, 0, tw, bar_height, padding / 2 - 2, status_text, 0);
 
   resizebarwin(m);
 
@@ -605,7 +605,7 @@ void drawbar(Monitor *m) {
   x = drw_text(drw, x, 0, w, bar_height, padding / 2, m->layout_symbol, 0);
 
   // render title of last highlighted client
-  if ((w = m->window_area_w - tw - trayWidth - x) > bar_height) {
+  if ((w = m->window_area.size.w - tw - trayWidth - x) > bar_height) {
     if (m->sel) {
       drw_setscheme(drw, scheme[m == selected_monitor ? SchemeSel : SchemeNorm]);
       drw_text(drw, x, 0, w, bar_height, padding / 2, m->sel->name, 0);
@@ -621,7 +621,7 @@ void drawbar(Monitor *m) {
   }
 
   // not sure what this does...
-  drw_map(drw, m->bar_window, 0, 0, m->window_area_w - trayWidth, bar_height);
+  drw_map(drw, m->bar_window, 0, 0, m->window_area.size.w - trayWidth, bar_height);
 }
 
 void drawbars(void) {
@@ -955,14 +955,14 @@ void manage(Window w, XWindowAttributes *wa) {
     applyrules(c);
   }
 
-  if (c->area.position.x + WIDTH(c) > c->monitor->window_area_x + c->monitor->window_area_w){
-    c->area.position.x = c->monitor->window_area_x + c->monitor->window_area_w - WIDTH(c);
+  if (c->area.position.x + WIDTH(c) > c->monitor->window_area.position.x + c->monitor->window_area.size.w){
+    c->area.position.x = c->monitor->window_area.position.x + c->monitor->window_area.size.w - WIDTH(c);
   }
-  if (c->area.position.y + HEIGHT(c) > c->monitor->window_area_y + c->monitor->window_area_h){
-    c->area.position.y = c->monitor->window_area_y + c->monitor->window_area_h - HEIGHT(c);
+  if (c->area.position.y + HEIGHT(c) > c->monitor->window_area.position.y + c->monitor->window_area.size.h){
+    c->area.position.y = c->monitor->window_area.position.y + c->monitor->window_area.size.h - HEIGHT(c);
   }
-  c->area.position.x = MAX(c->area.position.x, c->monitor->window_area_x);
-  c->area.position.y = MAX(c->area.position.y, c->monitor->window_area_y);
+  c->area.position.x = MAX(c->area.position.x, c->monitor->window_area.position.x);
+  c->area.position.y = MAX(c->area.position.y, c->monitor->window_area.position.y);
   c->bw = borderpx;
 
   wc.border_width = c->bw;
@@ -974,8 +974,8 @@ void manage(Window w, XWindowAttributes *wa) {
   updatewmhints(c);
 
   // set windows to center (patch)
-  c->area.position.x = c->monitor->monitor_area_x + (c->monitor->monitor_area_w - WIDTH(c)) / 2;
-  c->area.position.y = c->monitor->monitor_area_y + (c->monitor->monitor_area_h - HEIGHT(c)) / 2;
+  c->area.position.x = c->monitor->monitor_area.position.x + (c->monitor->monitor_area.size.w - WIDTH(c)) / 2;
+  c->area.position.y = c->monitor->monitor_area.position.y + (c->monitor->monitor_area.size.h - HEIGHT(c)) / 2;
 
   XSelectInput(display, w, EnterWindowMask | FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
   grabbuttons(c, 0);
@@ -1039,7 +1039,7 @@ monocle(Monitor *m)
 	if (n > 0) /* override layout symbol */
 		snprintf(m->layout_symbol, sizeof m->layout_symbol, "[%d]", n);
 	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-		resize(c, m->window_area_x, m->window_area_y, m->window_area_w - 2 * c->bw, m->window_area_h - 2 * c->bw, 0);
+		resize(c, m->window_area.position.x, m->window_area.position.y, m->window_area.size.w - 2 * c->bw, m->window_area.size.h - 2 * c->bw, 0);
 }
 
 void motionnotify(XEvent *e) {
@@ -1101,17 +1101,17 @@ void movemouse(const Arg *arg) {
 
       nx = ocx + (ev.xmotion.x - x);
       ny = ocy + (ev.xmotion.y - y);
-      if (abs(selected_monitor->window_area_x - nx) < snap) {
-        nx = selected_monitor->window_area_x;
+      if (abs(selected_monitor->window_area.position.x - nx) < snap) {
+        nx = selected_monitor->window_area.position.x;
 	    }
-      else if (abs((selected_monitor->window_area_x + selected_monitor->window_area_w) - (nx + WIDTH(c))) < snap) {
-        nx = selected_monitor->window_area_x + selected_monitor->window_area_w - WIDTH(c);
+      else if (abs((selected_monitor->window_area.position.x + selected_monitor->window_area.size.w) - (nx + WIDTH(c))) < snap) {
+        nx = selected_monitor->window_area.position.x + selected_monitor->window_area.size.w - WIDTH(c);
 	    }
-      if (abs(selected_monitor->window_area_y - ny) < snap) {
-        ny = selected_monitor->window_area_y;
+      if (abs(selected_monitor->window_area.position.y - ny) < snap) {
+        ny = selected_monitor->window_area.position.y;
 	    }
-      else if (abs((selected_monitor->window_area_y + selected_monitor->window_area_h) - (ny + HEIGHT(c))) < snap) {
-        ny = selected_monitor->window_area_y + selected_monitor->window_area_h - HEIGHT(c);
+      else if (abs((selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) - (ny + HEIGHT(c))) < snap) {
+        ny = selected_monitor->window_area.position.y + selected_monitor->window_area.size.h - HEIGHT(c);
 	    }
       if (!c->isfloating && selected_monitor->layout[selected_monitor->sellt]->arrange && (abs(nx - c->area.position.x) > snap || abs(ny - c->area.position.y) > snap)) {
         togglefloating(NULL);
@@ -1235,13 +1235,13 @@ void resize(Client *c, int x, int y, int w, int h, int interact) {
 }
 
 void resizebarwin(Monitor *m) {
-  unsigned int w = m->window_area_w;
+  unsigned int w = m->window_area.size.w;
 
   if (showsystray && m == systraytomon(m) && !systrayonleft) {
     w -= getsystraywidth();
   }
 
-  XMoveResizeWindow(display, m->bar_window, m->window_area_x, m->bar_y, w, bar_height);
+  XMoveResizeWindow(display, m->bar_window, m->window_area.position.x, m->bar_y, w, bar_height);
 }
 
 void resizeclient(Client *c, int x, int y, int w, int h) {
@@ -1312,7 +1312,7 @@ void resizemouse(const Arg *arg) {
 
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
-			if (c->monitor->window_area_x + nw >= selected_monitor->window_area_x && c->monitor->window_area_x + nw <= selected_monitor->window_area_x + selected_monitor->window_area_w && c->monitor->window_area_y + nh >= selected_monitor->window_area_y && c->monitor->window_area_y + nh <= selected_monitor->window_area_y + selected_monitor->window_area_h) {
+			if (c->monitor->window_area.position.x + nw >= selected_monitor->window_area.position.x && c->monitor->window_area.position.x + nw <= selected_monitor->window_area.position.x + selected_monitor->window_area.size.w && c->monitor->window_area.position.y + nh >= selected_monitor->window_area.position.y && c->monitor->window_area.position.y + nh <= selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) {
 				if (!c->isfloating && selected_monitor->layout[selected_monitor->sellt]->arrange && (abs(nw - c->area.size.w) > snap || abs(nh - c->area.size.h) > snap)) {
 				togglefloating(NULL);
 				}
@@ -1474,7 +1474,7 @@ void setfullscreen(Client *c, int fullscreen) {
     c->oldbw = c->bw;
     c->bw = 0;
     c->isfloating = 1;
-    resizeclient(c, c->monitor->monitor_area_x, c->monitor->monitor_area_y, c->monitor->monitor_area_w, c->monitor->monitor_area_h);
+    resizeclient(c, c->monitor->monitor_area.position.x, c->monitor->monitor_area.position.y, c->monitor->monitor_area.size.w, c->monitor->monitor_area.size.h);
     XRaiseWindow(display, c->window);
   } else if (!fullscreen && c->isfullscreen) {
     XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
@@ -1712,22 +1712,22 @@ void tile(Monitor *m) {
   }
 
   if (n > m->master_count){
-    mw = m->master_count ? m->window_area_w * m->master_factor : 0;
+    mw = m->master_count ? m->window_area.size.w * m->master_factor : 0;
   } else {
-    mw = m->window_area_w - m->gap;
+    mw = m->window_area.size.w - m->gap;
   }
 
   for (i = 0, my = ty = m->gap, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
     if (i < m->master_count) {
-      h = (m->window_area_h - my) / (MIN(n, m->master_count) - i) - m->gap;
-      resize(c, m->window_area_x + m->gap, m->window_area_y + my, mw - (2 * c->bw) - m->gap, h - (2 * c->bw), 0);
-      if (my + HEIGHT(c) + m->gap < m->window_area_h){
+      h = (m->window_area.size.h - my) / (MIN(n, m->master_count) - i) - m->gap;
+      resize(c, m->window_area.position.x + m->gap, m->window_area.position.y + my, mw - (2 * c->bw) - m->gap, h - (2 * c->bw), 0);
+      if (my + HEIGHT(c) + m->gap < m->window_area.size.h){
         my += HEIGHT(c) + m->gap;
 	    }
     } else {
-      h = (m->window_area_h - ty) / (n - i) - m->gap;
-      resize(c, m->window_area_x + mw + m->gap, m->window_area_y + ty, m->window_area_w - mw - (2 * c->bw) - 2 * m->gap, h - (2 * c->bw), 0);
-      if (ty + HEIGHT(c) + m->gap < m->window_area_h){
+      h = (m->window_area.size.h - ty) / (n - i) - m->gap;
+      resize(c, m->window_area.position.x + mw + m->gap, m->window_area.position.y + ty, m->window_area.size.w - mw - (2 * c->bw) - 2 * m->gap, h - (2 * c->bw), 0);
+      if (ty + HEIGHT(c) + m->gap < m->window_area.size.h){
         ty += HEIGHT(c) + m->gap;
 	    }
     }
@@ -1747,7 +1747,7 @@ void togglebar(const Arg *arg) {
     else if (selected_monitor->showbar) {
       wc.y = 0;
       if (!selected_monitor->topbar){
-        wc.y = selected_monitor->monitor_area_h - bar_height;
+        wc.y = selected_monitor->monitor_area.size.h - bar_height;
 	    }
     }
     XConfigureWindow(display, systray->win, CWY, &wc);
@@ -1875,13 +1875,13 @@ void updatebars(void) {
 	  }
 
     // calculate how long the bar is without the systray
-    width = monitor->window_area_w;
+    width = monitor->window_area.size.w;
     if (showsystray && monitor == systraytomon(monitor)){
       width -= getsystraywidth();
 	  }
 
     // create bar
-    monitor->bar_window = XCreateWindow(display, root, monitor->window_area_x, monitor->bar_y, width, bar_height, 0, DefaultDepth(display, screen), CopyFromParent, DefaultVisual(display, screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &window_attributes);
+    monitor->bar_window = XCreateWindow(display, root, monitor->window_area.position.x, monitor->bar_y, width, bar_height, 0, DefaultDepth(display, screen), CopyFromParent, DefaultVisual(display, screen), CWOverrideRedirect | CWBackPixmap | CWEventMask, &window_attributes);
 
     // set cursor
     XDefineCursor(display, monitor->bar_window, cursor[CurNormal]->cursor);
@@ -1897,13 +1897,13 @@ void updatebars(void) {
 }
 
 void updatebarpos(Monitor *m) {
-  m->window_area_y = m->monitor_area_y;
-  m->window_area_h = m->monitor_area_h;
+  m->window_area.position.y = m->monitor_area.position.y;
+  m->window_area.size.h = m->monitor_area.size.h;
 
   if (m->showbar) {
-    m->window_area_h -= bar_height;
-    m->bar_y = m->topbar ? m->window_area_y : m->window_area_y + m->window_area_h;
-    m->window_area_y = m->topbar ? m->window_area_y + bar_height : m->window_area_y;
+    m->window_area.size.h -= bar_height;
+    m->bar_y = m->topbar ? m->window_area.position.y : m->window_area.position.y + m->window_area.size.h;
+    m->window_area.position.y = m->topbar ? m->window_area.position.y + bar_height : m->window_area.position.y;
   } else {
     m->bar_y = -bar_height;
   }
@@ -1955,13 +1955,13 @@ int updategeom(void) {
 	  }
     }
     for (i = 0, m = monitors; i < nn && m; m = m->next, i++){
-      if (i >= n || unique[i].x_org != m->monitor_area_x || unique[i].y_org != m->monitor_area_y || unique[i].width != m->monitor_area_w || unique[i].height != m->monitor_area_h) {
+      if (i >= n || unique[i].x_org != m->monitor_area.position.x || unique[i].y_org != m->monitor_area.position.y || unique[i].width != m->monitor_area.size.w || unique[i].height != m->monitor_area.size.h) {
         dirty = 1;
         m->num = i;
-        m->monitor_area_x = m->window_area_x = unique[i].x_org;
-        m->monitor_area_y = m->window_area_y = unique[i].y_org;
-        m->monitor_area_w = m->window_area_w = unique[i].width;
-        m->monitor_area_h = m->window_area_h = unique[i].height;
+        m->monitor_area.position.x = m->window_area.position.x = unique[i].x_org;
+        m->monitor_area.position.y = m->window_area.position.y = unique[i].y_org;
+        m->monitor_area.size.w = m->window_area.size.w = unique[i].width;
+        m->monitor_area.size.h = m->window_area.size.h = unique[i].height;
         updatebarpos(m);
       }
 	}
@@ -1990,10 +1990,10 @@ int updategeom(void) {
     if (!monitors) {
       monitors = createmon();
 	}
-    if (monitors->monitor_area_w != screen_width || monitors->monitor_area_h != screen_height) {
+    if (monitors->monitor_area.size.w != screen_width || monitors->monitor_area.size.h != screen_height) {
       dirty = 1;
-      monitors->monitor_area_w = monitors->window_area_w = screen_width;
-      monitors->monitor_area_h = monitors->window_area_h = screen_height;
+      monitors->monitor_area.size.w = monitors->window_area.size.w = screen_width;
+      monitors->monitor_area.size.h = monitors->window_area.size.h = screen_height;
       updatebarpos(monitors);
     }
   }
@@ -2150,7 +2150,7 @@ void updatesystray(void) {
   XWindowChanges wc;
   Client *i;
   Monitor *m = systraytomon(NULL);
-  unsigned int x = m->monitor_area_x + m->monitor_area_w;
+  unsigned int x = m->monitor_area.position.x + m->monitor_area.size.w;
   unsigned int sw = TEXTW(status_text) - padding + systrayspacing;
   unsigned int w = 1;
 

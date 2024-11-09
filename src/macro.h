@@ -4,7 +4,7 @@
 /* macros */
 #define BUTTONMASK (ButtonPressMask | ButtonReleaseMask)
 #define CLEANMASK(mask) (mask & ~(numlockmask | LockMask) &  (ShiftMask | ControlMask | Mod1Mask | Mod2Mask | Mod3Mask | Mod4Mask | Mod5Mask))
-#define INTERSECT(x, y, w, h, m) (MAX(0, MIN((x) + (w), (m)->window_area_x + (m)->window_area_h) - MAX((x), (m)->window_area_x)) * MAX(0, MIN((y) + (h), (m)->window_area_y + (m)->window_area_h) - MAX((y), (m)->window_area_y)))
+#define INTERSECT(x, y, w, h, m) (MAX(0, MIN((x) + (w), (m)->window_area.position.x + (m)->window_area.size.h) - MAX((x), (m)->window_area.position.x)) * MAX(0, MIN((y) + (h), (m)->window_area.position.y + (m)->window_area.size.h) - MAX((y), (m)->window_area.position.y)))
 #define ISVISIBLE(C) ((C->tags & C->monitor->tagset[C->monitor->seltags]))
 #define LENGTH(X) (sizeof X / sizeof X[0])
 #define MOUSEMASK (BUTTONMASK | PointerMotionMask)

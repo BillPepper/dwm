@@ -167,14 +167,8 @@ struct Monitor {
   int master_count;         // clients in master
   int num;                  // monitor index?
   int bar_y;
-  int monitor_area_x;
-  int monitor_area_y;
-  int monitor_area_w;
-  int monitor_area_h;
-  int window_area_x;
-  int window_area_y;
-  int window_area_w;
-  int window_area_h;
+  Area monitor_area;
+  Area window_area;
   int gap;
   unsigned int seltags;
   unsigned int sellt;
