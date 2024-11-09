@@ -122,7 +122,7 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
   if (*width < bar_height){
     *width = bar_height;
   }
-  if (resize_hints_enabled || client->isfloating || !client->monitor->layout[client->monitor->selected_layout]->arrange) {
+  if (resize_hints_enabled || client->isfloating || !client->monitor->layout[client->monitor->selected_layout]->arrange_func) {
     if (!client->hintsvalid){
       updatesizehints(client);
 	  }
@@ -166,19 +166,26 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
 }
 
 void arrange(Monitor *monitor) {
+  // if monitor specified
   if (monitor){
     showhide(monitor->stack);
-  } else {
+  }
+
+  // otherwise, do it for all
+  else {
     for (monitor = monitors; monitor; monitor = monitor->next){
       showhide(monitor->stack);
 	  }
   }
 
-
+  // again, if monitor specified
   if (monitor) {
     arrangemon(monitor);
     restack(monitor);
-  } else {
+  }
+
+  // again, do it for all if not specified
+  else {
     for (monitor = monitors; monitor; monitor = monitor->next){
       arrangemon(monitor);
 	  }
@@ -187,8 +194,8 @@ void arrange(Monitor *monitor) {
 
 void arrangemon(Monitor *monitor) {
   strncpy(monitor->layout_symbol, monitor->layout[monitor->selected_layout]->symbol, sizeof monitor->layout_symbol);
-  if (monitor->layout[monitor->selected_layout]->arrange){
-    monitor->layout[monitor->selected_layout]->arrange(monitor);
+  if (monitor->layout[monitor->selected_layout]->arrange_func){
+    monitor->layout[monitor->selected_layout]->arrange_func(monitor);
   }
 }
 
@@ -438,7 +445,7 @@ void configurerequest(XEvent *e) {
     if (ev->value_mask & CWBorderWidth){
       c->bw = ev->border_width;
 	  }
-    else if (c->isfloating || !selected_monitor->layout[selected_monitor->selected_layout]->arrange) {
+    else if (c->isfloating || !selected_monitor->layout[selected_monitor->selected_layout]->arrange_func) {
       m = c->monitor;
       if (ev->value_mask & CWX) {
         c->old_area.position.x = c->area.position.x;
@@ -1113,10 +1120,10 @@ void movemouse(const Arg *arg) {
       else if (abs((selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) - (ny + HEIGHT(c))) < snap) {
         ny = selected_monitor->window_area.position.y + selected_monitor->window_area.size.h - HEIGHT(c);
 	    }
-      if (!c->isfloating && selected_monitor->layout[selected_monitor->selected_layout]->arrange && (abs(nx - c->area.position.x) > snap || abs(ny - c->area.position.y) > snap)) {
+      if (!c->isfloating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(nx - c->area.position.x) > snap || abs(ny - c->area.position.y) > snap)) {
         togglefloating(NULL);
 	    }
-      if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange || c->isfloating) {
+      if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || c->isfloating) {
         resize(c, nx, ny, c->area.size.w, c->area.size.h, 1);
 	    }
 
@@ -1313,11 +1320,11 @@ void resizemouse(const Arg *arg) {
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 			if (c->monitor->window_area.position.x + nw >= selected_monitor->window_area.position.x && c->monitor->window_area.position.x + nw <= selected_monitor->window_area.position.x + selected_monitor->window_area.size.w && c->monitor->window_area.position.y + nh >= selected_monitor->window_area.position.y && c->monitor->window_area.position.y + nh <= selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) {
-				if (!c->isfloating && selected_monitor->layout[selected_monitor->selected_layout]->arrange && (abs(nw - c->area.size.w) > snap || abs(nh - c->area.size.h) > snap)) {
+				if (!c->isfloating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(nw - c->area.size.w) > snap || abs(nh - c->area.size.h) > snap)) {
 				togglefloating(NULL);
 				}
 			}
-			if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange || c->isfloating) {
+			if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || c->isfloating) {
 				resize(c, c->area.position.x, c->area.position.y, nw, nh, 1);
 			}
 
@@ -1344,10 +1351,10 @@ void restack(Monitor *m) {
     return;
   }
 
-  if (m->selected->isfloating || !m->layout[m->selected_layout]->arrange){
+  if (m->selected->isfloating || !m->layout[m->selected_layout]->arrange_func){
     XRaiseWindow(display, m->selected->window);
   }
-  if (m->layout[m->selected_layout]->arrange) {
+  if (m->layout[m->selected_layout]->arrange_func) {
     wc.stack_mode = Below;
     wc.sibling = m->bar_window;
     for (c = m->stack; c; c = c->snext) {
@@ -1520,7 +1527,7 @@ void setlayout(const Arg *arg) {
 void setmfact(const Arg *arg) {
   float f;
 
-  if (!arg || !selected_monitor->layout[selected_monitor->selected_layout]->arrange) {
+  if (!arg || !selected_monitor->layout[selected_monitor->selected_layout]->arrange_func) {
     return;
   }
 
@@ -1650,7 +1657,7 @@ void showhide(Client *c) {
   if (ISVISIBLE(c)) {
     /* show clients top down */
     XMoveWindow(display, c->window, c->area.position.x, c->area.position.y);
-    if ((!c->monitor->layout[c->monitor->selected_layout]->arrange || c->isfloating) && !c->isfullscreen) {
+    if ((!c->monitor->layout[c->monitor->selected_layout]->arrange_func || c->isfloating) && !c->isfullscreen) {
       resize(c, c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h, 0);
 	  }
     showhide(c->snext);
@@ -2394,7 +2401,7 @@ Monitor *systraytomon(Monitor *m) {
 void zoom(const Arg *arg) {
   Client *c = selected_monitor->selected;
 
-  if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange || !c || c->isfloating) {
+  if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || !c || c->isfloating) {
     return;
   }
 

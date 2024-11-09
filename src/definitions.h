@@ -159,7 +159,7 @@ typedef struct {
 
 typedef struct {
   const char *symbol;
-  void (*arrange)(Monitor *);
+  void (*arrange_func)(Monitor *);
 } Layout;
 
 struct Monitor {
