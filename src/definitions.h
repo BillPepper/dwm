@@ -170,13 +170,13 @@ struct Monitor {
   Area monitor_area;
   Area window_area;
   int gap;
-  unsigned int seltags;
-  unsigned int sellt;
-  unsigned int tagset[2];
+  unsigned int selected_tags;
+  unsigned int selected_layout;
+  unsigned int tag_set[2];
   int showbar;
   int topbar;
   Client *clients;
-  Client *sel;
+  Client *selected;
   Client *stack;
   Monitor *next;
   Window bar_window;
