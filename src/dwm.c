@@ -135,11 +135,11 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *height -= client->baseh;
     }
     /* adjust for aspect limits */
-    if (client->mina > 0 && client->maxa > 0) {
-      if (client->maxa < (float)*width / *height)
-        *width = *height * client->maxa + 0.5;
-      else if (client->mina < (float)*height / *width)
-        *height = *width * client->mina + 0.5;
+    if (client->min_aspect > 0 && client->max_aspect > 0) {
+      if (client->max_aspect < (float)*width / *height)
+        *width = *height * client->max_aspect + 0.5;
+      else if (client->min_aspect < (float)*height / *width)
+        *height = *width * client->min_aspect + 0.5;
     }
     if (baseismin) { /* increment calculation requires this */
       *width -= client->basew;
@@ -162,7 +162,7 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *height = MIN(*height, client->maxh);
 	  }
   }
-  return *x != client->x || *y != client->y || *width != client->w || *height != client->h;
+  return *x != client->area.position.x || *y != client->area.position.y || *width != client->area.size.w || *height != client->area.size.h;
 }
 
 void arrange(Monitor *monitor) {
@@ -336,9 +336,9 @@ void clientmessage(XEvent *e) {
         wa.height = bar_height;
         wa.border_width = 0;
       }
-      c->x = c->oldx = c->y = c->oldy = 0;
-      c->w = c->oldw = wa.width;
-      c->h = c->oldh = wa.height;
+      c->area.position.x = c->oldx = c->area.position.y = c->oldy = 0;
+      c->area.size.w = c->oldw = wa.width;
+      c->area.size.h = c->oldh = wa.height;
       c->oldbw = wa.border_width;
       c->bw = 0;
       c->isfloating = True;
@@ -388,10 +388,10 @@ void configure(Client *c) {
   ce.display = display;
   ce.event = c->window;
   ce.window = c->window;
-  ce.x = c->x;
-  ce.y = c->y;
-  ce.width = c->w;
-  ce.height = c->h;
+  ce.x = c->area.position.x;
+  ce.y = c->area.position.y;
+  ce.width = c->area.size.w;
+  ce.height = c->area.size.h;
   ce.border_width = c->bw;
   ce.above = None;
   ce.override_redirect = False;
@@ -441,32 +441,32 @@ void configurerequest(XEvent *e) {
     else if (c->isfloating || !selected_monitor->layout[selected_monitor->sellt]->arrange) {
       m = c->monitor;
       if (ev->value_mask & CWX) {
-        c->oldx = c->x;
-        c->x = m->monitor_area_x + ev->x;
+        c->oldx = c->area.position.x;
+        c->area.position.x = m->monitor_area_x + ev->x;
       }
       if (ev->value_mask & CWY) {
-        c->oldy = c->y;
-        c->y = m->monitor_area_y + ev->y;
+        c->oldy = c->area.position.y;
+        c->area.position.y = m->monitor_area_y + ev->y;
       }
       if (ev->value_mask & CWWidth) {
-        c->oldw = c->w;
-        c->w = ev->width;
+        c->oldw = c->area.size.w;
+        c->area.size.w = ev->width;
       }
       if (ev->value_mask & CWHeight) {
-        c->oldh = c->h;
-        c->h = ev->height;
+        c->oldh = c->area.size.h;
+        c->area.size.h = ev->height;
       }
-      if ((c->x + c->w) > m->monitor_area_x + m->monitor_area_w && c->isfloating){
-        c->x = m->monitor_area_x + (m->monitor_area_w / 2 - WIDTH(c) / 2); /* center in x direction */
+      if ((c->area.position.x + c->area.size.w) > m->monitor_area_x + m->monitor_area_w && c->isfloating){
+        c->area.position.x = m->monitor_area_x + (m->monitor_area_w / 2 - WIDTH(c) / 2); /* center in x direction */
 	  }
-      if ((c->y + c->h) > m->monitor_area_y + m->monitor_area_h && c->isfloating){
-        c->y = m->monitor_area_y + (m->monitor_area_h / 2 - HEIGHT(c) / 2); /* center in y direction */
+      if ((c->area.position.y + c->area.size.h) > m->monitor_area_y + m->monitor_area_h && c->isfloating){
+        c->area.position.y = m->monitor_area_y + (m->monitor_area_h / 2 - HEIGHT(c) / 2); /* center in y direction */
 	  }
       if ((ev->value_mask & (CWX | CWY)) && !(ev->value_mask & (CWWidth | CWHeight))){
         configure(c);
 	  }
       if (ISVISIBLE(c)){
-        XMoveResizeWindow(display, c->window, c->x, c->y, c->w, c->h);
+        XMoveResizeWindow(display, c->window, c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h);
 	  }
     } else {
       configure(c);
@@ -778,7 +778,7 @@ unsigned int getsystraywidth() {
   Client *i;
 
   if (showsystray) {
-    for (i = systray->icons; i; w += i->w + systrayspacing, i = i->next);
+    for (i = systray->icons; i; w += i->area.size.w + systrayspacing, i = i->next);
   }
 
   return w ? w + systrayspacing : 1;
@@ -940,10 +940,10 @@ void manage(Window w, XWindowAttributes *wa) {
   c = ecalloc(1, sizeof(Client));
   c->window = w;
   /* geometry */
-  c->x = c->oldx = wa->x;
-  c->y = c->oldy = wa->y;
-  c->w = c->oldw = wa->width;
-  c->h = c->oldh = wa->height;
+  c->area.position.x = c->oldx = wa->x;
+  c->area.position.y = c->oldy = wa->y;
+  c->area.size.w = c->oldw = wa->width;
+  c->area.size.h = c->oldh = wa->height;
   c->oldbw = wa->border_width;
 
   updatetitle(c);
@@ -955,14 +955,14 @@ void manage(Window w, XWindowAttributes *wa) {
     applyrules(c);
   }
 
-  if (c->x + WIDTH(c) > c->monitor->window_area_x + c->monitor->window_area_w){
-    c->x = c->monitor->window_area_x + c->monitor->window_area_w - WIDTH(c);
+  if (c->area.position.x + WIDTH(c) > c->monitor->window_area_x + c->monitor->window_area_w){
+    c->area.position.x = c->monitor->window_area_x + c->monitor->window_area_w - WIDTH(c);
   }
-  if (c->y + HEIGHT(c) > c->monitor->window_area_y + c->monitor->window_area_h){
-    c->y = c->monitor->window_area_y + c->monitor->window_area_h - HEIGHT(c);
+  if (c->area.position.y + HEIGHT(c) > c->monitor->window_area_y + c->monitor->window_area_h){
+    c->area.position.y = c->monitor->window_area_y + c->monitor->window_area_h - HEIGHT(c);
   }
-  c->x = MAX(c->x, c->monitor->window_area_x);
-  c->y = MAX(c->y, c->monitor->window_area_y);
+  c->area.position.x = MAX(c->area.position.x, c->monitor->window_area_x);
+  c->area.position.y = MAX(c->area.position.y, c->monitor->window_area_y);
   c->bw = borderpx;
 
   wc.border_width = c->bw;
@@ -974,8 +974,8 @@ void manage(Window w, XWindowAttributes *wa) {
   updatewmhints(c);
 
   // set windows to center (patch)
-  c->x = c->monitor->monitor_area_x + (c->monitor->monitor_area_w - WIDTH(c)) / 2;
-  c->y = c->monitor->monitor_area_y + (c->monitor->monitor_area_h - HEIGHT(c)) / 2;
+  c->area.position.x = c->monitor->monitor_area_x + (c->monitor->monitor_area_w - WIDTH(c)) / 2;
+  c->area.position.y = c->monitor->monitor_area_y + (c->monitor->monitor_area_h - HEIGHT(c)) / 2;
 
   XSelectInput(display, w, EnterWindowMask | FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
   grabbuttons(c, 0);
@@ -988,7 +988,7 @@ void manage(Window w, XWindowAttributes *wa) {
   attach(c);
   attachstack(c);
   XChangeProperty(display, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->window), 1);
-  XMoveResizeWindow(display, c->window, c->x + 2 * screen_width, c->y, c->w, c->h); /* some windows require this */
+  XMoveResizeWindow(display, c->window, c->area.position.x + 2 * screen_width, c->area.position.y, c->area.size.w, c->area.size.h); /* some windows require this */
   setclientstate(c, NormalState);
   if (c->monitor == selected_monitor) {
     unfocus(selected_monitor->sel, 0);
@@ -1075,8 +1075,8 @@ void movemouse(const Arg *arg) {
   }
 
   restack(selected_monitor);
-  ocx = c->x;
-  ocy = c->y;
+  ocx = c->area.position.x;
+  ocy = c->area.position.y;
   if (XGrabPointer(display, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess) {
     return;
   }
@@ -1113,11 +1113,11 @@ void movemouse(const Arg *arg) {
       else if (abs((selected_monitor->window_area_y + selected_monitor->window_area_h) - (ny + HEIGHT(c))) < snap) {
         ny = selected_monitor->window_area_y + selected_monitor->window_area_h - HEIGHT(c);
 	    }
-      if (!c->isfloating && selected_monitor->layout[selected_monitor->sellt]->arrange && (abs(nx - c->x) > snap || abs(ny - c->y) > snap)) {
+      if (!c->isfloating && selected_monitor->layout[selected_monitor->sellt]->arrange && (abs(nx - c->area.position.x) > snap || abs(ny - c->area.position.y) > snap)) {
         togglefloating(NULL);
 	    }
       if (!selected_monitor->layout[selected_monitor->sellt]->arrange || c->isfloating) {
-        resize(c, nx, ny, c->w, c->h, 1);
+        resize(c, nx, ny, c->area.size.w, c->area.size.h, 1);
 	    }
 
       break;
@@ -1125,7 +1125,7 @@ void movemouse(const Arg *arg) {
   } while (ev.type != ButtonRelease);
 
   XUngrabPointer(display, CurrentTime);
-  if ((m = recttomon(c->x, c->y, c->w, c->h)) != selected_monitor) {
+  if ((m = recttomon(c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h)) != selected_monitor) {
     sendmon(c, m);
     selected_monitor = m;
     focus(NULL);
@@ -1152,7 +1152,7 @@ void propertynotify(XEvent *e) {
   if ((c = wintosystrayicon(ev->window))) {
     if (ev->atom == XA_WM_NORMAL_HINTS) {
       updatesizehints(c);
-      updatesystrayicongeom(c, c->w, c->h);
+      updatesystrayicongeom(c, c->area.size.w, c->area.size.h);
     } else {
       updatesystrayiconstate(c, ev);
 	}
@@ -1247,14 +1247,14 @@ void resizebarwin(Monitor *m) {
 void resizeclient(Client *c, int x, int y, int w, int h) {
   XWindowChanges wc;
 
-  c->oldx = c->x;
-  c->x = wc.x = x;
-  c->oldy = c->y;
-  c->y = wc.y = y;
-  c->oldw = c->w;
-  c->w = wc.width = w;
-  c->oldh = c->h;
-  c->h = wc.height = h;
+  c->oldx = c->area.position.x;
+  c->area.position.x = wc.x = x;
+  c->oldy = c->area.position.y;
+  c->area.position.y = wc.y = y;
+  c->oldw = c->area.size.w;
+  c->area.size.w = wc.width = w;
+  c->oldh = c->area.size.h;
+  c->area.size.h = wc.height = h;
   wc.border_width = c->bw;
   XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &wc);
   configure(c);
@@ -1289,13 +1289,13 @@ void resizemouse(const Arg *arg) {
   }
 
   restack(selected_monitor);
-  ocx = c->x;
-  ocy = c->y;
+  ocx = c->area.position.x;
+  ocy = c->area.position.y;
   if (XGrabPointer(display, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync, None, cursor[CurResize]->cursor, CurrentTime) != GrabSuccess) {
     return;
   }
 
-  XWarpPointer(display, None, c->window, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+  XWarpPointer(display, None, c->window, 0, 0, 0, 0, c->area.size.w + c->bw - 1, c->area.size.h + c->bw - 1);
   do {
     XMaskEvent(display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &ev);
     switch (ev.type) {
@@ -1313,21 +1313,21 @@ void resizemouse(const Arg *arg) {
 			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
 			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 			if (c->monitor->window_area_x + nw >= selected_monitor->window_area_x && c->monitor->window_area_x + nw <= selected_monitor->window_area_x + selected_monitor->window_area_w && c->monitor->window_area_y + nh >= selected_monitor->window_area_y && c->monitor->window_area_y + nh <= selected_monitor->window_area_y + selected_monitor->window_area_h) {
-				if (!c->isfloating && selected_monitor->layout[selected_monitor->sellt]->arrange && (abs(nw - c->w) > snap || abs(nh - c->h) > snap)) {
+				if (!c->isfloating && selected_monitor->layout[selected_monitor->sellt]->arrange && (abs(nw - c->area.size.w) > snap || abs(nh - c->area.size.h) > snap)) {
 				togglefloating(NULL);
 				}
 			}
 			if (!selected_monitor->layout[selected_monitor->sellt]->arrange || c->isfloating) {
-				resize(c, c->x, c->y, nw, nh, 1);
+				resize(c, c->area.position.x, c->area.position.y, nw, nh, 1);
 			}
 
 			break;
     }
   } while (ev.type != ButtonRelease);
-  XWarpPointer(display, None, c->window, 0, 0, 0, 0, c->w + c->bw - 1, c->h + c->bw - 1);
+  XWarpPointer(display, None, c->window, 0, 0, 0, 0, c->area.size.w + c->bw - 1, c->area.size.h + c->bw - 1);
   XUngrabPointer(display, CurrentTime);
   while (XCheckMaskEvent(display, EnterWindowMask, &ev));
-  if ((m = recttomon(c->x, c->y, c->w, c->h)) != selected_monitor) {
+  if ((m = recttomon(c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h)) != selected_monitor) {
     sendmon(c, m);
     selected_monitor = m;
     focus(NULL);
@@ -1481,11 +1481,11 @@ void setfullscreen(Client *c, int fullscreen) {
     c->isfullscreen = 0;
     c->isfloating = c->oldstate;
     c->bw = c->oldbw;
-    c->x = c->oldx;
-    c->y = c->oldy;
-    c->w = c->oldw;
-    c->h = c->oldh;
-    resizeclient(c, c->x, c->y, c->w, c->h);
+    c->area.position.x = c->oldx;
+    c->area.position.y = c->oldy;
+    c->area.size.w = c->oldw;
+    c->area.size.h = c->oldh;
+    resizeclient(c, c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h);
     arrange(c->monitor);
   }
 }
@@ -1649,15 +1649,15 @@ void showhide(Client *c) {
 
   if (ISVISIBLE(c)) {
     /* show clients top down */
-    XMoveWindow(display, c->window, c->x, c->y);
+    XMoveWindow(display, c->window, c->area.position.x, c->area.position.y);
     if ((!c->monitor->layout[c->monitor->sellt]->arrange || c->isfloating) && !c->isfullscreen) {
-      resize(c, c->x, c->y, c->w, c->h, 0);
+      resize(c, c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h, 0);
 	  }
     showhide(c->snext);
   } else {
     /* hide clients bottom up */
     showhide(c->snext);
-    XMoveWindow(display, c->window, WIDTH(c) * -2, c->y);
+    XMoveWindow(display, c->window, WIDTH(c) * -2, c->area.position.y);
   }
 }
 
@@ -1767,7 +1767,7 @@ void togglefloating(const Arg *arg) {
 
   selected_monitor->sel->isfloating = !selected_monitor->sel->isfloating || selected_monitor->sel->isfixed;
   if (selected_monitor->sel->isfloating) {
-    resize(selected_monitor->sel, selected_monitor->sel->x, selected_monitor->sel->y, selected_monitor->sel->w, selected_monitor->sel->h, 0);
+    resize(selected_monitor->sel, selected_monitor->sel->area.position.x, selected_monitor->sel->area.position.y, selected_monitor->sel->area.size.w, selected_monitor->sel->area.size.h, 0);
   }
 
   arrange(selected_monitor);
@@ -2062,10 +2062,10 @@ void updatesizehints(Client *c) {
     c->minw = c->minh = 0;
   }
   if (size.flags & PAspect) {
-    c->mina = (float)size.min_aspect.y / size.min_aspect.x;
-    c->maxa = (float)size.max_aspect.x / size.max_aspect.y;
+    c->min_aspect = (float)size.min_aspect.y / size.min_aspect.x;
+    c->max_aspect = (float)size.max_aspect.x / size.max_aspect.y;
   } else {
-    c->maxa = c->mina = 0.0;
+    c->max_aspect = c->min_aspect = 0.0;
   }
 
   c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
@@ -2097,25 +2097,25 @@ void updatestatus(void) {
 
 void updatesystrayicongeom(Client *i, int w, int h) {
   if (i) {
-    i->h = bar_height;
+    i->area.size.h = bar_height;
     if (w == h) {
-      i->w = bar_height;
+      i->area.size.w = bar_height;
 	  } else if (h == bar_height) {
-      i->w = w;
+      i->area.size.w = w;
 	  } else {
-      i->w = (int)((float)bar_height * ((float)w / (float)h));
+      i->area.size.w = (int)((float)bar_height * ((float)w / (float)h));
 	  }
 
-    applysizehints(i, &(i->x), &(i->y), &(i->w), &(i->h), False);
+    applysizehints(i, &(i->area.position.x), &(i->area.position.y), &(i->area.size.w), &(i->area.size.h), False);
     /* force icons into the systray dimensions if they don't want to */
-    if (i->h > bar_height) {
-      if (i->w == i->h) {
-        i->w = bar_height;
+    if (i->area.size.h > bar_height) {
+      if (i->area.size.w == i->area.size.h) {
+        i->area.size.w = bar_height;
 	    } else {
-        i->w = (int)((float)bar_height * ((float)i->w / (float)i->h));
+        i->area.size.w = (int)((float)bar_height * ((float)i->area.size.w / (float)i->area.size.h));
 	    }
 
-      i->h = bar_height;
+      i->area.size.h = bar_height;
     }
   }
 }
@@ -2202,9 +2202,9 @@ void updatesystray(void) {
     XChangeWindowAttributes(display, i->window, CWBackPixel, &wa);
     XMapRaised(display, i->window);
     w += systrayspacing;
-    i->x = w;
-    XMoveResizeWindow(display, i->window, i->x, 0, i->w, i->h);
-    w += i->w;
+    i->area.position.x = w;
+    XMoveResizeWindow(display, i->window, i->area.position.x, 0, i->area.size.w, i->area.size.h);
+    w += i->area.size.w;
     if (i->monitor != m) {
       i->monitor = m;
 	  }

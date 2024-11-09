@@ -85,6 +85,21 @@ enum {
 
 // -- Types --
 
+typedef struct {
+  int x;
+  int y;
+} Position;
+
+typedef struct {
+  int w;
+  int h;
+} Size;
+
+typedef struct {
+  Position position;
+  Size size;
+} Area;
+
 typedef union {
   int i;
   unsigned int ui;
@@ -106,9 +121,9 @@ typedef struct Client Client;
 // a client is a 'window'
 struct Client {
   char name[256];
-  float mina, maxa;
-  int x, y;
-  int w, h;
+  float min_aspect;
+  float max_aspect;
+  Area area;
   int oldx, oldy;
   int oldw, oldh;
   int basew, baseh;
