@@ -138,12 +138,12 @@ struct Client {
   int bw;
   int oldbw;
   unsigned int tags;
-  int isfixed;
-  int isfloating;
-  int isurgent;
-  int neverfocus;
-  int oldstate;
-  int isfullscreen;
+  int is_fixed;
+  int is_floating;
+  int is_urgent;
+  int never_focus;
+  int old_state;
+  int is_fullscreen;
   Client *next;
   Client *snext;
   Monitor *monitor;
@@ -177,7 +177,7 @@ struct Monitor {
   int bar_enabled;
   int is_topbar;
   Client *clients;
-  Client *selected;
+  Client *selected_client;
   Client *stack;
   Monitor *next;
   Window bar_window;
