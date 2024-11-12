@@ -145,7 +145,7 @@ struct Client {
   int old_state;
   int is_fullscreen;
   Client *next;
-  Client *snext;
+  Client *next_stack;
   Monitor *monitor;
   Window window;
 };
