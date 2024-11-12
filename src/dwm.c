@@ -819,7 +819,7 @@ long getstate(Window window) {
   return result;
 }
 
-int gettextprop(Window w, Atom atom, char *text, unsigned int size) {
+int gettextprop(Window window, Atom atom, char *text, unsigned int size) {
   char **list = NULL;
   int n;
   XTextProperty name;
@@ -829,7 +829,7 @@ int gettextprop(Window w, Atom atom, char *text, unsigned int size) {
   }
 
   text[0] = '\0';
-  if (!XGetTextProperty(display, w, &name, atom) || !name.nitems) {
+  if (!XGetTextProperty(display, window, &name, atom) || !name.nitems) {
     return 0;
   }
 
@@ -1058,11 +1058,18 @@ void motionnotify(XEvent *e) {
   static Monitor *mon = NULL;
   Monitor *m;
   XMotionEvent *ev = &e->xmotion;
+  Area area;
 
   if (ev->window != root) {
     return;
   }
-  if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
+
+  area.position.x = ev->x_root;
+  area.position.y = ev->y_root;
+  area.size.w = 1;
+  area.size.h = 1;
+
+  if ((m = recttomon(&area)) != mon && mon) {
     unfocus(selected_monitor->selected_client, 1);
     selected_monitor = m;
     focus(NULL);
@@ -1078,6 +1085,7 @@ void movemouse(const Arg *arg) {
   Monitor *monitor;
   XEvent event;
   Time last_time = 0;
+  Area area;
 
   if (!(client = selected_monitor->selected_client)) {
     return;
@@ -1141,7 +1149,13 @@ void movemouse(const Arg *arg) {
   } while (event.type != ButtonRelease);
 
   XUngrabPointer(display, CurrentTime);
-  if ((monitor = recttomon(client->area.position.x, client->area.position.y, client->area.size.w, client->area.size.h)) != selected_monitor) {
+
+  area.position.x = client->area.position.x;
+  area.position.y = client->area.position.y;
+  area.size.w = client->area.size.w;
+  area.size.h = client->area.size.h;
+
+  if ((monitor = recttomon(&area)) != selected_monitor) {
     sendmon(client, monitor);
     selected_monitor = monitor;
     focus(NULL);
@@ -1217,13 +1231,20 @@ void quit(const Arg *arg) {
   running = 0;
 }
 
-Monitor *recttomon(int x, int y, int w, int h) {
+Monitor *recttomon(Area *area) {
   Monitor *monitor, *r = selected_monitor;
-  int a, area = 0;
+  int a;
+  int area_val = 0; // used to be 'area' until I used the area struct as arg
+  int x, y, w, h;
+
+  x = area->position.x;
+  y = area->position.y;
+  w = area->size.w;
+  h = area->size.h;
 
   for (monitor = monitors; monitor; monitor = monitor->next) {
-    if ((a = INTERSECT(x, y, w, h, monitor)) > area) {
-      area = a;
+    if ((a = INTERSECT(x, y, w, h, monitor)) > area_val) {
+      area_val = a;
       r = monitor;
     }
   }
@@ -1298,6 +1319,7 @@ void resizemouse(const Arg *arg) {
   Monitor *monitor;
   XEvent event;
   Time last_time = 0;
+  Area area;
 
   if (!(client = selected_monitor->selected_client)) {
     return;
@@ -1347,7 +1369,13 @@ void resizemouse(const Arg *arg) {
   XWarpPointer(display, None, client->window, 0, 0, 0, 0, client->area.size.w + client->bw - 1, client->area.size.h + client->bw - 1);
   XUngrabPointer(display, CurrentTime);
   while (XCheckMaskEvent(display, EnterWindowMask, &event));
-  if ((monitor = recttomon(client->area.position.x, client->area.position.y, client->area.size.w, client->area.size.h)) != selected_monitor) {
+
+  area.position.x = client->area.position.x;
+  area.position.y = client->area.position.y;
+  area.size.w = client->area.size.w;
+  area.size.h = client->area.size.h;
+
+  if ((monitor = recttomon(&area)) != selected_monitor) {
     sendmon(client, monitor);
     selected_monitor = monitor;
     focus(NULL);
@@ -2324,14 +2352,14 @@ void view(const Arg *arg) {
   arrange(selected_monitor);
 }
 
-Client *wintoclient(Window w) {
-  Client *c;
-  Monitor *m;
+Client *wintoclient(Window window) {
+  Client *client;
+  Monitor *monitor;
 
-  for (m = monitors; m; m = m->next) {
-    for (c = m->clients; c; c = c->next) {
-      if (c->window == w){
-        return c;
+  for (monitor = monitors; monitor; monitor = monitor->next) {
+    for (client = monitor->clients; client; client = client->next) {
+      if (client->window == window){
+        return client;
 	    }
 	  }
   }
@@ -2339,44 +2367,52 @@ Client *wintoclient(Window w) {
   return NULL;
 }
 
-Client *wintosystrayicon(Window w) {
-  Client *i = NULL;
+Client *wintosystrayicon(Window window) {
+  Client *icons = NULL;
 
-  if (!systray_enabled || !w) {
-    return i;
+  if (!systray_enabled || !window) {
+    return icons;
   }
 
-  for (i = systray->icons; i && i->window != w; i = i->next);
+  for (icons = systray->icons; icons && icons->window != window; icons = icons->next);
 
-  return i;
+  return icons;
 }
 
-Monitor *wintomon(Window w) {
+Monitor *wintomon(Window window) {
   int x, y;
-  Client *c;
-  Monitor *m;
+  Client *client;
+  Monitor *monitor;
+  Area area;
 
-  if (w == root && getrootptr(&x, &y)) {
-    return recttomon(x, y, 1, 1);
+  area.position.x = 0;
+  area.position.y = 0;
+  area.size.w = 1;
+  area.size.h = 1;
+
+  if (window == root && getrootptr(&x, &y)) {
+    return recttomon(&area);
   }
 
-  for (m = monitors; m; m = m->next) {
-    if (w == m->bar_window){
-      return m;
+  for (monitor = monitors; monitor; monitor = monitor->next) {
+    if (window == monitor->bar_window){
+      return monitor;
 	  }
   }
 
-  if ((c = wintoclient(w))) {
-    return c->monitor;
+  if ((client = wintoclient(window))) {
+    return client->monitor;
   }
 
   return selected_monitor;
 }
 
-/* There's no way to check accesses to destroyed windows, thus those cases are
+
+int xerror(Display *dpy, XErrorEvent *ee) {
+  /* There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's). Other types of errors call Xlibs
  * default error handler, which may call exit. */
-int xerror(Display *dpy, XErrorEvent *ee) {
+
   if (ee->error_code == BadWindow ||
       (ee->request_code == X_SetInputFocus && ee->error_code == BadMatch) ||
       (ee->request_code == X_PolyText8 && ee->error_code == BadDrawable) ||
