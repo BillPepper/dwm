@@ -38,23 +38,23 @@ static void unmapnotify(XEvent *event);
 static int sendevent(Window window, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
 
 // stacking
-static void restack(Monitor *monitor);                  // restack clients on monitor
-static void focusstack(const Arg *arg);                 // focus stack by index
-static void incnmaster(const Arg *arg);                 // increment master area
-static void setgaps(const Arg *arg);                    // set the monitor gaps to arg then call arrange()
-static void setlayout(const Arg *arg);                  // set the layout and the label on bar to arg, then arrange and/or update
-static void setmfact(const Arg *arg);                   // set master factor to arg
+static void restack(Monitor *monitor);                                          // restack clients on monitor
+static void focusstack(const Arg *arg);                                         // focus stack by index
+static void incnmaster(const Arg *arg);                                         // increment master area
+static void setgaps(const Arg *arg);                                            // set the monitor gaps to arg then call arrange()
+static void setlayout(const Arg *arg);                                          // set the layout and the label on bar to arg, then arrange and/or update
+static void setmfact(const Arg *arg);                                           // set master factor to arg
 
 // mouse
-static int getrootptr(int *x, int *y);                  // get the monitor root window index of cursor position (TODO: use position struct)
-static void movemouse(const Arg *arg);                  // move mouse to another screen (arg not used?)
-static void resizemouse(const Arg *arg);                // handle mouse resizing
-static void grabbuttons(Client *client, int focused);   // passivly grab mouse buttons
+static int getrootptr(int *x, int *y);                                          // get the monitor root window index of cursor position (TODO: use position struct)
+static void movemouse(const Arg *arg);                                          // move mouse to another screen (arg not used?)
+static void resizemouse(const Arg *arg);                                        // handle mouse resizing
+static void grabbuttons(Client *client, int focused);                           // passivly grab mouse buttons
 
 // processes and signals
-static void sighup(int unused);                         // quit dwm with arg=1, which will restart dwm (unused arg)
-static void sigterm(int unused);                        // quit dwm with arg=0, which will end dwm (unused arg)
-static void spawn(const Arg *arg);                      // spawn a new process using fork()
+static void sighup(int unused);                                                 // quit dwm with arg=1, which will restart dwm (unused arg)
+static void sigterm(int unused);                                                // quit dwm with arg=0, which will end dwm (unused arg)
+static void spawn(const Arg *arg);                                              // spawn a new process using fork()
 
 // tagging
 static void tag(const Arg *arg);
@@ -63,32 +63,32 @@ static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
 
 // keys
-static void grabkeys(void);                             // passivly grab key inputs
-static void updatenumlockmask(void);                    // numlock stuff
+static void grabkeys(void);                                                     // passivly grab key inputs
+static void updatenumlockmask(void);                                            // numlock stuff
 
 // dwm core
-static void setup(void);                                // init dwm, bar, tray, screen, etc...
-static void run(void);                                  // main loop, check events and handle them
-static void scan(void);                                 // scan for client windows
-static void checkotherwm(void);                         // check if another wm is running
-static void cleanup(void);                              // ungrab keys, destroy windows, etc...
-static void quit(const Arg *arg);                       // quit dwm, arg=1 for restart, 0 for end
+static void setup(void);                                                        // init dwm, bar, tray, screen, etc...
+static void run(void);                                                          // main loop, check events and handle them
+static void scan(void);                                                         // scan for client windows
+static void checkotherwm(void);                                                 // check if another wm is running
+static void cleanup(void);                                                      // ungrab keys, destroy windows, etc...
+static void quit(const Arg *arg);                                               // quit dwm, arg=1 for restart, 0 for end
 
 // status and bars
-static void togglebar(const Arg *arg);                  // toggle bar (arg unused)
-static void update_bar_position(Monitor *monitor);      // recalculate bar position
-static void drawbar(Monitor *monitor);                  // draw bar, tags, layout and title
-static void drawbars(void);                             // wrapper calling drawbar() for all monitors
-static void resizebarwin(Monitor *monitor);             // resize bar and tray
-static void updatestatus(void);                         // render current status text or fallback then update tray
-static void updatebars(void);                           // set bar class hints, then render bar (top most) for each monitor
+static void togglebar(const Arg *arg);                                          // toggle bar (arg unused)
+static void update_bar_position(Monitor *monitor);                              // recalculate bar position
+static void drawbar(Monitor *monitor);                                          // draw bar, tags, layout and title
+static void drawbars(void);                                                     // wrapper calling drawbar() for all monitors
+static void resizebarwin(Monitor *monitor);                                     // resize bar and tray
+static void updatestatus(void);                                                 // render current status text or fallback then update tray
+static void updatebars(void);                                                   // set bar class hints, then render bar (top most) for each monitor
 
 // tray (uses clients as icons, TODO: implement icon struct)
-static void updatesystray(void);                        // initializes (for some reason) and updates the tray
-static unsigned int getsystraywidth();                  // retreive the length of the tray area
-static Monitor *systraytomon(Monitor *monitor);         // move tray to monitor, TODO: refactor or rewrite
+static void updatesystray(void);                                                // initializes (for some reason) and updates the tray
+static unsigned int getsystraywidth();                                          // retreive the length of the tray area
+static Monitor *systraytomon(Monitor *monitor);                                 // move tray to monitor, TODO: refactor or rewrite
 static void removesystrayicon(Client *client);
-static void updatesystrayicongeom(Client *client, int w, int h); // (TODO: use size struct)
+static void updatesystrayicongeom(Client *client, int w, int h);                // (TODO: use size struct)
 static void updatesystrayiconstate(Client *client, XPropertyEvent *event);
 
 // client
@@ -130,20 +130,18 @@ static Monitor *wintomon(Window window);                                        
 static Client *wintosystrayicon(Window window);                                 // get icon (client) for given x11 window
 
 // Error
-static int xerror(Display *display, XErrorEvent *event);
-static int xerrordummy(Display *display, XErrorEvent *event);
-static int xerrorstart(Display *display, XErrorEvent *event);
-
-// atom stuff
-static Atom getatomprop(Client *client, Atom prop);
+static int xerror(Display *display, XErrorEvent *event);                        // handle errors
+static int xerrordummy(Display *display, XErrorEvent *event);                   // returns 0
+static int xerrorstart(Display *display, XErrorEvent *event);                   // called when other wm is running
 
 // Other
-static void view(const Arg *arg);
-static void zoom(const Arg *arg); // zooms the master to the next client
-static int updategeom(void);
+static void view(const Arg *arg);                                               // view clients with given tag
+static void zoom(const Arg *arg);                                               // zooms the master to the next client
+static Atom getatomprop(Client *client, Atom prop);                             // get prop of given client
+static int updategeom(void);                                                    // some multi screen stuff, related to xinerama
 
 // Custom
-static void _debug();
-static void parse_args(int argc, char *argv[]);
+static void _debug();                                                           // debug
+static void parse_args(int argc, char *argv[]);                                 // parse main() args
 
 #endif
