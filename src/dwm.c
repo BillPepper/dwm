@@ -2478,10 +2478,6 @@ void zoom(const Arg *arg) {
   pop(c);
 }
 
-void _debug(){
-  printf("debug\n");
-}
-
 void parse_args(int argc, char *argv[]){
   if (argc == 2 && !strcmp("-v", argv[1])) {
     die("dwm-" VERSION);

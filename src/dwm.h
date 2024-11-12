@@ -141,7 +141,6 @@ static Atom getatomprop(Client *client, Atom prop);                             
 static int updategeom(void);                                                    // some multi screen stuff, related to xinerama
 
 // Custom
-static void _debug();                                                           // debug
 static void parse_args(int argc, char *argv[]);                                 // parse main() args
 
 #endif

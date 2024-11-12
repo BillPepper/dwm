@@ -3,6 +3,6 @@
 
 #include <stdio.h>
 
-static void _debug();
+void _debug();
 
 #endif

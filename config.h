@@ -5,6 +5,8 @@
 #include <X11/keysym.h>
 #include "src/exitdwm.c"
 
+#include "src/debug.h"
+
 /* appearance */
 static const int border_width = 3;		/* border pixel of windows */
 static const int gap = 15;						/* gaps between windows */
