@@ -1043,6 +1043,7 @@ void monocle(Monitor *monitor){
 	unsigned int client_count = 0;
 	Client *client;
   int x, y, w, h;
+  int size;
 
   // count visible clients
 	for (client = monitor->clients; client; client = client->next){
@@ -1052,12 +1053,14 @@ void monocle(Monitor *monitor){
   }
 
   /* override layout symbol */
+  size = sizeof monitor->layout_symbol;
 	if (client_count > 0){
-		snprintf(monitor->layout_symbol, sizeof monitor->layout_symbol, "[%d]", client_count);
+		snprintf(monitor->layout_symbol, size, "[%d]", client_count);
   }
 
   // resize all visible clients to window area
-	for (client = nexttiled(monitor->clients); client; client = nexttiled(client->next)){
+  client = nexttiled(monitor->clients);
+	for (; client; client = nexttiled(client->next)){
     x = monitor->window_area.position.x;
     y = monitor->window_area.position.y;
     w = monitor->window_area.size.w - (client->border_width * 2);
