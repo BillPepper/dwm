@@ -1042,6 +1042,7 @@ void maprequest(XEvent *e) {
 void monocle(Monitor *monitor){
 	unsigned int client_count = 0;
 	Client *client;
+  int x, y, w, h;
 
   // count visible clients
 	for (client = monitor->clients; client; client = client->next){
@@ -1057,7 +1058,12 @@ void monocle(Monitor *monitor){
 
   // resize all visible clients to window area
 	for (client = nexttiled(monitor->clients); client; client = nexttiled(client->next)){
-		resize(client, monitor->window_area.position.x, monitor->window_area.position.y, monitor->window_area.size.w - 2 * client->bw, monitor->window_area.size.h - 2 * client->bw, 0);
+    x = monitor->window_area.position.x;
+    y = monitor->window_area.position.y;
+    w = monitor->window_area.size.w - 2 * client->bw;
+    h = monitor->window_area.size.h - 2 * client->bw;
+
+		resize(client, x, y, w, h, 0);
   }
 }
 
