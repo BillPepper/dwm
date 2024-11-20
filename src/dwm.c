@@ -1042,7 +1042,7 @@ void maprequest(XEvent *e) {
 void monocle(Monitor *monitor){
 	unsigned int client_count = 0;
 	Client *client;
-  int x, y, w, h;
+  Area area;
   int size;
 
   // count visible clients
@@ -1061,12 +1061,12 @@ void monocle(Monitor *monitor){
   // resize all visible clients to window area
   client = nexttiled(monitor->clients);
 	for (; client; client = nexttiled(client->next)){
-    x = monitor->window_area.position.x;
-    y = monitor->window_area.position.y;
-    w = monitor->window_area.size.w - (client->border_width * 2);
-    h = monitor->window_area.size.h - (client->border_width * 2);
+    area.position.x = monitor->window_area.position.x;
+    area.position.y = monitor->window_area.position.y;
+    area.size.w = monitor->window_area.size.w - (client->border_width * 2);
+    area.size.h = monitor->window_area.size.h - (client->border_width * 2);
 
-		resize(client, x, y, w, h, 0);
+		resize(client, &area, 0);
   }
 }
 
@@ -1096,7 +1096,7 @@ void motionnotify(XEvent *e) {
 void movemouse(const Arg *arg) {
   // arg not used?
 
-  int x, y, old_client_x, old_client_y, new_x, new_y;
+  int x, y, old_client_x, old_client_y;
   Client *client;
   Monitor *monitor;
   XEvent event;
@@ -1139,25 +1139,31 @@ void movemouse(const Arg *arg) {
 	    }
       last_time = event.xmotion.time;
 
-      new_x = old_client_x + (event.xmotion.x - x);
-      new_y = old_client_y + (event.xmotion.y - y);
-      if (abs(selected_monitor->window_area.position.x - new_x) < snap) {
-        new_x = selected_monitor->window_area.position.x;
+      area.position.x = old_client_x + (event.xmotion.x - x);
+      area.position.y = old_client_y + (event.xmotion.y - y);
+      area.size.w = client->area.size.w;
+      area.size.h = client->area.size.h;
+
+      if (abs(selected_monitor->window_area.position.x - area.position.x) < snap) {
+        area.position.x = selected_monitor->window_area.position.x;
 	    }
-      else if (abs((selected_monitor->window_area.position.x + selected_monitor->window_area.size.w) - (new_x + WIDTH(client))) < snap) {
-        new_x = selected_monitor->window_area.position.x + selected_monitor->window_area.size.w - WIDTH(client);
+      else if (abs((selected_monitor->window_area.position.x + selected_monitor->window_area.size.w) - (area.position.x + WIDTH(client))) < snap) {
+        area.position.x = selected_monitor->window_area.position.x + selected_monitor->window_area.size.w - WIDTH(client);
 	    }
-      if (abs(selected_monitor->window_area.position.y - new_y) < snap) {
-        new_y = selected_monitor->window_area.position.y;
+
+      if (abs(selected_monitor->window_area.position.y - area.position.x) < snap) {
+        area.position.x = selected_monitor->window_area.position.y;
 	    }
-      else if (abs((selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) - (new_y + HEIGHT(client))) < snap) {
-        new_y = selected_monitor->window_area.position.y + selected_monitor->window_area.size.h - HEIGHT(client);
+      else if (abs((selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) - (area.position.x + HEIGHT(client))) < snap) {
+        area.position.x = selected_monitor->window_area.position.y + selected_monitor->window_area.size.h - HEIGHT(client);
 	    }
-      if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(new_x - client->area.position.x) > snap || abs(new_y - client->area.position.y) > snap)) {
+
+      if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(area.position.x - client->area.position.x) > snap || abs(area.position.x - client->area.position.y) > snap)) {
         togglefloating(NULL);
 	    }
+
       if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || client->is_floating) {
-        resize(client, new_x, new_y, client->area.size.w, client->area.size.h, 1);
+        resize(client, &area, 1);
 	    }
 
       break;
@@ -1285,7 +1291,14 @@ void removesystrayicon(Client *client) {
   free(client);
 }
 
-void resize(Client *c, int x, int y, int w, int h, int interact) {
+void resize(Client *c, Area *area, int interact) {
+  int x, y, w, h;
+
+  x = area->position.x;
+  y = area->position.y;
+  w = area->size.w;
+  h = area->size.h;
+
   if (applysizehints(c, &x, &y, &w, &h, interact)) {
     resizeclient(c, x, y, w, h);
   }
@@ -1337,6 +1350,11 @@ void resizemouse(const Arg *arg) {
   Time last_time = 0;
   Area area;
 
+  area.position.x = 0;
+  area.position.y = 0;
+  area.size.w = 0;
+  area.size.h = 0;
+
   if (!(client = selected_monitor->selected_client)) {
     return;
   }
@@ -1370,13 +1388,18 @@ void resizemouse(const Arg *arg) {
 
 			nw = MAX(event.xmotion.x - ocx - 2 * client->border_width + 1, 1);
 			nh = MAX(event.xmotion.y - ocy - 2 * client->border_width + 1, 1);
+      area.position.x = client->area.position.x;
+      area.position.y = client->area.position.y;
+			area.size.w = MAX(event.xmotion.x - ocx - 2 * client->border_width + 1, 1);
+			area.size.h = MAX(event.xmotion.y - ocy - 2 * client->border_width + 1, 1);
+
 			if (client->monitor->window_area.position.x + nw >= selected_monitor->window_area.position.x && client->monitor->window_area.position.x + nw <= selected_monitor->window_area.position.x + selected_monitor->window_area.size.w && client->monitor->window_area.position.y + nh >= selected_monitor->window_area.position.y && client->monitor->window_area.position.y + nh <= selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) {
 				if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(nw - client->area.size.w) > snap || abs(nh - client->area.size.h) > snap)) {
 				togglefloating(NULL);
 				}
 			}
 			if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || client->is_floating) {
-				resize(client, client->area.position.x, client->area.position.y, nw, nh, 1);
+				resize(client, &area, 1);
 			}
 
 			break;
@@ -1720,6 +1743,8 @@ void seturgent(Client *client, int urgency_state) {
 }
 
 void showhide(Client *client) {
+  Area area;
+
   if (!client){
     return;
   }
@@ -1728,7 +1753,12 @@ void showhide(Client *client) {
     /* show clients top down */
     XMoveWindow(display, client->window, client->area.position.x, client->area.position.y);
     if ((!client->monitor->layout[client->monitor->selected_layout]->arrange_func || client->is_floating) && !client->is_fullscreen) {
-      resize(client, client->area.position.x, client->area.position.y, client->area.size.w, client->area.size.h, 0);
+      area.position.x = client->area.position.x;
+      area.position.y = client->area.position.y;
+      area.size.w = client->area.size.w;
+      area.size.h = client->area.size.h;
+
+      resize(client, &area, 0);
 	  }
     showhide(client->next_stack);
   } else {
@@ -1784,6 +1814,7 @@ void tagmon(const Arg *arg) {
 void tile(Monitor *m) {
   unsigned int i, n, h, mw, my, ty;
   Client *c;
+  Area area;
 
   for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 
@@ -1800,13 +1831,25 @@ void tile(Monitor *m) {
   for (i = 0, my = ty = m->gap, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
     if (i < m->master_count) {
       h = (m->window_area.size.h - my) / (MIN(n, m->master_count) - i) - m->gap;
-      resize(c, m->window_area.position.x + m->gap, m->window_area.position.y + my, mw - (2 * c->border_width) - m->gap, h - (2 * c->border_width), 0);
+
+      area.position.x = m->window_area.position.x + m->gap;
+      area.position.y = m->window_area.position.y + my;
+      area.size.w = mw - (2 * c->border_width) - m->gap;
+      area.size.h = h - (2 * c->border_width);
+
+      resize(c, &area, 0);
       if (my + HEIGHT(c) + m->gap < m->window_area.size.h){
         my += HEIGHT(c) + m->gap;
 	    }
     } else {
       h = (m->window_area.size.h - ty) / (n - i) - m->gap;
-      resize(c, m->window_area.position.x + mw + m->gap, m->window_area.position.y + ty, m->window_area.size.w - mw - (2 * c->border_width) - 2 * m->gap, h - (2 * c->border_width), 0);
+
+      area.position.x = m->window_area.position.x + mw + m->gap;
+      area.position.y = m->window_area.position.y + ty;
+      area.size.w = m->window_area.size.w - mw - (2 * c->border_width) - 2 * m->gap;
+      area.size.h = h - (2 * c->border_width);
+
+      resize(c, &area, 0);
       if (ty + HEIGHT(c) + m->gap < m->window_area.size.h){
         ty += HEIGHT(c) + m->gap;
 	    }
@@ -1836,6 +1879,8 @@ void togglebar(const Arg *arg) {
 }
 
 void togglefloating(const Arg *arg) {
+  Area area;
+
   if (!selected_monitor->selected_client) {
     return;
   }
@@ -1847,7 +1892,12 @@ void togglefloating(const Arg *arg) {
 
   selected_monitor->selected_client->is_floating = !selected_monitor->selected_client->is_floating || selected_monitor->selected_client->is_fixed;
   if (selected_monitor->selected_client->is_floating) {
-    resize(selected_monitor->selected_client, selected_monitor->selected_client->area.position.x, selected_monitor->selected_client->area.position.y, selected_monitor->selected_client->area.size.w, selected_monitor->selected_client->area.size.h, 0);
+    area.position.x = selected_monitor->selected_client->area.position.x;
+    area.position.y = selected_monitor->selected_client->area.position.y;
+    area.size.w = selected_monitor->selected_client->area.size.w;
+    area.size.h = selected_monitor->selected_client->area.size.h;
+
+    resize(selected_monitor->selected_client, &area, 0);
   }
 
   arrange(selected_monitor);
