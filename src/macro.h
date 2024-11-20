@@ -8,8 +8,8 @@
 #define ISVISIBLE(C) ((C->tags & C->monitor->tag_set[C->monitor->selected_tags]))
 #define LENGTH(X) (sizeof X / sizeof X[0])
 #define MOUSEMASK (BUTTONMASK | PointerMotionMask)
-#define WIDTH(X) ((X)->area.size.w + 2 * (X)->bw)
-#define HEIGHT(X) ((X)->area.size.h + 2 * (X)->bw)
+#define WIDTH(X) ((X)->area.size.w + 2 * (X)->border_width)
+#define HEIGHT(X) ((X)->area.size.h + 2 * (X)->border_width)
 #define TAGMASK ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X) (drw_fontset_getwidth(drw, (X)) + padding)
 

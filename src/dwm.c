@@ -96,10 +96,10 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
     if (*y > screen_height){
       *y = screen_height - HEIGHT(client);
 	  }
-    if (*x + *width + 2 * client->bw < 0){
+    if (*x + *width + 2 * client->border_width < 0){
       *x = 0;
 	  }
-    if (*y + *height + 2 * client->bw < 0){
+    if (*y + *height + 2 * client->border_width < 0){
       *y = 0;
 	  }
   } else {
@@ -109,10 +109,10 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
     if (*y >= m->window_area.position.y + m->window_area.size.h){
       *y = m->window_area.position.y + m->window_area.size.h - HEIGHT(client);
 	  }
-    if (*x + *width + 2 * client->bw <= m->window_area.position.x){
+    if (*x + *width + 2 * client->border_width <= m->window_area.position.x){
       *x = m->window_area.position.x;
 	  }
-    if (*y + *height + 2 * client->bw <= m->window_area.position.y){
+    if (*y + *height + 2 * client->border_width <= m->window_area.position.y){
       *y = m->window_area.position.y;
 	  }
   }
@@ -346,8 +346,8 @@ void clientmessage(XEvent *e) {
       c->area.position.x = c->old_area.position.x = c->area.position.y = c->old_area.position.y = 0;
       c->area.size.w = c->old_area.size.w = wa.width;
       c->area.size.h = c->old_area.size.h = wa.height;
-      c->oldbw = wa.border_width;
-      c->bw = 0;
+      c->old_border_width = wa.border_width;
+      c->border_width = 0;
       c->is_floating = True;
       /* reuse tags field as mapped status */
       c->tags = 1;
@@ -399,7 +399,7 @@ void configure(Client *client) {
   event.y = client->area.position.y;
   event.width = client->area.size.w;
   event.height = client->area.size.h;
-  event.border_width = client->bw;
+  event.border_width = client->border_width;
   event.above = None;
   event.override_redirect = False;
 
@@ -444,7 +444,7 @@ void configurerequest(XEvent *e) {
 
   if ((c = wintoclient(ev->window))) {
     if (ev->value_mask & CWBorderWidth){
-      c->bw = ev->border_width;
+      c->border_width = ev->border_width;
 	  }
     else if (c->is_floating || !selected_monitor->layout[selected_monitor->selected_layout]->arrange_func) {
       m = c->monitor;
@@ -956,7 +956,7 @@ void manage(Window w, XWindowAttributes *wa) {
   c->area.position.y = c->old_area.position.y = wa->y;
   c->area.size.w = c->old_area.size.w = wa->width;
   c->area.size.h = c->old_area.size.h = wa->height;
-  c->oldbw = wa->border_width;
+  c->old_border_width = wa->border_width;
 
   updatetitle(c);
   if (XGetTransientForHint(display, w, &trans) && (t = wintoclient(trans))){
@@ -975,9 +975,9 @@ void manage(Window w, XWindowAttributes *wa) {
   }
   c->area.position.x = MAX(c->area.position.x, c->monitor->window_area.position.x);
   c->area.position.y = MAX(c->area.position.y, c->monitor->window_area.position.y);
-  c->bw = border_width;
+  c->border_width = border_width;
 
-  wc.border_width = c->bw;
+  wc.border_width = c->border_width;
   XConfigureWindow(display, w, CWBorderWidth, &wc);
   XSetWindowBorder(display, w, scheme[SchemeNorm][ColBorder].pixel);
   configure(c); /* propagates border_width, if size doesn't change */
@@ -1060,8 +1060,8 @@ void monocle(Monitor *monitor){
 	for (client = nexttiled(monitor->clients); client; client = nexttiled(client->next)){
     x = monitor->window_area.position.x;
     y = monitor->window_area.position.y;
-    w = monitor->window_area.size.w - 2 * client->bw;
-    h = monitor->window_area.size.h - 2 * client->bw;
+    w = monitor->window_area.size.w - (client->border_width * 2);
+    h = monitor->window_area.size.h - (client->border_width * 2);
 
 		resize(client, x, y, w, h, 0);
   }
@@ -1309,7 +1309,7 @@ void resizeclient(Client *c, int x, int y, int w, int h) {
   c->area.size.w = window_changes.width = w;
   c->old_area.size.h = c->area.size.h;
   c->area.size.h = window_changes.height = h;
-  window_changes.border_width = c->bw;
+  window_changes.border_width = c->border_width;
   XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
   configure(c);
   XSync(display, False);
@@ -1350,7 +1350,7 @@ void resizemouse(const Arg *arg) {
     return;
   }
 
-  XWarpPointer(display, None, client->window, 0, 0, 0, 0, client->area.size.w + client->bw - 1, client->area.size.h + client->bw - 1);
+  XWarpPointer(display, None, client->window, 0, 0, 0, 0, client->area.size.w + client->border_width - 1, client->area.size.h + client->border_width - 1);
   do {
     XMaskEvent(display, MOUSEMASK | ExposureMask | SubstructureRedirectMask, &event);
     switch (event.type) {
@@ -1365,8 +1365,8 @@ void resizemouse(const Arg *arg) {
 			}
 			last_time = event.xmotion.time;
 
-			nw = MAX(event.xmotion.x - ocx - 2 * client->bw + 1, 1);
-			nh = MAX(event.xmotion.y - ocy - 2 * client->bw + 1, 1);
+			nw = MAX(event.xmotion.x - ocx - 2 * client->border_width + 1, 1);
+			nh = MAX(event.xmotion.y - ocy - 2 * client->border_width + 1, 1);
 			if (client->monitor->window_area.position.x + nw >= selected_monitor->window_area.position.x && client->monitor->window_area.position.x + nw <= selected_monitor->window_area.position.x + selected_monitor->window_area.size.w && client->monitor->window_area.position.y + nh >= selected_monitor->window_area.position.y && client->monitor->window_area.position.y + nh <= selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) {
 				if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(nw - client->area.size.w) > snap || abs(nh - client->area.size.h) > snap)) {
 				togglefloating(NULL);
@@ -1379,7 +1379,7 @@ void resizemouse(const Arg *arg) {
 			break;
     }
   } while (event.type != ButtonRelease);
-  XWarpPointer(display, None, client->window, 0, 0, 0, 0, client->area.size.w + client->bw - 1, client->area.size.h + client->bw - 1);
+  XWarpPointer(display, None, client->window, 0, 0, 0, 0, client->area.size.w + client->border_width - 1, client->area.size.h + client->border_width - 1);
   XUngrabPointer(display, CurrentTime);
   while (XCheckMaskEvent(display, EnterWindowMask, &event));
 
@@ -1538,8 +1538,8 @@ void setfullscreen(Client *c, int fullscreen) {
     XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&netatom[NetWMFullscreen], 1);
     c->is_fullscreen = 1;
     c->old_state = c->is_floating;
-    c->oldbw = c->bw;
-    c->bw = 0;
+    c->old_border_width = c->border_width;
+    c->border_width = 0;
     c->is_floating = 1;
     resizeclient(c, c->monitor->monitor_area.position.x, c->monitor->monitor_area.position.y, c->monitor->monitor_area.size.w, c->monitor->monitor_area.size.h);
     XRaiseWindow(display, c->window);
@@ -1547,7 +1547,7 @@ void setfullscreen(Client *c, int fullscreen) {
     XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
     c->is_fullscreen = 0;
     c->is_floating = c->old_state;
-    c->bw = c->oldbw;
+    c->border_width = c->old_border_width;
     c->area.position.x = c->old_area.position.x;
     c->area.position.y = c->old_area.position.y;
     c->area.size.w = c->old_area.size.w;
@@ -1797,13 +1797,13 @@ void tile(Monitor *m) {
   for (i = 0, my = ty = m->gap, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
     if (i < m->master_count) {
       h = (m->window_area.size.h - my) / (MIN(n, m->master_count) - i) - m->gap;
-      resize(c, m->window_area.position.x + m->gap, m->window_area.position.y + my, mw - (2 * c->bw) - m->gap, h - (2 * c->bw), 0);
+      resize(c, m->window_area.position.x + m->gap, m->window_area.position.y + my, mw - (2 * c->border_width) - m->gap, h - (2 * c->border_width), 0);
       if (my + HEIGHT(c) + m->gap < m->window_area.size.h){
         my += HEIGHT(c) + m->gap;
 	    }
     } else {
       h = (m->window_area.size.h - ty) / (n - i) - m->gap;
-      resize(c, m->window_area.position.x + mw + m->gap, m->window_area.position.y + ty, m->window_area.size.w - mw - (2 * c->bw) - 2 * m->gap, h - (2 * c->bw), 0);
+      resize(c, m->window_area.position.x + mw + m->gap, m->window_area.position.y + ty, m->window_area.size.w - mw - (2 * c->border_width) - 2 * m->gap, h - (2 * c->border_width), 0);
       if (ty + HEIGHT(c) + m->gap < m->window_area.size.h){
         ty += HEIGHT(c) + m->gap;
 	    }
@@ -1901,7 +1901,7 @@ void unmanage(Client *client, int destroyed) {
   detach(client);
   detachstack(client);
   if (!destroyed) {
-    window_changes.border_width = client->oldbw;
+    window_changes.border_width = client->old_border_width;
     XGrabServer(display); /* avoid race conditions */
     XSetErrorHandler(xerrordummy);
     XSelectInput(display, client->window, NoEventMask);

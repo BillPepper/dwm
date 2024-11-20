@@ -135,8 +135,8 @@ struct Client {
   Size max;
   Size min;
   int hintsvalid;
-  int bw;
-  int oldbw;
+  int border_width;
+  int old_border_width;
   unsigned int tags;
   int is_fixed;
   int is_floating;
