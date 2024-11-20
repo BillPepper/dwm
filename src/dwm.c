@@ -1039,19 +1039,26 @@ void maprequest(XEvent *e) {
   }
 }
 
-void
-monocle(Monitor *m)
-{
-	unsigned int n = 0;
-	Client *c;
+void monocle(Monitor *monitor){
+	unsigned int client_count = 0;
+	Client *client;
 
-	for (c = m->clients; c; c = c->next)
-		if (ISVISIBLE(c))
-			n++;
-	if (n > 0) /* override layout symbol */
-		snprintf(m->layout_symbol, sizeof m->layout_symbol, "[%d]", n);
-	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-		resize(c, m->window_area.position.x, m->window_area.position.y, m->window_area.size.w - 2 * c->bw, m->window_area.size.h - 2 * c->bw, 0);
+  // count visible clients
+	for (client = monitor->clients; client; client = client->next){
+		if (ISVISIBLE(client)){
+      client_count++;
+    }
+  }
+
+  /* override layout symbol */
+	if (client_count > 0){
+		snprintf(monitor->layout_symbol, sizeof monitor->layout_symbol, "[%d]", client_count);
+  }
+
+  // resize all visible clients to window area
+	for (client = nexttiled(monitor->clients); client; client = nexttiled(client->next)){
+		resize(client, monitor->window_area.position.x, monitor->window_area.position.y, monitor->window_area.size.w - 2 * client->bw, monitor->window_area.size.h - 2 * client->bw, 0);
+  }
 }
 
 void motionnotify(XEvent *e) {
