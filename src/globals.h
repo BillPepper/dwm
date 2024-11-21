@@ -1,3 +1,6 @@
+#ifndef GLOBALS_H
+#define GLOBALS_H
+
 #include "definitions.h"
 #include "dwm.h"
 
@@ -39,3 +42,5 @@ static void (*handler[LASTEvent])(XEvent *) = {
   [ResizeRequest] = resizerequest,
   [UnmapNotify] = unmapnotify
 };
+
+#endif
