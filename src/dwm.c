@@ -1151,11 +1151,11 @@ void movemouse(const Arg *arg) {
         area.position.x = selected_monitor->window_area.position.x + selected_monitor->window_area.size.w - WIDTH(client);
 	    }
 
-      if (abs(selected_monitor->window_area.position.y - area.position.x) < snap) {
-        area.position.x = selected_monitor->window_area.position.y;
+      if (abs(selected_monitor->window_area.position.y - area.position.y) < snap) {
+        area.position.y = selected_monitor->window_area.position.y;
 	    }
-      else if (abs((selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) - (area.position.x + HEIGHT(client))) < snap) {
-        area.position.x = selected_monitor->window_area.position.y + selected_monitor->window_area.size.h - HEIGHT(client);
+      else if (abs((selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) - (area.position.y + HEIGHT(client))) < snap) {
+        area.position.y = selected_monitor->window_area.position.y + selected_monitor->window_area.size.h - HEIGHT(client);
 	    }
 
       if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(area.position.x - client->area.position.x) > snap || abs(area.position.x - client->area.position.y) > snap)) {
