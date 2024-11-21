@@ -324,72 +324,75 @@ void cleanupmon(Monitor *mon) {
   free(mon);
 }
 
-void clientmessage(XEvent *e) {
-  XWindowAttributes wa;
-  XSetWindowAttributes swa;
-  XClientMessageEvent *cme = &e->xclient;
-  Client *c = wintoclient(cme->window);
+void clientmessage(XEvent *event) {
+  XWindowAttributes window_attributes;
+  XSetWindowAttributes set_window_attributes;
+  XClientMessageEvent *client_msg = &event->xclient;
+  Client *client = wintoclient(client_msg->window);
+  Size size;
 
-  if (systray_enabled && cme->window == systray->window && cme->message_type == netatom[NetSystemTrayOP]) {
+  if (systray_enabled && client_msg->window == systray->window && client_msg->message_type == netatom[NetSystemTrayOP]) {
     /* add systray icons */
-    if (cme->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
-      if (!(c = (Client *)calloc(1, sizeof(Client)))){
+    if (client_msg->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
+      if (!(client = (Client *)calloc(1, sizeof(Client)))){
         die("fatal: could not malloc() %u bytes\n", sizeof(Client));
 	    }
-      if (!(c->window = cme->data.l[2])) {
-        free(c);
+      if (!(client->window = client_msg->data.l[2])) {
+        free(client);
         return;
       }
-      c->monitor = selected_monitor;
-      c->next = systray->icons;
-      systray->icons = c;
-      if (!XGetWindowAttributes(display, c->window, &wa)) {
+      client->monitor = selected_monitor;
+      client->next = systray->icons;
+      systray->icons = client;
+      if (!XGetWindowAttributes(display, client->window, &window_attributes)) {
         /* use sane defaults */
-        wa.width = bar_height;
-        wa.height = bar_height;
-        wa.border_width = 0;
+        window_attributes.width = bar_height;
+        window_attributes.height = bar_height;
+        window_attributes.border_width = 0;
       }
-      c->area.position.x = c->old_area.position.x = c->area.position.y = c->old_area.position.y = 0;
-      c->area.size.w = c->old_area.size.w = wa.width;
-      c->area.size.h = c->old_area.size.h = wa.height;
-      c->old_border_width = wa.border_width;
-      c->border_width = 0;
-      c->is_floating = True;
+      client->area.position.x = client->old_area.position.x = client->area.position.y = client->old_area.position.y = 0;
+      client->area.size.w = client->old_area.size.w = window_attributes.width;
+      client->area.size.h = client->old_area.size.h = window_attributes.height;
+      client->old_border_width = window_attributes.border_width;
+      client->border_width = 0;
+      client->is_floating = True;
       /* reuse tags field as mapped status */
-      c->tags = 1;
-      updatesizehints(c);
-      updatesystrayicongeom(c, wa.width, wa.height);
-      XAddToSaveSet(display, c->window);
-      XSelectInput(display, c->window, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-      XReparentWindow(display, c->window, systray->window, 0, 0);
+      client->tags = 1;
+      updatesizehints(client);
+      size.w = window_attributes.width;
+      size.h = window_attributes.height;
+      updatesystrayicongeom(client, &size);
+      XAddToSaveSet(display, client->window);
+      XSelectInput(display, client->window, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
+      XReparentWindow(display, client->window, systray->window, 0, 0);
       /* use parents background color */
-      swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
-      XChangeWindowAttributes(display, c->window, CWBackPixel, &swa);
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      set_window_attributes.background_pixel = scheme[SchemeNorm][ColBg].pixel;
+      XChangeWindowAttributes(display, client->window, CWBackPixel, &set_window_attributes);
+      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       /* FIXME not sure if I have to send these events, too */
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_FOCUS_IN, 0, systray->window, XEMBED_EMBEDDED_VERSION);
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
-      sendevent(c->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_FOCUS_IN, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       XSync(display, False);
       resizebarwin(selected_monitor);
       updatesystray();
-      setclientstate(c, NormalState);
+      setclientstate(client, NormalState);
     }
     return;
   }
 
-  if (!c){
+  if (!client){
     return;
   }
-  if (cme->message_type == netatom[NetWMState]) {
-    if (cme->data.l[1] == netatom[NetWMFullscreen] || cme->data.l[2] == netatom[NetWMFullscreen]){
-      setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
-                        || (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ &&
-                            !c->is_fullscreen)));
+  if (client_msg->message_type == netatom[NetWMState]) {
+    if (client_msg->data.l[1] == netatom[NetWMFullscreen] || client_msg->data.l[2] == netatom[NetWMFullscreen]){
+      setfullscreen(client, (client_msg->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
+                        || (client_msg->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ &&
+                            !client->is_fullscreen)));
 	  }
-  } else if (cme->message_type == netatom[NetActiveWindow]) {
-    if (c != selected_monitor->selected_client && !c->is_urgent){
-      seturgent(c, 1);
+  } else if (client_msg->message_type == netatom[NetActiveWindow]) {
+    if (client != selected_monitor->selected_client && !client->is_urgent){
+      seturgent(client, 1);
 	  }
   }
 }
@@ -1207,51 +1210,54 @@ void pop(Client *client) {
   arrange(client->monitor);
 }
 
-void propertynotify(XEvent *e) {
-  Client *c;
+void propertynotify(XEvent *event) {
+  Client *client;
   Window trans;
-  XPropertyEvent *ev = &e->xproperty;
+  XPropertyEvent *event_prop = &event->xproperty;
+  Size size;
 
-  if ((c = wintosystrayicon(ev->window))) {
-    if (ev->atom == XA_WM_NORMAL_HINTS) {
-      updatesizehints(c);
-      updatesystrayicongeom(c, c->area.size.w, c->area.size.h);
+  if ((client = wintosystrayicon(event_prop->window))) {
+    if (event_prop->atom == XA_WM_NORMAL_HINTS) {
+      updatesizehints(client);
+      size.w = client->area.size.w;
+      size.h = client->area.size.h;
+      updatesystrayicongeom(client, &size);
     } else {
-      updatesystrayiconstate(c, ev);
+      updatesystrayiconstate(client, event_prop);
 	}
 
     resizebarwin(selected_monitor);
     updatesystray();
   }
 
-  if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
+  if ((event_prop->window == root) && (event_prop->atom == XA_WM_NAME)) {
     updatestatus();
   }
-  else if (ev->state == PropertyDelete) {
+  else if (event_prop->state == PropertyDelete) {
     return; /* ignore */
-  } else if ((c = wintoclient(ev->window))) {
-    switch (ev->atom) {
+  } else if ((client = wintoclient(event_prop->window))) {
+    switch (event_prop->atom) {
     default:
       break;
     case XA_WM_TRANSIENT_FOR:
-      if (!c->is_floating && (XGetTransientForHint(display, c->window, &trans)) && (c->is_floating = (wintoclient(trans)) != NULL)) arrange(c->monitor);
+      if (!client->is_floating && (XGetTransientForHint(display, client->window, &trans)) && (client->is_floating = (wintoclient(trans)) != NULL)) arrange(client->monitor);
       break;
     case XA_WM_NORMAL_HINTS:
-      c->hintsvalid = 0;
+      client->hintsvalid = 0;
       break;
     case XA_WM_HINTS:
-      updatewmhints(c);
+      updatewmhints(client);
       drawbars();
       break;
     }
-    if (ev->atom == XA_WM_NAME || ev->atom == netatom[NetWMName]) {
-      updatetitle(c);
-      if (c == c->monitor->selected_client) {
-        drawbar(c->monitor);
+    if (event_prop->atom == XA_WM_NAME || event_prop->atom == netatom[NetWMName]) {
+      updatetitle(client);
+      if (client == client->monitor->selected_client) {
+        drawbar(client->monitor);
 	  }
     }
-    if (ev->atom == netatom[NetWMWindowType]) {
-      updatewindowtype(c);
+    if (event_prop->atom == netatom[NetWMWindowType]) {
+      updatewindowtype(client);
 	  }
   }
 }
@@ -1339,12 +1345,17 @@ void resizeclient(Client *c, Area *area) {
   XSync(display, False);
 }
 
-void resizerequest(XEvent *e) {
-  XResizeRequestEvent *ev = &e->xresizerequest;
-  Client *i;
+void resizerequest(XEvent *event) {
+  XResizeRequestEvent *request_event = &event->xresizerequest;
+  Client *icon;
+  Size size;
 
-  if ((i = wintosystrayicon(ev->window))) {
-    updatesystrayicongeom(i, ev->width, ev->height);
+  size.w = request_event->width;
+  size.h = request_event->height;
+
+  if ((icon = wintosystrayicon(request_event->window))) {
+
+    updatesystrayicongeom(icon, &size);
     resizebarwin(selected_monitor);
     updatesystray();
   }
@@ -2246,8 +2257,12 @@ void updatestatus(void) {
   updatesystray();
 }
 
-void updatesystrayicongeom(Client *client, int w, int h) {
+void updatesystrayicongeom(Client *client, Size *size) {
   Area area;
+  int w, h;
+
+  w = size->w;
+  h = size->h;
 
   if (client) {
     client->area.size.h = bar_height;

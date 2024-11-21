@@ -88,7 +88,7 @@ static void updatesystray(void);                                                
 static unsigned int getsystraywidth();                                          // retreive the length of the tray area
 static Monitor *systraytomon(Monitor *monitor);                                 // move tray to monitor, TODO: refactor or rewrite
 static void removesystrayicon(Client *client);
-static void updatesystrayicongeom(Client *client, int w, int h);                // (TODO: use size struct)
+static void updatesystrayicongeom(Client *client, Size *size);                  // (TODO: use size struct)
 static void updatesystrayiconstate(Client *client, XPropertyEvent *event);
 
 // client
