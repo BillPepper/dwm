@@ -15,9 +15,7 @@ static void arrange(Monitor *monitor);                  // arrange specified, or
 static void arrangemon(Monitor *monitor);               // set layout string and call arrange callback
 static void cleanupmon(Monitor *monitor);               // remove monitor
 
-// layout 'arrange' function callbacks
-static void monocle(Monitor *monitor);                  // monocle layout callback
-static void tile(Monitor *monitor);                     // tile layout callback
+#include "layout.h"
 
 // events
 static void buttonpress(XEvent *event);

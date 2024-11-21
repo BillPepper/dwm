@@ -1,9 +1,12 @@
 #include "src/definitions.h"
-#include "src/dwm.h"
 #include <X11/keysym.h>
 #include "src/exitdwm.c"
 
+#include "src/dwm.h"
+
 #include "src/debug.h"
+
+void tile(Monitor *m);
 
 // -- Appearance ---------------------------------------------------------------
 
