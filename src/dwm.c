@@ -2567,7 +2567,7 @@ Monitor *systraytomon(Monitor *monitor) {
   for (n = 1, current_monitor = monitors; current_monitor && current_monitor->next; n++, current_monitor = current_monitor->next);
   for (i = 1, current_monitor = monitors; current_monitor && current_monitor->next && i < systray_pinned; i++, current_monitor = current_monitor->next);
 
-  if (systray_pinning_fail_first && n < systray_pinned) {
+  if (systray_fail_pin_position && n < systray_pinned) {
     return monitors;
   }
 
