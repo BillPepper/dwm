@@ -5,6 +5,7 @@
 #include "src/dwm.h"
 
 #include "src/debug.h"
+#include "src/layout.h"
 
 void tile(Monitor *m);
 
