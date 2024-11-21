@@ -18,11 +18,7 @@ static void sighup(int unused);                                                 
 static void sigterm(int unused);                                                // quit dwm with arg=0, which will end dwm (unused arg)
 static void spawn(const Arg *arg);                                              // spawn a new process using fork()
 
-// tagging
-static void tag(const Arg *arg);                                                // show clients with specified tag
-static void tagmon(const Arg *arg);                                             // move to next/prev monitor
-static void toggletag(const Arg *arg);
-static void toggleview(const Arg *arg);
+#include "tagging.h"
 
 // status and bars
 static void togglebar(const Arg *arg);                                          // toggle bar (arg unused)
