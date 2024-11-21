@@ -1,8 +1,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include "drw.h"
+
 #include "definitions.h"
-#include "dwm.h"
+#include "events.h"
 
 /* variables */
 static Systray *systray = NULL;

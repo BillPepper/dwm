@@ -15,7 +15,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-
 #ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
