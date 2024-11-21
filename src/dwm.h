@@ -57,8 +57,8 @@ static void sigterm(int unused);                                                
 static void spawn(const Arg *arg);                                              // spawn a new process using fork()
 
 // tagging
-static void tag(const Arg *arg);
-static void tagmon(const Arg *arg);
+static void tag(const Arg *arg);                                                // show clients with specified tag
+static void tagmon(const Arg *arg);                                             // move to next/prev monitor
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
 
@@ -87,16 +87,16 @@ static void updatebars(void);                                                   
 static void updatesystray(void);                                                // initializes (for some reason) and updates the tray
 static unsigned int getsystraywidth();                                          // retreive the length of the tray area
 static Monitor *systraytomon(Monitor *monitor);                                 // move tray to monitor, TODO: refactor or rewrite
-static void removesystrayicon(Client *client);
-static void updatesystrayicongeom(Client *client, Size *size);                  // (TODO: use size struct)
-static void updatesystrayiconstate(Client *client, XPropertyEvent *event);
+static void removesystrayicon(Client *client);                                  // remove tray icon
+static void updatesystrayicongeom(Client *client, Size *size);                  // ?
+static void updatesystrayiconstate(Client *client, XPropertyEvent *event);      // ?
 
 // client
 static void killclient(const Arg *arg);                                         // close client window
 static void togglefloating(const Arg *arg);                                     // toggle floating for current client (arg unused)
 static void togglefullscreen(const Arg *arg);                                   // toggle fullscreen for current client (arg unused)
 static void updateclientlist(void);                                             // update all clients on all monitors
-static int applysizehints(Client *client, Area *area, int interact);            // (TODO: use area struct)
+static int applysizehints(Client *client, Area *area, int interact);
 static void applyrules(Client *client);                                         // apply client rules defined in config
 static void attach(Client *client);                                             // attach new client to client list
 static void attachstack(Client *client);                                        // attach client to it's monitors stack
@@ -105,9 +105,9 @@ static void detach(Client *client);                                             
 static void detachstack(Client *client);                                        // remove client from it's monitors stack
 static void focus(Client *client);                                              // focus given client
 static Client *nexttiled(Client *client);                                       // get next tiled client
-static void pop(Client *client);                                                // remove client from stack? (TODO: use area struct)
-static void resize(Client *client, Area *area, int interact);                   // apply size hints (TODO: use area struct)
-static void resizeclient(Client *client, Area *area);                           // resize client (TODO: use area struct)
+static void pop(Client *client);                                                // remove client from stack?
+static void resize(Client *client, Area *area, int interact);                   // apply size hints
+static void resizeclient(Client *client, Area *area);                           // resize client
 static void sendmon(Client *client, Monitor *m);                                // send client to montior
 static void setclientstate(Client *client, long state);                         // set the client state (normal/icon/withdrawn)
 static void setfocus(Client *client);                                           // focus given client if focusable
