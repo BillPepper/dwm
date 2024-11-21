@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void exitdwm(){
+void exitdwm(const Arg *arg){
   #if defined S_LOCK ||             \
       defined S_RESTART_DWM ||      \
       defined S_OFFSCREEN ||        \

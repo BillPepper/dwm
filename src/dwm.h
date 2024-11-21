@@ -9,6 +9,8 @@
 #include "layout.h"
 #include "events.h"
 
+#include "debug.h"
+
 // stacking
 static void restack(Monitor *monitor);                                          // restack clients on monitor
 static void focusstack(const Arg *arg);                                         // focus stack by index
