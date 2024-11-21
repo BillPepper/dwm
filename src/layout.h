@@ -1,7 +1,7 @@
-#include "definitions.h"
-
 #ifndef LAYOUT_H
 #define LAYOUT_H
+
+#include "definitions.h"
 
 // layout 'arrange' function callbacks
 static void monocle(Monitor *monitor);                  // monocle layout callback
