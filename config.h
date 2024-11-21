@@ -1,5 +1,3 @@
-/* See LICENSE file for copyright and license details. */
-
 #include "src/definitions.h"
 #include "src/dwm.h"
 #include <X11/keysym.h>
@@ -7,29 +5,35 @@
 
 #include "src/debug.h"
 
-/* appearance */
-static const int border_width = 3;		/* border pixel of windows */
-static const int gap = 15;						/* gaps between windows */
-static const int snap = 32;						/* snap pixel */
+// -- Appearance ---------------------------------------------------------------
 
-/* Tray */
-static const int systray_pinned = 1;   							/* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
-static const int systray_on_left = 0;    						/* 0: systray in the right corner, >0: systray on left of status text */
-static const int systray_spacing = 2;   						/* systray spacing */
-static const int systray_pinning_fail_first = 1;   	/* 1: if pinning fails, display systray on the first monitor, False: display systray on the last monitor*/
-static const int systray_enabled = 1;        				/* 0 means no systray */
+static const int border_width = 3;
+static const int gap = 15;
+static const int snap = 32;
 
-// bar
-static const int is_bar_enabled = 1;				/* 0 means no bar */
-static const int is_top_bar = 1;        		/* 0 means bottom bar */
-static const int status_monitor = 1;		/* show status only on given monitor index */
 
-// fonts
+// -- Tray ---------------------------------------------------------------------
+
+static const int systray_fail_pin_position = 1; // (0:first,1:last) monitor
+static const int systray_pinned = 1; // (0: follow cursor, >0: index of monitor)
+static const int systray_on_left = 0;
+static const int systray_enabled = 1;
+static const int systray_spacing = 2;
+
+
+// -- Bar ----------------------------------------------------------------------
+
+static const int is_bar_enabled = 1;
+static const int is_top_bar = 1;
+static const int status_monitor = 1; // index
+
+
+// -- Fonts --------------------------------------------------------------------
 static const char *fonts[] = { "monospace:size=10" };
 static const char dmenufont[] = "monospace:size=10";
 
 
-// Colors
+// - Colors --------------------------------------------------------------------
 static const char col_gray[] = "#222222";
 static const char col_green[] = "#4f772d";
 static const char col_light_green[] = "#90a955";
@@ -177,4 +181,3 @@ static const Button buttons[] = {
 	{ ClkTagBar,    MODKEY, Button1, tag,            {0} },
 	{ ClkTagBar,    MODKEY, Button3, toggletag,      {0} },
 };
-
