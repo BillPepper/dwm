@@ -8,9 +8,10 @@
 #include "monitor.h"
 #include "layout.h"
 #include "events.h"
+#include "stacking.h"
+#include "input.h"
 
 #include "debug.h"
-#include "stacking.h"
 
 // processes and signals
 static void sighup(int unused);                                                 // quit dwm with arg=1, which will restart dwm (unused arg)
@@ -22,15 +23,6 @@ static void tag(const Arg *arg);                                                
 static void tagmon(const Arg *arg);                                             // move to next/prev monitor
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
-
-
-// dwm core
-static void setup(void);                                                        // init dwm, bar, tray, screen, etc...
-static void run(void);                                                          // main loop, check events and handle them
-static void scan(void);                                                         // scan for client windows
-static void checkotherwm(void);                                                 // check if another wm is running
-static void cleanup(void);                                                      // ungrab keys, destroy windows, etc...
-static void quit(const Arg *arg);                                               // quit dwm, arg=1 for restart, 0 for end
 
 // status and bars
 static void togglebar(const Arg *arg);                                          // toggle bar (arg unused)
