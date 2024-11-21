@@ -106,8 +106,8 @@ static void detachstack(Client *client);                                        
 static void focus(Client *client);                                              // focus given client
 static Client *nexttiled(Client *client);                                       // get next tiled client
 static void pop(Client *client);                                                // remove client from stack? (TODO: use area struct)
-static void resize(Client *client, Area *area, int interact);   // apply size hints (TODO: use area struct)
-static void resizeclient(Client *client, int x, int y, int w, int h);           // resize client (TODO: use area struct)
+static void resize(Client *client, Area *area, int interact);                   // apply size hints (TODO: use area struct)
+static void resizeclient(Client *client, Area *area);                           // resize client (TODO: use area struct)
 static void sendmon(Client *client, Monitor *m);                                // send client to montior
 static void setclientstate(Client *client, long state);                         // set the client state (normal/icon/withdrawn)
 static void setfocus(Client *client);                                           // focus given client if focusable

@@ -417,6 +417,7 @@ void configurenotify(XEvent *e) {
   Client *c;
   XConfigureEvent *ev = &e->xconfigure;
   int dirty;
+  Area area;
 
   /* TODO: updategeom handling sucks, needs to be simplified */
   if (ev->window == root) {
@@ -429,7 +430,11 @@ void configurenotify(XEvent *e) {
       for (m = monitors; m; m = m->next) {
         for (c = m->clients; c; c = c->next){
           if (c->is_fullscreen){
-            resizeclient(c, m->monitor_area.position.x, m->monitor_area.position.y, m->monitor_area.size.w, m->monitor_area.size.h);
+            area.position.x = m->monitor_area.position.x;
+            area.position.y = m->monitor_area.position.y;
+            area.size.w = m->monitor_area.size.w;
+            area.size.h = m->monitor_area.size.h;
+            resizeclient(c, &area);
 		      }
 		    }
 
@@ -1298,15 +1303,8 @@ void removesystrayicon(Client *client) {
 }
 
 void resize(Client *c, Area *area, int interact) {
-  int x, y, w, h;
-
-  x = area->position.x;
-  y = area->position.y;
-  w = area->size.w;
-  h = area->size.h;
-
   if (applysizehints(c, area, interact)) {
-    resizeclient(c, x, y, w, h);
+    resizeclient(c, area);
   }
 }
 
@@ -1320,17 +1318,21 @@ void resizebarwin(Monitor *monitor) {
   XMoveResizeWindow(display, monitor->bar_window, monitor->window_area.position.x, monitor->bar_y, width, bar_height);
 }
 
-void resizeclient(Client *c, int x, int y, int w, int h) {
+void resizeclient(Client *c, Area *area) {
   XWindowChanges window_changes;
 
   c->old_area.position.x = c->area.position.x;
-  c->area.position.x = window_changes.x = x;
+  c->area.position.x = window_changes.x = area->position.x;
+
   c->old_area.position.y = c->area.position.y;
-  c->area.position.y = window_changes.y = y;
+  c->area.position.y = window_changes.y = area->position.y;
+
   c->old_area.size.w = c->area.size.w;
-  c->area.size.w = window_changes.width = w;
+  c->area.size.w = window_changes.width = area->size.w;
+
   c->old_area.size.h = c->area.size.h;
-  c->area.size.h = window_changes.height = h;
+  c->area.size.h = window_changes.height = area->size.h;
+
   window_changes.border_width = c->border_width;
   XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
   configure(c);
@@ -1566,6 +1568,8 @@ void setfocus(Client *client) {
 }
 
 void setfullscreen(Client *c, int fullscreen) {
+  Area area;
+
   if (fullscreen && !c->is_fullscreen) {
     XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&netatom[NetWMFullscreen], 1);
     c->is_fullscreen = 1;
@@ -1573,7 +1577,13 @@ void setfullscreen(Client *c, int fullscreen) {
     c->old_border_width = c->border_width;
     c->border_width = 0;
     c->is_floating = 1;
-    resizeclient(c, c->monitor->monitor_area.position.x, c->monitor->monitor_area.position.y, c->monitor->monitor_area.size.w, c->monitor->monitor_area.size.h);
+
+    area.position.x = c->monitor->monitor_area.position.x;
+    area.position.y = c->monitor->monitor_area.position.y;
+    area.size.w = c->monitor->monitor_area.size.w;
+    area.size.h = c->monitor->monitor_area.size.h;
+
+    resizeclient(c, &area);
     XRaiseWindow(display, c->window);
   } else if (!fullscreen && c->is_fullscreen) {
     XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
@@ -1584,7 +1594,13 @@ void setfullscreen(Client *c, int fullscreen) {
     c->area.position.y = c->old_area.position.y;
     c->area.size.w = c->old_area.size.w;
     c->area.size.h = c->old_area.size.h;
-    resizeclient(c, c->area.position.x, c->area.position.y, c->area.size.w, c->area.size.h);
+
+    area.position.x = c->area.position.x;;
+    area.position.y = c->area.position.y;;
+    area.size.w = c->area.size.w;
+    area.size.h = c->area.size.h;
+
+    resizeclient(c, &area);
     arrange(c->monitor);
   }
 }
