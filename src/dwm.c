@@ -82,9 +82,15 @@ void applyrules(Client *client) {
 }
 
 // apply size hints to client
-int applysizehints(Client *client, int *x, int *y, int *width, int *height, int interact) {
+int applysizehints(Client *client, Area *area, int interact) {
   int baseismin;
-  Monitor *m = client->monitor;
+  Monitor *monitor = client->monitor;
+
+  int *x, *y, *width, *height;
+  x = &area->position.x;
+  y = &area->position.y;
+  width = &area->size.w;
+  height = &area->size.h;
 
   /* set minimum possible */
   *width = MAX(1, *width);
@@ -103,17 +109,17 @@ int applysizehints(Client *client, int *x, int *y, int *width, int *height, int 
       *y = 0;
 	  }
   } else {
-    if (*x >= m->window_area.position.x + m->window_area.size.w){
-      *x = m->window_area.position.x + m->window_area.size.w - WIDTH(client);
+    if (*x >= monitor->window_area.position.x + monitor->window_area.size.w){
+      *x = monitor->window_area.position.x + monitor->window_area.size.w - WIDTH(client);
 	  }
-    if (*y >= m->window_area.position.y + m->window_area.size.h){
-      *y = m->window_area.position.y + m->window_area.size.h - HEIGHT(client);
+    if (*y >= monitor->window_area.position.y + monitor->window_area.size.h){
+      *y = monitor->window_area.position.y + monitor->window_area.size.h - HEIGHT(client);
 	  }
-    if (*x + *width + 2 * client->border_width <= m->window_area.position.x){
-      *x = m->window_area.position.x;
+    if (*x + *width + 2 * client->border_width <= monitor->window_area.position.x){
+      *x = monitor->window_area.position.x;
 	  }
-    if (*y + *height + 2 * client->border_width <= m->window_area.position.y){
-      *y = m->window_area.position.y;
+    if (*y + *height + 2 * client->border_width <= monitor->window_area.position.y){
+      *y = monitor->window_area.position.y;
 	  }
   }
   if (*height < bar_height){
@@ -1299,7 +1305,7 @@ void resize(Client *c, Area *area, int interact) {
   w = area->size.w;
   h = area->size.h;
 
-  if (applysizehints(c, &x, &y, &w, &h, interact)) {
+  if (applysizehints(c, area, interact)) {
     resizeclient(c, x, y, w, h);
   }
 }
@@ -2225,6 +2231,8 @@ void updatestatus(void) {
 }
 
 void updatesystrayicongeom(Client *client, int w, int h) {
+  Area area;
+
   if (client) {
     client->area.size.h = bar_height;
     if (w == h) {
@@ -2235,7 +2243,12 @@ void updatesystrayicongeom(Client *client, int w, int h) {
       client->area.size.w = (int)((float)bar_height * ((float)w / (float)h));
 	  }
 
-    applysizehints(client, &(client->area.position.x), &(client->area.position.y), &(client->area.size.w), &(client->area.size.h), False);
+    area.position.x = client->area.position.x;
+    area.position.y = client->area.position.y;
+    area.size.w = client->area.size.w;
+    area.size.h = client->area.size.h;
+
+    applysizehints(client, &area, False);
     /* force icons into the systray dimensions if they don't want to */
     if (client->area.size.h > bar_height) {
       if (client->area.size.w == client->area.size.h) {

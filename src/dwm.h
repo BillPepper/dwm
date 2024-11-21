@@ -96,7 +96,7 @@ static void killclient(const Arg *arg);                                         
 static void togglefloating(const Arg *arg);                                     // toggle floating for current client (arg unused)
 static void togglefullscreen(const Arg *arg);                                   // toggle fullscreen for current client (arg unused)
 static void updateclientlist(void);                                             // update all clients on all monitors
-static int applysizehints(Client *client, int *x, int *y, int *w, int *h, int interact); // (TODO: use area struct)
+static int applysizehints(Client *client, Area *area, int interact);            // (TODO: use area struct)
 static void applyrules(Client *client);                                         // apply client rules defined in config
 static void attach(Client *client);                                             // attach new client to client list
 static void attachstack(Client *client);                                        // attach client to it's monitors stack
