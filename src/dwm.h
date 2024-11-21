@@ -12,12 +12,6 @@
 #include "debug.h"
 #include "stacking.h"
 
-// mouse
-static int getrootptr(int *x, int *y);                                          // get the monitor root window index of cursor position (TODO: use position struct)
-static void movemouse(const Arg *arg);                                          // move mouse to another screen (arg not used?)
-static void resizemouse(const Arg *arg);                                        // handle mouse resizing
-static void grabbuttons(Client *client, int focused);                           // passivly grab mouse buttons
-
 // processes and signals
 static void sighup(int unused);                                                 // quit dwm with arg=1, which will restart dwm (unused arg)
 static void sigterm(int unused);                                                // quit dwm with arg=0, which will end dwm (unused arg)
@@ -29,9 +23,6 @@ static void tagmon(const Arg *arg);                                             
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
 
-// keys
-static void grabkeys(void);                                                     // passivly grab key inputs
-static void updatenumlockmask(void);                                            // numlock stuff
 
 // dwm core
 static void setup(void);                                                        // init dwm, bar, tray, screen, etc...
