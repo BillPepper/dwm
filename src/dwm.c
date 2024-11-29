@@ -5,7 +5,7 @@ struct NumTags {
   char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
 };
 
-void applyrules(Client *client) {
+void apply_config_rules(Client *client) {
   const char *class;
   const char *instance;
   unsigned int i;

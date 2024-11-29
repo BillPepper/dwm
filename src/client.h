@@ -8,7 +8,7 @@ void togglefloating(const Arg *arg);                                     // togg
 void togglefullscreen(const Arg *arg);                                   // toggle fullscreen for current client (arg unused)
 void updateclientlist(void);                                             // update all clients on all monitors
 int applysizehints(Client *client, Area *area, int interact);
-void applyrules(Client *client);                                         // apply client rules defined in config
+void apply_config_rules(Client *client);                                         // apply client rules defined in config
 void attach(Client *client);                                             // attach new client to client list
 void attachstack(Client *client);                                        // attach client to it's monitors stack
 void configure(Client *client);                                          // configure new client
