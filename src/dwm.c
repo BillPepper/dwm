@@ -5,9 +5,6 @@ struct NumTags {
   char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
 };
 
-/* -- function implementations -- */
-
-// apply the rules in config to client
 void applyrules(Client *client) {
   const char *class;
   const char *instance;
@@ -16,6 +13,10 @@ void applyrules(Client *client) {
   Monitor *monitor;
   XClassHint class_hint = {NULL, NULL};
 
+  bool is_title_match;
+  bool is_class_match;
+  bool is_instance_match;
+
   /* rule matching */
   client->is_floating = 0;
   client->tags = 0;
@@ -23,12 +24,21 @@ void applyrules(Client *client) {
   class = class_hint.res_class ? class_hint.res_class : broken;
   instance = class_hint.res_name ? class_hint.res_name : broken;
 
+  // for every rule in config
   for (i = 0; i < LENGTH(rules); i++) {
     rule = &rules[i];
-    if ((!rule->title || strstr(client->name, rule->title)) && (!rule->class_name || strstr(class, rule->class_name)) && (!rule->instance || strstr(instance, rule->instance))) {
+
+    is_title_match = (!rule->title || strstr(client->name, rule->title));
+    is_class_match = (!rule->class_name || strstr(class, rule->class_name));
+    is_instance_match = (!rule->instance || strstr(instance, rule->instance));
+
+    if (is_title_match && is_class_match && is_instance_match) {
       client->is_floating = rule->is_floating;
       client->tags |= rule->tags;
+
+      // find monitor the rule applies to
       for (monitor = monitors; monitor && monitor->num != rule->monitor; monitor = monitor->next);
+
       if (monitor){
         client->monitor = monitor;
 	    }
@@ -943,7 +953,7 @@ void manage(Window w, XWindowAttributes *wa) {
     c->tags = t->tags;
   } else {
     c->monitor = selected_monitor;
-    applyrules(c);
+    apply_config_rules(c);
   }
 
   if (c->area.position.x + WIDTH(c) > c->monitor->window_area.position.x + c->monitor->window_area.size.w){
