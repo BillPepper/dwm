@@ -37,7 +37,6 @@ void update_bar_position(Monitor *monitor) {
   }
 }
 
-
 void drawbar(Monitor *m) {
   int x, w, text_width = 0, tray_width = 0;
   int boxs = drw->fonts->h / 9;

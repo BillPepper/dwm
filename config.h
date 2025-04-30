@@ -106,10 +106,10 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 /*- modifier                key        function        argument */
 #define MODKEY Mod1Mask
 #define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,	view,       {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,	toggleview, {.ui = 1 << TAG} }, \
-	{ MODKEY|ShiftMask,             KEY,	tag,        {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,  {.ui = 1 << TAG} },
+	{ MODKEY,                       KEY,	view,       {.ui = 1 << TAG} }, \				// show clients with tag
+	{ MODKEY|ControlMask,           KEY,	toggleview, {.ui = 1 << TAG} }, \				// show all clients with selected tags
+	{ MODKEY|ShiftMask,             KEY,	tag,        {.ui = 1 << TAG} }, \				// set current clients tag
+	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,  {.ui = 1 << TAG} },					// enable/disable showing of clients with this tag
 
 static const Key keys[] = {
 	{ MODKEY, XK_b, togglebar, {0} },
