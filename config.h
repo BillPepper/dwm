@@ -97,8 +97,8 @@ Layout layouts[3] = {
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray, "-nf", col_green, "-sb", col_gray, "-sf", col_light_green, NULL };
+char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
+const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray, "-nf", col_green, "-sb", col_gray, "-sf", col_light_green, NULL };
 static const char *termcmd[]  = { "alacritty", NULL };
 static const char *termaltcmd[]  = { "urxvt", NULL };
 

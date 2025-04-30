@@ -74,7 +74,7 @@ void exitdwm(const Arg *arg){
   }
 
   if (systemReturn){
-    printf("System command returned: %d", systemReturn);
+    printf("System command returned: %d\n", systemReturn);
   }
 
 close_streams:

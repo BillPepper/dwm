@@ -1,6 +1,9 @@
 #ifndef CORE_H
 #define CORE_H
 
+extern int restart;
+extern int running;
+
 #include "definitions.h"
 
 void setup(void);                                                        // init dwm, bar, tray, screen, etc...
