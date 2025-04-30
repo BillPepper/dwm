@@ -3,7 +3,7 @@
 
 include config.mk
 
-SRC = src/drw.c src/dwm.c src/util.c src/debug.c src/layout.c src/error.c
+SRC = src/drw.c src/dwm.c src/util.c src/debug.c src/layout.c src/error.c src/bar.c
 OBJ = ${SRC:.c=.o}
 
 all: options dwm

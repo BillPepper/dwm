@@ -20,8 +20,8 @@ static const int snap = 32;
 
 static const int systray_fail_pin_position = 1; // (0:first,1:last) monitor
 static const int systray_pinned = 1; // (0: follow cursor, >0: index of monitor)
-static const int systray_on_left = 0;
-static const int systray_enabled = 1;
+int systray_on_left = 0;
+int systray_enabled = 1;
 static const int systray_spacing = 2;
 
 
@@ -29,7 +29,7 @@ static const int systray_spacing = 2;
 
 static const int is_bar_enabled = 1;
 static const int is_top_bar = 1;
-static const int status_monitor = 1; // index
+int status_monitor = 1; // index
 
 
 // -- Fonts --------------------------------------------------------------------
@@ -52,7 +52,7 @@ static const char *colors[][3] = {
 };
 
 /* tagging */
-static const char *tags[] = {
+const char *tags[15] = {
 	"1",
 	"2",
 	"3",
