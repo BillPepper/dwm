@@ -42,7 +42,7 @@ void exitdwm(const Arg *arg){
   FILE *exit_menu = popen(a, "r");
 
   char exit_action[16];
-  int systemReturn;
+  int systemReturn = -1;
 
   if (exit_menu == NULL || fscanf(exit_menu, "%15[a-zA-Z -]", exit_action) == EOF){
     fputs("Error. Failure in exit_dwm.", stderr);
@@ -73,7 +73,9 @@ void exitdwm(const Arg *arg){
     systemReturn = system("systemctl poweroff -i");
   }
 
-  printf("System command returned: %d", systemReturn);
+  if (systemReturn){
+    printf("System command returned: %d", systemReturn);
+  }
 
 close_streams:
   pclose(exit_menu);

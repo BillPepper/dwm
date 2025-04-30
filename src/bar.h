@@ -31,7 +31,7 @@ extern Clr **scheme;
 extern Window root;
 extern Cur *cursor[];
 extern int screen;
-const char *tags[15];
+extern const char *tags[15];
 extern int systray_on_left;
 
 void togglebar(const Arg *arg);                                          // toggle bar (arg unused)
