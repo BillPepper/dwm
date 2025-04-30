@@ -44,6 +44,7 @@
 #include "process.h"
 #include "tagging.h"
 #include "bar.h"
+#include "tray.h"
 #include "client.h"
 #include "window.h"
 #include "error.h"
