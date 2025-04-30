@@ -2,6 +2,7 @@
 #define BAR_H
 
 #include <X11/Xlib.h>
+
 #include "definitions.h"
 
 static void togglebar(const Arg *arg);                                          // toggle bar (arg unused)

@@ -1,6 +1,10 @@
 #ifndef TRAY_H
 #define TRAY_H
 
+#include <X11/Xlib.h>
+
+#include "definitions.h"
+
 // tray (uses clients as icons, TODO: implement icon struct)
 static void updatesystray(void);                                                // initializes (for some reason) and updates the tray
 static unsigned int getsystraywidth();                                          // retreive the length of the tray area
