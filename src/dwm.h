@@ -29,11 +29,11 @@
 #endif
 
 //dwm
+#include "globals.h"
 #include "drw.h"
 #include "util.h"
 #include "macro.h"
 #include "definitions.h"
-#include "globals.h"
 #include "core.h"
 #include "monitor.h"
 #include "layout.h"

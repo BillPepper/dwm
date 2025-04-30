@@ -3,21 +3,44 @@
 
 #include <X11/Xlib.h>
 
-static void buttonpress(XEvent *event);
-static void clientmessage(XEvent *event);
-static void configurenotify(XEvent *event);
-static void configurerequest(XEvent *event);
-static void destroynotify(XEvent *event);
-static void enternotify(XEvent *event);
-static void expose(XEvent *event);
-static void focusin(XEvent *event);
-static void keypress(XEvent *event);
-static void mappingnotify(XEvent *event);
-static void maprequest(XEvent *event);
-static void motionnotify(XEvent *event);
-static void propertynotify(XEvent *event);
-static void resizerequest(XEvent *event);
-static void unmapnotify(XEvent *event);
-static int sendevent(Window window, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
+
+void buttonpress(XEvent *event);
+void clientmessage(XEvent *event);
+void configurenotify(XEvent *event);
+void configurerequest(XEvent *event);
+void destroynotify(XEvent *event);
+void enternotify(XEvent *event);
+void expose(XEvent *event);
+void focusin(XEvent *event);
+void keypress(XEvent *event);
+void mappingnotify(XEvent *event);
+void maprequest(XEvent *event);
+void motionnotify(XEvent *event);
+void propertynotify(XEvent *event);
+void resizerequest(XEvent *event);
+void unmapnotify(XEvent *event);
+int sendevent(Window window, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
+
+// Array of function pointers
+#define EVENT_COUNT LASTEvent
+void (*handler[EVENT_COUNT])(XEvent *) = {
+  // handler[index] = callback
+  [ButtonPress] = buttonpress,
+  [ClientMessage] = clientmessage,
+  [ConfigureRequest] = configurerequest,
+  [ConfigureNotify] = configurenotify,
+  [DestroyNotify] = destroynotify,
+  [EnterNotify] = enternotify,
+  [Expose] = expose,
+  [FocusIn] = focusin,
+  [KeyPress] = keypress,
+  [MappingNotify] = mappingnotify,
+  [MapRequest] = maprequest,
+  [MotionNotify] = motionnotify,
+  [PropertyNotify] = propertynotify,
+  [ResizeRequest] = resizerequest,
+  [UnmapNotify] = unmapnotify
+};
+
 
 #endif

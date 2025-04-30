@@ -1,12 +1,17 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include "globals.h"
+#include <X11/Xproto.h>
+#include <X11/Xft/Xft.h>
+
+#include "util.h"
+
+extern int (*xerrorxlib)(Display *, XErrorEvent *);
 
 // Error
-static int xerror(Display *display, XErrorEvent *event);                        // handle errors
-static int xerrordummy(Display *display, XErrorEvent *event);                   // returns 0
-static int xerrorstart(Display *display, XErrorEvent *event);                   // called when other wm is running
+int xerror(Display *display, XErrorEvent *event);                               // handle errors
+int xerrordummy(Display *display, XErrorEvent *event);                          // returns 0
+int xerrorstart(Display *display, XErrorEvent *event);                          // called when other wm is running
 
 
 #endif
