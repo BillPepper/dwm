@@ -12,7 +12,7 @@ void tile(Monitor *m);
 // -- Appearance ---------------------------------------------------------------
 
 static const int border_width = 3;
-static const int gap = 15;
+int gap = 15;
 static const int snap = 32;
 
 
@@ -27,8 +27,8 @@ int systray_spacing = 2;
 
 // -- Bar ----------------------------------------------------------------------
 
-static const int is_bar_enabled = 1;
-static const int is_top_bar = 1;
+int is_bar_enabled = 1;
+int is_top_bar = 1;
 int status_monitor = 1; // index
 
 
@@ -81,13 +81,13 @@ static const Rule rules[] = {
 };
 
 /* layout(s) */
-static const float mfact     = 0.5;					/* factor of master area size [0.05..0.95] */
-static const int nmaster     = 1;						/* number of clients in master area */
+float mfact     = 0.5;					/* factor of master area size [0.05..0.95] */
+int nmaster     = 1;						/* number of clients in master area */
 static const int resize_hints_enabled = 0;	/* 1 means respect size hints in tiled resizals */
 static const int is_fullscreen_locked = 1;	/* 1 will force focus on the fullscreen window */
 
 /* Layout symbols and corresponding arrance function callbacks. NULL = floating */
-static const Layout layouts[] = {
+Layout layouts[3] = {
 	{ "[T]", tile },
 	{ "[N]", NULL },
 	{ "[M]", monocle },

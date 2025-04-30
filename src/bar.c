@@ -132,7 +132,7 @@ void resizebarwin(Monitor *monitor) {
 void updatestatus(void) {
   // default status text
   if (!gettextprop(root, XA_WM_NAME, status_text, sizeof(status_text))) {
-    strcpy(status_text, "dwm-" VERSION);
+    strcpy(status_text, "pdwm-" VERSION);
   }
 
   // show status on all screens

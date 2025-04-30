@@ -146,40 +146,6 @@ int applysizehints(Client *client, Area *area, int interact) {
   return *x != client->area.position.x || *y != client->area.position.y || *width != client->area.size.w || *height != client->area.size.h;
 }
 
-void arrange(Monitor *monitor) {
-  // if monitor specified
-  if (monitor){
-    showhide(monitor->stack);
-  }
-
-  // otherwise, do it for all
-  else {
-    for (monitor = monitors; monitor; monitor = monitor->next){
-      showhide(monitor->stack);
-	  }
-  }
-
-  // again, if monitor specified
-  if (monitor) {
-    arrangemon(monitor);
-    restack(monitor);
-  }
-
-  // again, do it for all if not specified
-  else {
-    for (monitor = monitors; monitor; monitor = monitor->next){
-      arrangemon(monitor);
-	  }
-  }
-}
-
-void arrangemon(Monitor *monitor) {
-  strncpy(monitor->layout_symbol, monitor->layout[monitor->selected_layout]->symbol, sizeof monitor->layout_symbol);
-  if (monitor->layout[monitor->selected_layout]->arrange_func){
-    monitor->layout[monitor->selected_layout]->arrange_func(monitor);
-  }
-}
-
 void attach(Client *client) {
   client->next = client->monitor->clients;
   client->monitor->clients = client;
@@ -282,21 +248,6 @@ void cleanup(void) {
   XSync(display, False);
   XSetInputFocus(display, PointerRoot, RevertToPointerRoot, CurrentTime);
   XDeleteProperty(display, root, netatom[NetActiveWindow]);
-}
-
-void cleanupmon(Monitor *mon) {
-  Monitor *m;
-
-  if (mon == monitors){
-    monitors = monitors->next;
-  }
-  else {
-    for (m = monitors; m && m->next != mon; m = m->next);
-    m->next = mon->next;
-  }
-  XUnmapWindow(display, mon->bar_window);
-  XDestroyWindow(display, mon->bar_window);
-  free(mon);
 }
 
 void clientmessage(XEvent *event) {
@@ -481,23 +432,6 @@ void configurerequest(XEvent *e) {
   XSync(display, False);
 }
 
-Monitor *createmon(void) {
-  Monitor *monitor;
-
-  monitor = ecalloc(1, sizeof(Monitor));
-  monitor->tag_set[0] = monitor->tag_set[1] = 1;
-  monitor->master_factor = mfact;
-  monitor->master_count = nmaster;
-  monitor->bar_enabled = is_bar_enabled;
-  monitor->is_topbar = is_top_bar;
-  monitor->gap = gap;
-  monitor->layout[0] = &layouts[0];
-  monitor->layout[1] = &layouts[1 % LENGTH(layouts)];
-  strncpy(monitor->layout_symbol, layouts[0].symbol, sizeof monitor->layout_symbol);
-
-  return monitor;
-}
-
 void destroynotify(XEvent *e) {
   Client *c;
   XDestroyWindowEvent *ev = &e->xdestroywindow;
@@ -530,24 +464,6 @@ void detachstack(Client *c) {
     c->monitor->selected_client = t;
   }
 }
-
-Monitor *dirtomon(int dir) {
-  Monitor *monitor = NULL;
-
-  if (dir > 0) {
-    if (!(monitor = selected_monitor->next)){
-      monitor = monitors;
-	  }
-  } else if (selected_monitor == monitors){
-    for (monitor = monitors; monitor->next; monitor = monitor->next);
-  }
-  else {
-    for (monitor = monitors; monitor->next != selected_monitor; monitor = monitor->next);
-  }
-
-  return monitor;
-}
-
 
 void enternotify(XEvent *e) {
   Client *c;
@@ -616,21 +532,6 @@ void focusin(XEvent *e) {
   if (selected_monitor->selected_client && ev->window != selected_monitor->selected_client->window) {
     setfocus(selected_monitor->selected_client);
   }
-}
-
-void focusmon(const Arg *arg) {
-  Monitor *m;
-
-  if (!monitors->next) {
-    return;
-  }
-  if ((m = dirtomon(arg->i)) == selected_monitor) {
-    return;
-  }
-
-  unfocus(selected_monitor->selected_client, 0);
-  selected_monitor = m;
-  focus(NULL);
 }
 
 void focusstack(const Arg *arg) {
@@ -1121,27 +1022,6 @@ void quit(const Arg *arg) {
   }
 
   running = 0;
-}
-
-Monitor *recttomon(Area *area) {
-  Monitor *monitor, *r = selected_monitor;
-  int a;
-  int area_val = 0; // used to be 'area' until I used the area struct as arg
-  int x, y, w, h;
-
-  x = area->position.x;
-  y = area->position.y;
-  w = area->size.w;
-  h = area->size.h;
-
-  for (monitor = monitors; monitor; monitor = monitor->next) {
-    if ((a = INTERSECT(x, y, w, h, monitor)) > area_val) {
-      area_val = a;
-      r = monitor;
-    }
-  }
-
-  return r;
 }
 
 void resize(Client *c, Area *area, int interact) {
@@ -1670,9 +1550,6 @@ void tagmon(const Arg *arg) {
   sendmon(selected_monitor->selected_client, dirtomon(arg->i));
 }
 
-
-
-
 void togglefloating(const Arg *arg) {
   Area area;
 
@@ -1783,8 +1660,6 @@ void unmapnotify(XEvent *e) {
     updatesystray();
   }
 }
-
-
 
 void updateclientlist() {
   Client *client;
@@ -1949,7 +1824,6 @@ void updatesizehints(Client *c) {
   c->hintsvalid = 1;
 }
 
-
 void updatetitle(Client *client) {
   if (!gettextprop(client->window, netatom[NetWMName], client->name, sizeof client->name)) {
     gettextprop(client->window, XA_WM_NAME, client->name, sizeof client->name);
@@ -2064,7 +1938,6 @@ Monitor *wintomon(Window window) {
   return selected_monitor;
 }
 
-
 void zoom(const Arg *arg) {
   Client *c = selected_monitor->selected_client;
 
@@ -2081,7 +1954,7 @@ void zoom(const Arg *arg) {
 
 void parse_args(int argc, char *argv[]){
   if (argc == 2 && !strcmp("-v", argv[1])) {
-    die("dwm-" VERSION);
+    die("pdwm-" VERSION);
   }
   if (argc != 1) {
     die("usage: dwm [-v]");
