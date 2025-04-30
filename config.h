@@ -89,7 +89,7 @@ static const int is_fullscreen_locked = 1;	/* 1 will force focus on the fullscre
 /* Layout symbols and corresponding arrance function callbacks. NULL = floating */
 Layout layouts[3] = {
 	{ "[T]", tile },
-	{ "[N]", NULL },
+	{ "[F]", NULL },
 	{ "[M]", monocle },
 };
 
