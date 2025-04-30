@@ -17,7 +17,9 @@ int padding;                                                             /* sum 
 int (*xerrorxlib)(Display *, XErrorEvent *);
 unsigned int numlockmask = 0;
 
-Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
+Atom wmatom[WMLast];
+Atom netatom[NetLast];
+Atom xatom[XLast];
 int restart = 0;                                                         // 1 if dwm should restart
 int running = 1;                                                         // 1 if dwm is running
 Cur *cursor[CurLast];

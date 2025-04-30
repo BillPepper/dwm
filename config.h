@@ -18,11 +18,11 @@ static const int snap = 32;
 
 // -- Tray ---------------------------------------------------------------------
 
-static const int systray_fail_pin_position = 1; // (0:first,1:last) monitor
-static const int systray_pinned = 1; // (0: follow cursor, >0: index of monitor)
+int systray_fail_pin_position = 1; // (0:first,1:last) monitor
+int systray_pinned = 1; // (0: follow cursor, >0: index of monitor)
 int systray_on_left = 0;
 int systray_enabled = 1;
-static const int systray_spacing = 2;
+int systray_spacing = 2;
 
 
 // -- Bar ----------------------------------------------------------------------
