@@ -4,13 +4,32 @@
 #include "definitions.h"
 
 // mouse
-static int getrootptr(int *x, int *y);                                          // get the monitor root window index of cursor position (TODO: use position struct)
-static void movemouse(const Arg *arg);                                          // move mouse to another screen (arg not used?)
-static void resizemouse(const Arg *arg);                                        // handle mouse resizing
-static void grabbuttons(Client *client, int focused);                           // passivly grab mouse buttons
+
+// @descr: Get the monitor root window index of cursor position (TODO: use position struct)
+// @param: x -> mouse x position, y -> mouse y position
+static int getrootptr(int *x, int *y);
+
+// @descr: Move mouse to another screen (arg not used?)
+// @param: unused
+static void movemouse(const Arg *arg);
+
+// @descr: Handle mouse resizing
+// @param: unused
+static void resizemouse(const Arg *arg);
+
+// @descr: Passivly grab mouse buttons
+// @param: client -> the client buttons should be grabbed for (?)
+// @param: focused -> ?
+static void grabbuttons(Client *client, int focused);
 
 // keys
-static void grabkeys(void);                                                     // passivly grab key inputs
+
+// @descr: Passivly grab key inputs
+// @param: none
+static void grabkeys(void);
+
+// @descr:
+// @param:
 static void updatenumlockmask(void);                                            // numlock stuff
 
 #endif

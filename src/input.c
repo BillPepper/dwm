@@ -178,20 +178,20 @@ void resizemouse(const Arg *arg) {
   }
 }
 
-void grabbuttons(Client *c, int focused) {
+void grabbuttons(Client *client, int focused) {
   updatenumlockmask();
   {
     unsigned int i, j;
     unsigned int modifiers[] = {0, LockMask, numlockmask, numlockmask | LockMask};
-    XUngrabButton(display, AnyButton, AnyModifier, c->window);
+    XUngrabButton(display, AnyButton, AnyModifier, client->window);
     if (!focused){
-      XGrabButton(display, AnyButton, AnyModifier, c->window, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
+      XGrabButton(display, AnyButton, AnyModifier, client->window, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
 	  }
 
     for (i = 0; i < LENGTH(buttons); i++){
       if (buttons[i].click == ClkClientWin){
         for (j = 0; j < LENGTH(modifiers); j++) {
-          XGrabButton(display, buttons[i].button, buttons[i].mask | modifiers[j], c->window, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
+          XGrabButton(display, buttons[i].button, buttons[i].mask | modifiers[j], client->window, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
 		    }
       }
 	  }
@@ -231,6 +231,7 @@ void grabkeys(void) {
     XFree(syms);
   }
 }
+
 void updatenumlockmask(void) {
   unsigned int i, j;
   XModifierKeymap *modmap;

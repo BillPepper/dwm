@@ -1730,13 +1730,14 @@ void setup(void) {
   bar_height = drw->fonts->h + 2;
   updategeom();
 
-  /* init atoms */
+  /* init wm atoms */
   utf8string = XInternAtom(display, "UTF8_STRING", False);
   wmatom[WMProtocols] = XInternAtom(display, "WM_PROTOCOLS", False);
   wmatom[WMDelete] = XInternAtom(display, "WM_DELETE_WINDOW", False);
   wmatom[WMState] = XInternAtom(display, "WM_STATE", False);
   wmatom[WMTakeFocus] = XInternAtom(display, "WM_TAKE_FOCUS", False);
 
+  // init net atoms
   netatom[NetActiveWindow] = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
   netatom[NetSupported] = XInternAtom(display, "_NET_SUPPORTED", False);
   netatom[NetSystemTray] = XInternAtom(display, "_NET_SYSTEM_TRAY_S0", False);
@@ -1751,6 +1752,7 @@ void setup(void) {
   netatom[NetWMWindowTypeDialog] = XInternAtom(display, "_NET_WM_WINDOW_TYPE_DIALOG", False);
   netatom[NetClientList] = XInternAtom(display, "_NET_CLIENT_LIST", False);
 
+  // init x atoms
   xatom[Manager] = XInternAtom(display, "MANAGER", False);
   xatom[Xembed] = XInternAtom(display, "_XEMBED", False);
   xatom[XembedInfo] = XInternAtom(display, "_XEMBED_INFO", False);
