@@ -379,70 +379,109 @@ void killclient(const Arg *arg) {
   }
 }
 
-void manage(Window w, XWindowAttributes *wa) {
-  Client *c, *t = NULL;
+void manage(Window window, XWindowAttributes *window_attributes) {
+  // Appears to create a client struct and tie the input x window to it
+
+
+  Client *client;
+  Client *t = NULL;
   Window trans = None;
-  XWindowChanges wc;
+  XWindowChanges window_changes;
 
-  c = ecalloc(1, sizeof(Client));
-  c->window = w;
+  int client_x, client_y, client_w, client_h;
+  int win_area_x, win_area_y, win_area_w, win_area_h;
+  int monitor_area_x, monitor_area_y, monitor_area_w, monitor_area_h;
+
+  // Create client struct
+  client = ecalloc(1, sizeof(Client));
+  client->window = window;
+
   /* geometry */
-  c->area.position.x = c->old_area.position.x = wa->x;
-  c->area.position.y = c->old_area.position.y = wa->y;
-  c->area.size.w = c->old_area.size.w = wa->width;
-  c->area.size.h = c->old_area.size.h = wa->height;
-  c->old_border_width = wa->border_width;
+  client->area.position.x = window_attributes->x;
+  client->area.position.y = window_attributes->y;
+  client->area.size.w = window_attributes->width;
+  client->area.size.h = window_attributes->height;
 
-  updatetitle(c);
-  if (XGetTransientForHint(display, w, &trans) && (t = wintoclient(trans))){
-    c->monitor = t->monitor;
-    c->tags = t->tags;
+  client->old_area.position.x = window_attributes->x;
+  client->old_area.position.y = window_attributes->y;
+  client->old_area.size.w = window_attributes->width;
+  client->old_area.size.h = window_attributes->height;
+
+  client->old_border_width = window_attributes->border_width;
+
+  // Update the client struct's title with current one of the x window
+  updatetitle(client);
+
+  // (?) if window is a transient, find client by it's window to set position
+  if (XGetTransientForHint(display, window, &trans) && (t = wintoclient(trans))){
+    client->monitor = t->monitor;
+    client->tags = t->tags;
   } else {
-    c->monitor = selected_monitor;
-    apply_config_rules(c);
+    client->monitor = selected_monitor;
+    apply_config_rules(client);
   }
 
-  if (c->area.position.x + WIDTH(c) > c->monitor->window_area.position.x + c->monitor->window_area.size.w){
-    c->area.position.x = c->monitor->window_area.position.x + c->monitor->window_area.size.w - WIDTH(c);
-  }
-  if (c->area.position.y + HEIGHT(c) > c->monitor->window_area.position.y + c->monitor->window_area.size.h){
-    c->area.position.y = c->monitor->window_area.position.y + c->monitor->window_area.size.h - HEIGHT(c);
-  }
-  c->area.position.x = MAX(c->area.position.x, c->monitor->window_area.position.x);
-  c->area.position.y = MAX(c->area.position.y, c->monitor->window_area.position.y);
-  c->border_width = border_width;
+  client_x = client->area.position.x;
+  client_y = client->area.position.y;
 
-  wc.border_width = c->border_width;
-  XConfigureWindow(display, w, CWBorderWidth, &wc);
-  XSetWindowBorder(display, w, scheme[SchemeNorm][ColBorder].pixel);
-  configure(c); /* propagates border_width, if size doesn't change */
-  updatewindowtype(c);
-  updatesizehints(c);
-  updatewmhints(c);
+  win_area_x = client->monitor->window_area.position.x;
+  win_area_y = client->monitor->window_area.position.y;
+  win_area_w = client->monitor->window_area.size.w;
+  win_area_h = client->monitor->window_area.size.h;
+
+  if (client_x + WIDTH(client) > win_area_x + win_area_w){
+    client->area.position.x = win_area_x + win_area_w - WIDTH(client);
+  }
+
+  if (client_y + HEIGHT(client) > win_area_y + win_area_h){
+    client->area.position.y = win_area_y + win_area_h - HEIGHT(client);
+  }
+
+  client->area.position.x = MAX(client_x, win_area_x);
+  client->area.position.y = MAX(client_y, win_area_y);
+  client->border_width = border_width;
+
+  window_changes.border_width = client->border_width;
+  XConfigureWindow(display, window, CWBorderWidth, &window_changes);
+  XSetWindowBorder(display, window, scheme[SchemeNorm][ColBorder].pixel);
+  configure(client); /* propagates border_width, if size doesn't change */
+  updatewindowtype(client);
+  updatesizehints(client);
+  updatewmhints(client);
+
+  monitor_area_x = client->monitor->monitor_area.position.x;
+  monitor_area_y = client->monitor->monitor_area.position.y;
+  monitor_area_w = client->monitor->monitor_area.size.w;
+  monitor_area_h = client->monitor->monitor_area.size.h;
 
   // set windows to center (patch)
-  c->area.position.x = c->monitor->monitor_area.position.x + (c->monitor->monitor_area.size.w - WIDTH(c)) / 2;
-  c->area.position.y = c->monitor->monitor_area.position.y + (c->monitor->monitor_area.size.h - HEIGHT(c)) / 2;
+  client->area.position.x = monitor_area_x + (monitor_area_w - WIDTH(client)) / 2;
+  client->area.position.y = monitor_area_y + (monitor_area_h - HEIGHT(client)) / 2;
 
-  XSelectInput(display, w, EnterWindowMask | FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
-  grabbuttons(c, 0);
-  if (!c->is_floating) {
-    c->is_floating = c->old_state = trans != None || c->is_fixed;
+  XSelectInput(display, window, EnterWindowMask | FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
+  grabbuttons(client, 0);
+  if (!client->is_floating) {
+    client->is_floating = client->old_state = trans != None || client->is_fixed;
   }
-  if (c->is_floating) {
-    XRaiseWindow(display, c->window);
+  if (client->is_floating) {
+    XRaiseWindow(display, client->window);
   }
-  attach(c);
-  attachstack(c);
-  XChangeProperty(display, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->window), 1);
-  XMoveResizeWindow(display, c->window, c->area.position.x + 2 * screen_width, c->area.position.y, c->area.size.w, c->area.size.h); /* some windows require this */
-  setclientstate(c, NormalState);
-  if (c->monitor == selected_monitor) {
+
+  attach(client);
+  attachstack(client);
+
+  XChangeProperty(display, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(client->window), 1);
+  XMoveResizeWindow(display, client->window, client_x + 2 * screen_width, client_y, client->area.size.w, client->area.size.h); /* some windows require this */
+  setclientstate(client, NormalState);
+
+  if (client->monitor == selected_monitor) {
     unfocus(selected_monitor->selected_client, 0);
   }
-  c->monitor->selected_client = c;
-  arrange(c->monitor);
-  XMapWindow(display, c->window);
+
+  client->monitor->selected_client = client;
+
+  arrange(client->monitor);
+  XMapWindow(display, client->window);
   focus(NULL);
 }
 
@@ -944,53 +983,55 @@ void updatenumlockmask(void) {
   XFreeModifiermap(modmap);
 }
 
-void updatesizehints(Client *c) {
+void updatesizehints(Client *client) {
   long master_size;
   XSizeHints size;
 
-  if (!XGetWMNormalHints(display, c->window, &size, &master_size)) {
-    /* size is uninitialized, ensure that size.flags aren't used */
+  /* if size is uninitialized, ensure that size.flags aren't used */
+  if (!XGetWMNormalHints(display, client->window, &size, &master_size)) {
     size.flags = PSize;
   }
+
+
   if (size.flags & PBaseSize) {
-    c->base.w = size.base_width;
-    c->base.h = size.base_height;
+    client->base.w = size.base_width;
+    client->base.h = size.base_height;
   } else if (size.flags & PMinSize) {
-    c->base.w = size.min_width;
-    c->base.h = size.min_height;
+    client->base.w = size.min_width;
+    client->base.h = size.min_height;
   } else {
-    c->base.w = c->base.h = 0;
+    client->base.w = client->base.h = 0;
   }
   if (size.flags & PResizeInc) {
-    c->inc.w = size.width_inc;
-    c->inc.h = size.height_inc;
+    client->inc.w = size.width_inc;
+    client->inc.h = size.height_inc;
   } else {
-    c->inc.w = c->inc.h = 0;
+    client->inc.w = client->inc.h = 0;
   }
   if (size.flags & PMaxSize) {
-    c->max.w = size.max_width;
-    c->max.h = size.max_height;
+    client->max.w = size.max_width;
+    client->max.h = size.max_height;
   } else {
-    c->max.w = c->max.h = 0;
+    client->max.w = client->max.h = 0;
   }
   if (size.flags & PMinSize) {
-    c->min.w = size.min_width;
-    c->min.h = size.min_height;
+    client->min.w = size.min_width;
+    client->min.h = size.min_height;
   } else if (size.flags & PBaseSize) {
-    c->min.w = size.base_width;
-    c->min.h = size.base_height;
+    client->min.w = size.base_width;
+    client->min.h = size.base_height;
   } else {
-    c->min.w = c->min.h = 0;
+    client->min.w = client->min.h = 0;
   }
   if (size.flags & PAspect) {
-    c->aspect.min = (float)size.min_aspect.y / size.min_aspect.x;
-    c->aspect.max = (float)size.max_aspect.x / size.max_aspect.y;
+    client->aspect.min = (float)size.min_aspect.y / size.min_aspect.x;
+    client->aspect.max = (float)size.max_aspect.x / size.max_aspect.y;
   } else {
-    c->aspect.max = c->aspect.min = 0.0;
+    client->aspect.max = client->aspect.min = 0.0;
   }
 
-  c->is_fixed = (c->max.w && c->max.h && c->max.w == c->min.w && c->max.h == c->min.h);
-  c->hintsvalid = 1;
+  client->is_fixed = (client->max.w && client->max.h && client->max.w == client->min.w && client->max.h == client->min.h);
+  client->hintsvalid = 1;
 }
 
 void updatetitle(Client *client) {
@@ -1910,7 +1951,7 @@ int main(int argc, char *argv[]) {
 
   checkotherwm(); // check if another wm is running
   setup();        // init systray, bars, screens, etc.
-  scan();
+  scan();         // scan for windows and mangage() them
   run(); 			    // event loop
 
   // relaunch dwm
