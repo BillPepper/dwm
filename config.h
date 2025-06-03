@@ -83,7 +83,7 @@ static const Rule rules[] = {
 /* layout(s) */
 float mfact     = 0.5;					/* factor of master area size [0.05..0.95] */
 int nmaster     = 1;						/* number of clients in master area */
-static const int resize_hints_enabled = 0;	/* 1 means respect size hints in tiled resizals */
+int resize_hints_enabled = 0;	/* 1 means respect size hints in tiled resizals */
 static const int is_fullscreen_locked = 1;	/* 1 will force focus on the fullscreen window */
 
 /* Layout symbols and corresponding arrance function callbacks. NULL = floating */

@@ -11,7 +11,8 @@ Systray *systray = NULL;
 const char broken[] = "broken";                                          // default window title
 char status_text[256];                                                   // right side bar text
 int screen;
-int screen_width, screen_height;                                         /* X display screen geometry width, height */
+int screen_width;
+int screen_height;                                                       /* X display screen geometry width, height */
 int bar_height;                                                          /* bar height */
 int padding;                                                             /* sum of left and right padding for text */
 int (*xerrorxlib)(Display *, XErrorEvent *);

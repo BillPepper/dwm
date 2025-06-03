@@ -3,17 +3,29 @@
 
 
 #include <X11/Xlib.h>
+#include <X11/Xatom.h>
 
 #include "events.h"
 #include "error.h"
+#include "macro.h"
 
 #include "definitions.h"
 
 // defined in config.h and global.h
 extern void arrange(Monitor *monitor);
+
+extern int resize_hints_enabled;
+
 extern Monitor *selected_monitor;
 extern Display *display;
 extern Atom wmatom[WMLast];
+extern Atom netatom[NetLast];
+extern Display *display;
+extern Window root;
+extern Monitor *monitors;
+extern int screen_width;
+extern int screen_height;
+extern int bar_height;
 
 // @desc: close client window
 // @arg0: arg -> unused
