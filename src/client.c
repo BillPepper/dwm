@@ -293,3 +293,263 @@ void focus(Client *client) {
   selected_monitor->selected_client = client;
   drawbars();
 }
+
+
+
+Client *nexttiled(Client *client) {
+  for (; client && (client->is_floating || !ISVISIBLE(client)); client = client->next);
+  return client;
+}
+
+void pop(Client *client) {
+  detach(client);
+  attach(client);
+  focus(client);
+  arrange(client->monitor);
+}
+
+void resize(Client *c, Area *area, int interact) {
+  if (applysizehints(c, area, interact)) {
+    resizeclient(c, area);
+  }
+}
+
+void resizeclient(Client *c, Area *area) {
+  XWindowChanges window_changes;
+
+  c->old_area.position.x = c->area.position.x;
+  c->area.position.x = window_changes.x = area->position.x;
+
+  c->old_area.position.y = c->area.position.y;
+  c->area.position.y = window_changes.y = area->position.y;
+
+  c->old_area.size.w = c->area.size.w;
+  c->area.size.w = window_changes.width = area->size.w;
+
+  c->old_area.size.h = c->area.size.h;
+  c->area.size.h = window_changes.height = area->size.h;
+
+  window_changes.border_width = c->border_width;
+  XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
+  configure(c);
+  XSync(display, False);
+}
+
+void sendmon(Client *client, Monitor *monitor){
+  if (client->monitor == monitor) {
+    return;
+  }
+
+  unfocus(client, 1);
+  detach(client);
+  detachstack(client);
+  client->monitor = monitor;
+  client->tags = monitor->tag_set[monitor->selected_tags]; /* assign tags of target monitor */
+  attach(client);
+  attachstack(client);
+  focus(NULL);
+  arrange(NULL);
+}
+
+
+void setclientstate(Client *c, long state){
+  long data[] = {state, None};
+
+  XChangeProperty(display, c->window, wmatom[WMState], wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
+}
+
+void setfocus(Client *client) {
+  if (!client->never_focus) {
+    XSetInputFocus(display, client->window, RevertToPointerRoot, CurrentTime);
+    XChangeProperty(display, root, netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(client->window), 1);
+  }
+  sendevent(client->window, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
+}
+
+void setfullscreen(Client *c, int fullscreen) {
+  Area area;
+
+  if (fullscreen && !c->is_fullscreen) {
+    XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&netatom[NetWMFullscreen], 1);
+    c->is_fullscreen = 1;
+    c->old_state = c->is_floating;
+    c->old_border_width = c->border_width;
+    c->border_width = 0;
+    c->is_floating = 1;
+
+    area.position.x = c->monitor->monitor_area.position.x;
+    area.position.y = c->monitor->monitor_area.position.y;
+    area.size.w = c->monitor->monitor_area.size.w;
+    area.size.h = c->monitor->monitor_area.size.h;
+
+    resizeclient(c, &area);
+    XRaiseWindow(display, c->window);
+  } else if (!fullscreen && c->is_fullscreen) {
+    XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
+    c->is_fullscreen = 0;
+    c->is_floating = c->old_state;
+    c->border_width = c->old_border_width;
+    c->area.position.x = c->old_area.position.x;
+    c->area.position.y = c->old_area.position.y;
+    c->area.size.w = c->old_area.size.w;
+    c->area.size.h = c->old_area.size.h;
+
+    area.position.x = c->area.position.x;;
+    area.position.y = c->area.position.y;;
+    area.size.w = c->area.size.w;
+    area.size.h = c->area.size.h;
+
+    resizeclient(c, &area);
+    arrange(c->monitor);
+  }
+}
+
+void seturgent(Client *client, int urgency_state) {
+  XWMHints *hints;
+
+  client->is_urgent = urgency_state;
+  if (!(hints = XGetWMHints(display, client->window))) {
+    return;
+  }
+
+  hints->flags = urgency_state ? (hints->flags | XUrgencyHint) : (hints->flags & ~XUrgencyHint);
+  XSetWMHints(display, client->window, hints);
+  XFree(hints);
+}
+
+void showhide(Client *client) {
+  Area area;
+
+  if (!client){
+    return;
+  }
+
+  if (ISVISIBLE(client)) {
+    /* show clients top down */
+    XMoveWindow(display, client->window, client->area.position.x, client->area.position.y);
+    if ((!client->monitor->layout[client->monitor->selected_layout]->arrange_func || client->is_floating) && !client->is_fullscreen) {
+      area.position.x = client->area.position.x;
+      area.position.y = client->area.position.y;
+      area.size.w = client->area.size.w;
+      area.size.h = client->area.size.h;
+
+      resize(client, &area, 0);
+	  }
+    showhide(client->next_stack);
+  } else {
+    /* hide clients bottom up */
+    showhide(client->next_stack);
+    XMoveWindow(display, client->window, WIDTH(client) * -2, client->area.position.y);
+  }
+}
+
+
+
+void unfocus(Client *client, int setfocus) {
+  if (!client) {
+    return;
+  }
+
+  grabbuttons(client, 0);
+  XSetWindowBorder(display, client->window, scheme[SchemeNorm][ColBorder].pixel);
+  if (setfocus) {
+    XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);
+    XDeleteProperty(display, root, netatom[NetActiveWindow]);
+  }
+}
+
+void updatesizehints(Client *client) {
+  long master_size;
+  XSizeHints size;
+
+  /* if size is uninitialized, ensure that size.flags aren't used */
+  if (!XGetWMNormalHints(display, client->window, &size, &master_size)) {
+    size.flags = PSize;
+  }
+
+
+  if (size.flags & PBaseSize) {
+    client->base.w = size.base_width;
+    client->base.h = size.base_height;
+  } else if (size.flags & PMinSize) {
+    client->base.w = size.min_width;
+    client->base.h = size.min_height;
+  } else {
+    client->base.w = client->base.h = 0;
+  }
+  if (size.flags & PResizeInc) {
+    client->inc.w = size.width_inc;
+    client->inc.h = size.height_inc;
+  } else {
+    client->inc.w = client->inc.h = 0;
+  }
+  if (size.flags & PMaxSize) {
+    client->max.w = size.max_width;
+    client->max.h = size.max_height;
+  } else {
+    client->max.w = client->max.h = 0;
+  }
+  if (size.flags & PMinSize) {
+    client->min.w = size.min_width;
+    client->min.h = size.min_height;
+  } else if (size.flags & PBaseSize) {
+    client->min.w = size.base_width;
+    client->min.h = size.base_height;
+  } else {
+    client->min.w = client->min.h = 0;
+  }
+  if (size.flags & PAspect) {
+    client->aspect.min = (float)size.min_aspect.y / size.min_aspect.x;
+    client->aspect.max = (float)size.max_aspect.x / size.max_aspect.y;
+  } else {
+    client->aspect.max = client->aspect.min = 0.0;
+  }
+
+  client->is_fixed = (client->max.w && client->max.h && client->max.w == client->min.w && client->max.h == client->min.h);
+  client->hintsvalid = 1;
+}
+
+void updatetitle(Client *client) {
+  if (!gettextprop(client->window, netatom[NetWMName], client->name, sizeof client->name)) {
+    gettextprop(client->window, XA_WM_NAME, client->name, sizeof client->name);
+  }
+
+  /* hack to mark broken clients */
+  if (client->name[0] == '\0') {
+    strcpy(client->name, broken);
+  }
+}
+
+void updatewindowtype(Client *client) {
+  Atom state = getatomprop(client, netatom[NetWMState]);
+  Atom type = getatomprop(client, netatom[NetWMWindowType]);
+
+  if (state == netatom[NetWMFullscreen]) {
+    setfullscreen(client, 1);
+  }
+  if (type == netatom[NetWMWindowTypeDialog]) {
+    client->is_floating = 1;
+  }
+}
+
+void updatewmhints(Client *client) {
+  XWMHints *hints;
+
+  if ((hints = XGetWMHints(display, client->window))) {
+    if (client == selected_monitor->selected_client && hints->flags & XUrgencyHint){
+      hints->flags &= ~XUrgencyHint;
+      XSetWMHints(display, client->window, hints);
+    } else {
+      client->is_urgent = (hints->flags & XUrgencyHint) ? 1 : 0;
+	}
+
+    if (hints->flags & InputHint) {
+      client->never_focus = !hints->input;
+	}
+    else {
+      client->never_focus = 0;
+	}
+
+    XFree(hints);
+  }
+}
