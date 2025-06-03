@@ -1,7 +1,12 @@
 #ifndef STACKING_H
 #define STACKING_H
 
+#include <X11/Xlib.h>
+
 #include "definitions.h"
+#include "bar.h"
+
+extern int is_fullscreen_locked;
 
 void restack(Monitor *monitor);                                          // restack clients on monitor
 void focusstack(const Arg *arg);                                         // focus stack by index
