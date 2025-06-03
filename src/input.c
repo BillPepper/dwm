@@ -188,7 +188,7 @@ void grabbuttons(Client *client, int focused) {
       XGrabButton(display, AnyButton, AnyModifier, client->window, False, BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
 	  }
 
-    for (i = 0; i < LENGTH(buttons); i++){
+    for (i = 0; i < button_count; i++){
       if (buttons[i].click == ClkClientWin){
         for (j = 0; j < LENGTH(modifiers); j++) {
           XGrabButton(display, buttons[i].button, buttons[i].mask | modifiers[j], client->window, False, BUTTONMASK, GrabModeAsync, GrabModeSync, None, None);
@@ -218,7 +218,7 @@ void grabkeys(void) {
 	  }
 
     for (k = start; k <= end; k++){
-      for (i = 0; i < LENGTH(keys); i++){
+      for (i = 0; i < key_count; i++){
         /* skip modifier codes, we do that ourselves */
         if (keys[i].keysym == syms[(k - start) * skip]){
           for (j = 0; j < LENGTH(modifiers); j++){

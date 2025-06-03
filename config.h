@@ -112,7 +112,8 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 	{ MODKEY|ShiftMask,             KEY,	tag,        {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,  {.ui = 1 << TAG} },
 
-static const Key keys[] = {
+int key_count = 39;
+Key keys[] = {
 	{ MODKEY, XK_b, togglebar, {0} },
 
 	// command
@@ -172,7 +173,8 @@ static const Key keys[] = {
 
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
-static const Button buttons[] = {
+int button_count = 11;
+Button buttons[] = {
 	/* click                event mask      button          function        argument */
 	{ ClkLtSymbol,  0,      Button1, setlayout,      {0} },
 	{ ClkLtSymbol,  0,      Button3, setlayout,      {.v = &layouts[2]} },
