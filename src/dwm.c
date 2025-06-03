@@ -56,7 +56,7 @@ void apply_config_rules(Client *client) {
   client->tags = client->tags & TAGMASK ? client->tags & TAGMASK : client->monitor->tag_set[client->monitor->selected_tags];
 }
 
-// apply size hints to client
+
 int applysizehints(Client *client, Area *area, int interact) {
   int baseismin;
   Monitor *monitor = client->monitor;
@@ -83,7 +83,9 @@ int applysizehints(Client *client, Area *area, int interact) {
     if (*y + *height + 2 * client->border_width < 0){
       *y = 0;
 	  }
-  } else {
+  }
+
+  else {
     if (*x >= monitor->window_area.position.x + monitor->window_area.size.w){
       *x = monitor->window_area.position.x + monitor->window_area.size.w - WIDTH(client);
 	  }
@@ -97,12 +99,18 @@ int applysizehints(Client *client, Area *area, int interact) {
       *y = monitor->window_area.position.y;
 	  }
   }
+
+  // clamp height
   if (*height < bar_height){
     *height = bar_height;
   }
+
+  // clamp width
   if (*width < bar_height){
     *width = bar_height;
   }
+
+  // (?) deal with floating windows
   if (resize_hints_enabled || client->is_floating || !client->monitor->layout[client->monitor->selected_layout]->arrange_func) {
     if (!client->hintsvalid){
       updatesizehints(client);
@@ -115,6 +123,7 @@ int applysizehints(Client *client, Area *area, int interact) {
       *width -= client->base.w;
       *height -= client->base.h;
     }
+
     /* adjust for aspect limits */
     if (client->aspect.min > 0 && client->aspect.max > 0) {
       if (client->aspect.max < (float)*width / *height)
@@ -122,23 +131,31 @@ int applysizehints(Client *client, Area *area, int interact) {
       else if (client->aspect.min < (float)*height / *width)
         *height = *width * client->aspect.min + 0.5;
     }
-    if (baseismin) { /* increment calculation requires this */
+
+    /* increment calculation requires this */
+    if (baseismin) {
       *width -= client->base.w;
       *height -= client->base.h;
     }
+
     /* adjust for increment value */
     if (client->inc.w){
       *width -= *width % client->inc.w;
 	  }
+
+    /* adjust for increment value */
     if (client->inc.h){
       *height -= *height % client->inc.h;
 	  }
+
     /* restore base dimensions */
     *width = MAX(*width + client->base.w, client->min.w);
     *height = MAX(*height + client->base.h, client->min.h);
+
     if (client->max.w){
       *width = MIN(*width, client->max.w);
 	  }
+
     if (client->max.h){
       *height = MIN(*height, client->max.h);
 	  }
