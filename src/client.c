@@ -217,3 +217,79 @@ void apply_config_rules(Client *client) {
 
   client->tags = client->tags & TAGMASK ? client->tags & TAGMASK : client->monitor->tag_set[client->monitor->selected_tags];
 }
+
+void attach(Client *client) {
+  client->next = client->monitor->clients;
+  client->monitor->clients = client;
+}
+
+void attachstack(Client *client) {
+  client->next_stack = client->monitor->stack;
+  client->monitor->stack = client;
+}
+
+void configure(Client *client) {
+  XConfigureEvent event;
+
+  event.type = ConfigureNotify;
+  event.display = display;
+  event.event = client->window;
+  event.window = client->window;
+  event.x = client->area.position.x;
+  event.y = client->area.position.y;
+  event.width = client->area.size.w;
+  event.height = client->area.size.h;
+  event.border_width = client->border_width;
+  event.above = None;
+  event.override_redirect = False;
+
+  XSendEvent(display, client->window, False, StructureNotifyMask, (XEvent *)&event);
+}
+
+
+void detach(Client *c) {
+  Client **tc;
+
+  for (tc = &c->monitor->clients; *tc && *tc != c; tc = &(*tc)->next);
+  *tc = c->next;
+}
+
+void detachstack(Client *c) {
+  Client **tc, *t;
+
+  for (tc = &c->monitor->stack; *tc && *tc != c; tc = &(*tc)->next_stack);
+  *tc = c->next_stack;
+
+  if (c == c->monitor->selected_client) {
+    for (t = c->monitor->stack; t && !ISVISIBLE(t); t = t->next_stack);
+    c->monitor->selected_client = t;
+  }
+}
+
+void focus(Client *client) {
+  if (!client || !ISVISIBLE(client)) {
+    for (client = selected_monitor->stack; client && !ISVISIBLE(client); client = client->next_stack);
+  }
+  if (selected_monitor->selected_client && selected_monitor->selected_client != client) {
+    unfocus(selected_monitor->selected_client, 0);
+  }
+  if (client) {
+    if (client->monitor != selected_monitor) {
+      selected_monitor = client->monitor;
+	  }
+    if (client->is_urgent) {
+      seturgent(client, 0);
+	  }
+
+    detachstack(client);
+    attachstack(client);
+    grabbuttons(client, 1);
+    XSetWindowBorder(display, client->window, scheme[SchemeSel][ColBorder].pixel);
+    setfocus(client);
+  } else {
+    XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);
+    XDeleteProperty(display, root, netatom[NetActiveWindow]);
+  }
+  selected_monitor->selected_client = client;
+  drawbars();
+}

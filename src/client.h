@@ -10,6 +10,8 @@
 #include "events.h"
 #include "error.h"
 #include "macro.h"
+#include "input.h"
+#include "bar.h"
 
 #include "definitions.h"
 #include "tagging.h"
