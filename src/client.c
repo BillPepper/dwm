@@ -16,7 +16,6 @@ void killclient(const Arg *arg) {
   }
 }
 
-
 void togglefloating(const Arg *arg) {
   Area area;
 
@@ -40,4 +39,10 @@ void togglefloating(const Arg *arg) {
   }
 
   arrange(selected_monitor);
+}
+
+void togglefullscreen(const Arg *arg) {
+  if (selected_monitor->selected_client) {
+    setfullscreen(selected_monitor->selected_client, !selected_monitor->selected_client->is_fullscreen);
+  }
 }

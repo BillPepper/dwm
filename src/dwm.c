@@ -581,13 +581,6 @@ Monitor *wintomon(Window window) {
 
 // -- Client -------------------------------------------------------------------
 
-
-void togglefullscreen(const Arg *arg) {
-  if (selected_monitor->selected_client) {
-    setfullscreen(selected_monitor->selected_client, !selected_monitor->selected_client->is_fullscreen);
-  }
-}
-
 void updateclientlist() {
   Client *client;
   Monitor *monitor;
