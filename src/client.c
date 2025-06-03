@@ -15,3 +15,29 @@ void killclient(const Arg *arg) {
     XUngrabServer(display);
   }
 }
+
+
+void togglefloating(const Arg *arg) {
+  Area area;
+
+  if (!selected_monitor->selected_client) {
+    return;
+  }
+
+  /* no support for fullscreen windows */
+  if (selected_monitor->selected_client->is_fullscreen) {
+    return;
+  }
+
+  selected_monitor->selected_client->is_floating = !selected_monitor->selected_client->is_floating || selected_monitor->selected_client->is_fixed;
+  if (selected_monitor->selected_client->is_floating) {
+    area.position.x = selected_monitor->selected_client->area.position.x;
+    area.position.y = selected_monitor->selected_client->area.position.y;
+    area.size.w = selected_monitor->selected_client->area.size.w;
+    area.size.h = selected_monitor->selected_client->area.size.h;
+
+    resize(selected_monitor->selected_client, &area, 0);
+  }
+
+  arrange(selected_monitor);
+}

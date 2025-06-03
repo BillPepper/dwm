@@ -4,13 +4,13 @@
 
 #include <X11/Xlib.h>
 
-
 #include "events.h"
 #include "error.h"
 
 #include "definitions.h"
 
 // defined in config.h and global.h
+extern void arrange(Monitor *monitor);
 extern Monitor *selected_monitor;
 extern Display *display;
 extern Atom wmatom[WMLast];
