@@ -3,7 +3,7 @@
 
 #include "definitions.h"
 
-// mouse
+// -- Mouse --------------------------------------------------------------------
 
 // @descr: Get the monitor root window index of cursor position (TODO: use position struct)
 // @param: x -> mouse x position, y -> mouse y position
@@ -22,7 +22,8 @@ static void resizemouse(const Arg *arg);
 // @param: focused -> ?
 static void grabbuttons(Client *client, int focused);
 
-// keys
+
+// -- Keys ---------------------------------------------------------------------
 
 // @descr: Passivly grab key inputs
 // @param: none
