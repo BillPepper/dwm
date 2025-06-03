@@ -40,7 +40,4 @@ Atom getatomprop(Client *client, Atom prop);
 // @desc: some multi screen stuff, related to xinerama
 int updategeom(void);
 
-// @desc: parse main() args
-void parse_args(int argc, char *argv[]);
-
 #endif

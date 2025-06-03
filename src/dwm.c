@@ -5,264 +5,6 @@ struct NumTags {
   char limitexceeded[LENGTH(tags) > 31 ? -1 : 1];
 };
 
-void apply_config_rules(Client *client) {
-  const char *class;
-  const char *instance;
-  unsigned int i;
-  const Rule *rule;
-  Monitor *monitor;
-  XClassHint class_hint = {NULL, NULL};
-
-  bool is_title_match;
-  bool is_class_match;
-  bool is_instance_match;
-
-  /* rule matching */
-  client->is_floating = 0;
-  client->tags = 0;
-  XGetClassHint(display, client->window, &class_hint);
-  class = class_hint.res_class ? class_hint.res_class : broken;
-  instance = class_hint.res_name ? class_hint.res_name : broken;
-
-  // for every rule in config
-  for (i = 0; i < LENGTH(rules); i++) {
-    rule = &rules[i];
-
-    is_title_match = (!rule->title || strstr(client->name, rule->title));
-    is_class_match = (!rule->class_name || strstr(class, rule->class_name));
-    is_instance_match = (!rule->instance || strstr(instance, rule->instance));
-
-    if (is_title_match && is_class_match && is_instance_match) {
-      client->is_floating = rule->is_floating;
-      client->tags |= rule->tags;
-
-      // find monitor the rule applies to
-      for (monitor = monitors; monitor && monitor->num != rule->monitor; monitor = monitor->next);
-
-      if (monitor){
-        client->monitor = monitor;
-	    }
-    }
-  }
-
-  if (class_hint.res_class){
-    XFree(class_hint.res_class);
-  }
-
-  if (class_hint.res_name){
-    XFree(class_hint.res_name);
-  }
-
-  client->tags = client->tags & TAGMASK ? client->tags & TAGMASK : client->monitor->tag_set[client->monitor->selected_tags];
-}
-
-
-int applysizehints(Client *client, Area *area, int interact) {
-  int baseismin;
-  Monitor *monitor = client->monitor;
-
-  int *x, *y, *width, *height;
-  x = &area->position.x;
-  y = &area->position.y;
-  width = &area->size.w;
-  height = &area->size.h;
-
-  /* set minimum possible */
-  *width = MAX(1, *width);
-  *height = MAX(1, *height);
-  if (interact) {
-    if (*x > screen_width){
-      *x = screen_width - WIDTH(client);
-	  }
-    if (*y > screen_height){
-      *y = screen_height - HEIGHT(client);
-	  }
-    if (*x + *width + 2 * client->border_width < 0){
-      *x = 0;
-	  }
-    if (*y + *height + 2 * client->border_width < 0){
-      *y = 0;
-	  }
-  }
-
-  else {
-    if (*x >= monitor->window_area.position.x + monitor->window_area.size.w){
-      *x = monitor->window_area.position.x + monitor->window_area.size.w - WIDTH(client);
-	  }
-    if (*y >= monitor->window_area.position.y + monitor->window_area.size.h){
-      *y = monitor->window_area.position.y + monitor->window_area.size.h - HEIGHT(client);
-	  }
-    if (*x + *width + 2 * client->border_width <= monitor->window_area.position.x){
-      *x = monitor->window_area.position.x;
-	  }
-    if (*y + *height + 2 * client->border_width <= monitor->window_area.position.y){
-      *y = monitor->window_area.position.y;
-	  }
-  }
-
-  // clamp height
-  if (*height < bar_height){
-    *height = bar_height;
-  }
-
-  // clamp width
-  if (*width < bar_height){
-    *width = bar_height;
-  }
-
-  // (?) deal with floating windows
-  if (resize_hints_enabled || client->is_floating || !client->monitor->layout[client->monitor->selected_layout]->arrange_func) {
-    if (!client->hintsvalid){
-      updatesizehints(client);
-	  }
-    /* see last two sentences in ICCCM 4.1.2.3 */
-    baseismin = client->base.w == client->min.w && client->base.h == client->min.h;
-
-    /* temporarily remove base dimensions */
-    if (!baseismin) {
-      *width -= client->base.w;
-      *height -= client->base.h;
-    }
-
-    /* adjust for aspect limits */
-    if (client->aspect.min > 0 && client->aspect.max > 0) {
-      if (client->aspect.max < (float)*width / *height)
-        *width = *height * client->aspect.max + 0.5;
-      else if (client->aspect.min < (float)*height / *width)
-        *height = *width * client->aspect.min + 0.5;
-    }
-
-    /* increment calculation requires this */
-    if (baseismin) {
-      *width -= client->base.w;
-      *height -= client->base.h;
-    }
-
-    /* adjust for increment value */
-    if (client->inc.w){
-      *width -= *width % client->inc.w;
-	  }
-
-    /* adjust for increment value */
-    if (client->inc.h){
-      *height -= *height % client->inc.h;
-	  }
-
-    /* restore base dimensions */
-    *width = MAX(*width + client->base.w, client->min.w);
-    *height = MAX(*height + client->base.h, client->min.h);
-
-    if (client->max.w){
-      *width = MIN(*width, client->max.w);
-	  }
-
-    if (client->max.h){
-      *height = MIN(*height, client->max.h);
-	  }
-  }
-  return *x != client->area.position.x || *y != client->area.position.y || *width != client->area.size.w || *height != client->area.size.h;
-}
-
-void attach(Client *client) {
-  client->next = client->monitor->clients;
-  client->monitor->clients = client;
-}
-
-void attachstack(Client *client) {
-  client->next_stack = client->monitor->stack;
-  client->monitor->stack = client;
-}
-
-void configure(Client *client) {
-  XConfigureEvent event;
-
-  event.type = ConfigureNotify;
-  event.display = display;
-  event.event = client->window;
-  event.window = client->window;
-  event.x = client->area.position.x;
-  event.y = client->area.position.y;
-  event.width = client->area.size.w;
-  event.height = client->area.size.h;
-  event.border_width = client->border_width;
-  event.above = None;
-  event.override_redirect = False;
-
-  XSendEvent(display, client->window, False, StructureNotifyMask, (XEvent *)&event);
-}
-
-void detach(Client *c) {
-  Client **tc;
-
-  for (tc = &c->monitor->clients; *tc && *tc != c; tc = &(*tc)->next);
-  *tc = c->next;
-}
-
-void detachstack(Client *c) {
-  Client **tc, *t;
-
-  for (tc = &c->monitor->stack; *tc && *tc != c; tc = &(*tc)->next_stack);
-  *tc = c->next_stack;
-
-  if (c == c->monitor->selected_client) {
-    for (t = c->monitor->stack; t && !ISVISIBLE(t); t = t->next_stack);
-    c->monitor->selected_client = t;
-  }
-}
-
-void focus(Client *client) {
-  if (!client || !ISVISIBLE(client)) {
-    for (client = selected_monitor->stack; client && !ISVISIBLE(client); client = client->next_stack);
-  }
-  if (selected_monitor->selected_client && selected_monitor->selected_client != client) {
-    unfocus(selected_monitor->selected_client, 0);
-  }
-  if (client) {
-    if (client->monitor != selected_monitor) {
-      selected_monitor = client->monitor;
-	  }
-    if (client->is_urgent) {
-      seturgent(client, 0);
-	  }
-
-    detachstack(client);
-    attachstack(client);
-    grabbuttons(client, 1);
-    XSetWindowBorder(display, client->window, scheme[SchemeSel][ColBorder].pixel);
-    setfocus(client);
-  } else {
-    XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);
-    XDeleteProperty(display, root, netatom[NetActiveWindow]);
-  }
-  selected_monitor->selected_client = client;
-  drawbars();
-}
-
-Atom getatomprop(Client *c, Atom prop) {
-  int di;
-  unsigned long dl;
-  unsigned char *p = NULL;
-  Atom da, atom = None;
-
-  /* FIXME getatomprop should return the number of items and a pointer to
-   * the stored data instead of this workaround */
-  Atom req = XA_ATOM;
-  if (prop == xatom[XembedInfo]){
-    req = xatom[XembedInfo];
-  }
-
-  if (XGetWindowProperty(display, c->window, prop, 0L, sizeof atom, False, req, &da, &di, &dl, &dl, &p) == Success && p) {
-    atom = *(Atom *)p;
-    if (da == xatom[XembedInfo] && dl == 2) {
-      atom = ((Atom *)p)[1];
-	  }
-
-    XFree(p);
-  }
-
-  return atom;
-}
-
 int getrootptr(int *x, int *y) {
   int di;
   unsigned int dui;
@@ -370,8 +112,7 @@ void grabkeys(void) {
 }
 
 #ifdef XINERAMA
-static int isuniquegeom(XineramaScreenInfo *unique, size_t n,
-                        XineramaScreenInfo *info) {
+static int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info) {
   while (n--)
     if (unique[n].x_org == info->x_org && unique[n].y_org == info->y_org &&
         unique[n].width == info->width && unique[n].height == info->height)
@@ -379,22 +120,6 @@ static int isuniquegeom(XineramaScreenInfo *unique, size_t n,
   return 1;
 }
 #endif /* XINERAMA */
-
-void killclient(const Arg *arg) {
-  if (!selected_monitor->selected_client) {
-    return;
-  }
-
-  if (!sendevent(selected_monitor->selected_client->window, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
-    XGrabServer(display);
-    XSetErrorHandler(xerrordummy);
-    XSetCloseDownMode(display, DestroyAll);
-    XKillClient(display, selected_monitor->selected_client->window);
-    XSync(display, False);
-    XSetErrorHandler(xerror);
-    XUngrabServer(display);
-  }
-}
 
 void manage(Window window, XWindowAttributes *window_attributes) {
   // Appears to create a client struct and tie the input x window to it
@@ -593,45 +318,6 @@ void movemouse(const Arg *arg) {
   }
 }
 
-Client *nexttiled(Client *client) {
-  for (; client && (client->is_floating || !ISVISIBLE(client)); client = client->next);
-  return client;
-}
-
-void pop(Client *client) {
-  detach(client);
-  attach(client);
-  focus(client);
-  arrange(client->monitor);
-}
-
-void resize(Client *c, Area *area, int interact) {
-  if (applysizehints(c, area, interact)) {
-    resizeclient(c, area);
-  }
-}
-
-void resizeclient(Client *c, Area *area) {
-  XWindowChanges window_changes;
-
-  c->old_area.position.x = c->area.position.x;
-  c->area.position.x = window_changes.x = area->position.x;
-
-  c->old_area.position.y = c->area.position.y;
-  c->area.position.y = window_changes.y = area->position.y;
-
-  c->old_area.size.w = c->area.size.w;
-  c->area.size.w = window_changes.width = area->size.w;
-
-  c->old_area.size.h = c->area.size.h;
-  c->area.size.h = window_changes.height = area->size.h;
-
-  window_changes.border_width = c->border_width;
-  XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
-  configure(c);
-  XSync(display, False);
-}
-
 void resizemouse(const Arg *arg) {
   int ocx, ocy, nw, nh;
   Client *client;
@@ -709,6 +395,520 @@ void resizemouse(const Arg *arg) {
     selected_monitor = monitor;
     focus(NULL);
   }
+}
+
+void unmanage(Client *client, int destroyed) {
+  Monitor *monitor = client->monitor;
+  XWindowChanges window_changes;
+
+  detach(client);
+  detachstack(client);
+  if (!destroyed) {
+    window_changes.border_width = client->old_border_width;
+    XGrabServer(display); /* avoid race conditions */
+    XSetErrorHandler(xerrordummy);
+    XSelectInput(display, client->window, NoEventMask);
+    XConfigureWindow(display, client->window, CWBorderWidth, &window_changes); /* restore border */
+    XUngrabButton(display, AnyButton, AnyModifier, client->window);
+    setclientstate(client, WithdrawnState);
+    XSync(display, False);
+    XSetErrorHandler(xerror);
+    XUngrabServer(display);
+  }
+  free(client);
+  focus(NULL);
+  updateclientlist();
+  arrange(monitor);
+}
+
+int updategeom(void) {
+  int dirty = 0;
+
+  #ifdef XINERAMA
+  if (XineramaIsActive(display)) {
+    int i, j, n, nn;
+    Client *c;
+    Monitor *m;
+    XineramaScreenInfo *info = XineramaQueryScreens(display, &nn);
+    XineramaScreenInfo *unique = NULL;
+
+    for (n = 0, m = monitors; m; m = m->next, n++)
+      ;
+    /* only consider unique geometries as separate screens */
+    unique = ecalloc(nn, sizeof(XineramaScreenInfo));
+    for (i = 0, j = 0; i < nn; i++) {
+      if (isuniquegeom(unique, j, &info[i])){
+        memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
+	  }
+	}
+    XFree(info);
+    nn = j;
+
+    /* new monitors if nn > n */
+    for (i = n; i < nn; i++) {
+      for (m = monitors; m && m->next; m = m->next)
+        ;
+      if (m) {
+        m->next = createmon();
+	  } else {
+        monitors = createmon();
+	  }
+    }
+    for (i = 0, m = monitors; i < nn && m; m = m->next, i++){
+      if (i >= n || unique[i].x_org != m->monitor_area.position.x || unique[i].y_org != m->monitor_area.position.y || unique[i].width != m->monitor_area.size.w || unique[i].height != m->monitor_area.size.h) {
+        dirty = 1;
+        m->num = i;
+        m->monitor_area.position.x = m->window_area.position.x = unique[i].x_org;
+        m->monitor_area.position.y = m->window_area.position.y = unique[i].y_org;
+        m->monitor_area.size.w = m->window_area.size.w = unique[i].width;
+        m->monitor_area.size.h = m->window_area.size.h = unique[i].height;
+        update_bar_position(m);
+      }
+	}
+
+    /* removed monitors if n > nn */
+    for (i = nn; i < n; i++) {
+      for (m = monitors; m && m->next; m = m->next)
+        ;
+      while ((c = m->clients)) {
+        dirty = 1;
+        m->clients = c->next;
+        detachstack(c);
+        c->monitor = monitors;
+        attach(c);
+        attachstack(c);
+      }
+      if (m == selected_monitor) {
+        selected_monitor = monitors;
+	  }
+      cleanupmon(m);
+    }
+    free(unique);
+  } else
+  #endif /* XINERAMA */
+  {    /* default monitor setup */
+    if (!monitors) {
+      monitors = createmon();
+	}
+    if (monitors->monitor_area.size.w != screen_width || monitors->monitor_area.size.h != screen_height) {
+      dirty = 1;
+      monitors->monitor_area.size.w = monitors->window_area.size.w = screen_width;
+      monitors->monitor_area.size.h = monitors->window_area.size.h = screen_height;
+      update_bar_position(monitors);
+    }
+  }
+  if (dirty) {
+    selected_monitor = monitors;
+    selected_monitor = wintomon(root);
+  }
+
+  return dirty;
+}
+
+void updatenumlockmask(void) {
+  unsigned int i, j;
+  XModifierKeymap *modmap;
+
+  numlockmask = 0;
+  modmap = XGetModifierMapping(display);
+
+  for (i = 0; i < 8; i++) {
+    for (j = 0; j < modmap->max_keypermod; j++) {
+      if (modmap->modifiermap[i * modmap->max_keypermod + j] == XKeysymToKeycode(display, XK_Num_Lock)) {
+        numlockmask = (1 << i);
+	    }
+	  }
+  }
+
+  XFreeModifiermap(modmap);
+}
+
+Client *wintoclient(Window window) {
+  Client *client;
+  Monitor *monitor;
+
+  for (monitor = monitors; monitor; monitor = monitor->next) {
+    for (client = monitor->clients; client; client = client->next) {
+      if (client->window == window){
+        return client;
+	    }
+	  }
+  }
+
+  return NULL;
+}
+
+Client *wintosystrayicon(Window window) {
+  Client *icons = NULL;
+
+  if (!systray_enabled || !window) {
+    return icons;
+  }
+
+  for (icons = systray->icons; icons && icons->window != window; icons = icons->next);
+
+  return icons;
+}
+
+Monitor *wintomon(Window window) {
+  int x, y;
+  Client *client;
+  Monitor *monitor;
+  Area area;
+
+  area.position.x = 0;
+  area.position.y = 0;
+  area.size.w = 1;
+  area.size.h = 1;
+
+  if (window == root && getrootptr(&x, &y)) {
+    return recttomon(&area);
+  }
+
+  for (monitor = monitors; monitor; monitor = monitor->next) {
+    if (window == monitor->bar_window){
+      return monitor;
+	  }
+  }
+
+  if ((client = wintoclient(window))) {
+    return client->monitor;
+  }
+
+  return selected_monitor;
+}
+
+
+// -- Client -------------------------------------------------------------------
+
+void killclient(const Arg *arg) {
+  if (!selected_monitor->selected_client) {
+    return;
+  }
+
+  if (!sendevent(selected_monitor->selected_client->window, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
+    XGrabServer(display);
+    XSetErrorHandler(xerrordummy);
+    XSetCloseDownMode(display, DestroyAll);
+    XKillClient(display, selected_monitor->selected_client->window);
+    XSync(display, False);
+    XSetErrorHandler(xerror);
+    XUngrabServer(display);
+  }
+}
+
+void togglefloating(const Arg *arg) {
+  Area area;
+
+  if (!selected_monitor->selected_client) {
+    return;
+  }
+
+  /* no support for fullscreen windows */
+  if (selected_monitor->selected_client->is_fullscreen) {
+    return;
+  }
+
+  selected_monitor->selected_client->is_floating = !selected_monitor->selected_client->is_floating || selected_monitor->selected_client->is_fixed;
+  if (selected_monitor->selected_client->is_floating) {
+    area.position.x = selected_monitor->selected_client->area.position.x;
+    area.position.y = selected_monitor->selected_client->area.position.y;
+    area.size.w = selected_monitor->selected_client->area.size.w;
+    area.size.h = selected_monitor->selected_client->area.size.h;
+
+    resize(selected_monitor->selected_client, &area, 0);
+  }
+
+  arrange(selected_monitor);
+}
+
+void togglefullscreen(const Arg *arg) {
+  if (selected_monitor->selected_client) {
+    setfullscreen(selected_monitor->selected_client, !selected_monitor->selected_client->is_fullscreen);
+  }
+}
+
+void updateclientlist() {
+  Client *client;
+  Monitor *monitor;
+
+  XDeleteProperty(display, root, netatom[NetClientList]);
+  for (monitor = monitors; monitor; monitor = monitor->next) {
+    for (client = monitor->clients; client; client = client->next) {
+      XChangeProperty(display, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(client->window), 1);
+	  }
+  }
+}
+
+int applysizehints(Client *client, Area *area, int interact) {
+  int baseismin;
+  Monitor *monitor = client->monitor;
+
+  int *x, *y, *width, *height;
+  x = &area->position.x;
+  y = &area->position.y;
+  width = &area->size.w;
+  height = &area->size.h;
+
+  /* set minimum possible */
+  *width = MAX(1, *width);
+  *height = MAX(1, *height);
+  if (interact) {
+    if (*x > screen_width){
+      *x = screen_width - WIDTH(client);
+	  }
+    if (*y > screen_height){
+      *y = screen_height - HEIGHT(client);
+	  }
+    if (*x + *width + 2 * client->border_width < 0){
+      *x = 0;
+	  }
+    if (*y + *height + 2 * client->border_width < 0){
+      *y = 0;
+	  }
+  }
+
+  else {
+    if (*x >= monitor->window_area.position.x + monitor->window_area.size.w){
+      *x = monitor->window_area.position.x + monitor->window_area.size.w - WIDTH(client);
+	  }
+    if (*y >= monitor->window_area.position.y + monitor->window_area.size.h){
+      *y = monitor->window_area.position.y + monitor->window_area.size.h - HEIGHT(client);
+	  }
+    if (*x + *width + 2 * client->border_width <= monitor->window_area.position.x){
+      *x = monitor->window_area.position.x;
+	  }
+    if (*y + *height + 2 * client->border_width <= monitor->window_area.position.y){
+      *y = monitor->window_area.position.y;
+	  }
+  }
+
+  // clamp height
+  if (*height < bar_height){
+    *height = bar_height;
+  }
+
+  // clamp width
+  if (*width < bar_height){
+    *width = bar_height;
+  }
+
+  // (?) deal with floating windows
+  if (resize_hints_enabled || client->is_floating || !client->monitor->layout[client->monitor->selected_layout]->arrange_func) {
+    if (!client->hintsvalid){
+      updatesizehints(client);
+	  }
+    /* see last two sentences in ICCCM 4.1.2.3 */
+    baseismin = client->base.w == client->min.w && client->base.h == client->min.h;
+
+    /* temporarily remove base dimensions */
+    if (!baseismin) {
+      *width -= client->base.w;
+      *height -= client->base.h;
+    }
+
+    /* adjust for aspect limits */
+    if (client->aspect.min > 0 && client->aspect.max > 0) {
+      if (client->aspect.max < (float)*width / *height)
+        *width = *height * client->aspect.max + 0.5;
+      else if (client->aspect.min < (float)*height / *width)
+        *height = *width * client->aspect.min + 0.5;
+    }
+
+    /* increment calculation requires this */
+    if (baseismin) {
+      *width -= client->base.w;
+      *height -= client->base.h;
+    }
+
+    /* adjust for increment value */
+    if (client->inc.w){
+      *width -= *width % client->inc.w;
+	  }
+
+    /* adjust for increment value */
+    if (client->inc.h){
+      *height -= *height % client->inc.h;
+	  }
+
+    /* restore base dimensions */
+    *width = MAX(*width + client->base.w, client->min.w);
+    *height = MAX(*height + client->base.h, client->min.h);
+
+    if (client->max.w){
+      *width = MIN(*width, client->max.w);
+	  }
+
+    if (client->max.h){
+      *height = MIN(*height, client->max.h);
+	  }
+  }
+  return *x != client->area.position.x || *y != client->area.position.y || *width != client->area.size.w || *height != client->area.size.h;
+}
+
+void apply_config_rules(Client *client) {
+  const char *class;
+  const char *instance;
+  unsigned int i;
+  const Rule *rule;
+  Monitor *monitor;
+  XClassHint class_hint = {NULL, NULL};
+
+  bool is_title_match;
+  bool is_class_match;
+  bool is_instance_match;
+
+  /* rule matching */
+  client->is_floating = 0;
+  client->tags = 0;
+  XGetClassHint(display, client->window, &class_hint);
+  class = class_hint.res_class ? class_hint.res_class : broken;
+  instance = class_hint.res_name ? class_hint.res_name : broken;
+
+  // for every rule in config
+  for (i = 0; i < LENGTH(rules); i++) {
+    rule = &rules[i];
+
+    is_title_match = (!rule->title || strstr(client->name, rule->title));
+    is_class_match = (!rule->class_name || strstr(class, rule->class_name));
+    is_instance_match = (!rule->instance || strstr(instance, rule->instance));
+
+    if (is_title_match && is_class_match && is_instance_match) {
+      client->is_floating = rule->is_floating;
+      client->tags |= rule->tags;
+
+      // find monitor the rule applies to
+      for (monitor = monitors; monitor && monitor->num != rule->monitor; monitor = monitor->next);
+
+      if (monitor){
+        client->monitor = monitor;
+	    }
+    }
+  }
+
+  if (class_hint.res_class){
+    XFree(class_hint.res_class);
+  }
+
+  if (class_hint.res_name){
+    XFree(class_hint.res_name);
+  }
+
+  client->tags = client->tags & TAGMASK ? client->tags & TAGMASK : client->monitor->tag_set[client->monitor->selected_tags];
+}
+
+void attach(Client *client) {
+  client->next = client->monitor->clients;
+  client->monitor->clients = client;
+}
+
+void attachstack(Client *client) {
+  client->next_stack = client->monitor->stack;
+  client->monitor->stack = client;
+}
+
+void configure(Client *client) {
+  XConfigureEvent event;
+
+  event.type = ConfigureNotify;
+  event.display = display;
+  event.event = client->window;
+  event.window = client->window;
+  event.x = client->area.position.x;
+  event.y = client->area.position.y;
+  event.width = client->area.size.w;
+  event.height = client->area.size.h;
+  event.border_width = client->border_width;
+  event.above = None;
+  event.override_redirect = False;
+
+  XSendEvent(display, client->window, False, StructureNotifyMask, (XEvent *)&event);
+}
+
+void detach(Client *c) {
+  Client **tc;
+
+  for (tc = &c->monitor->clients; *tc && *tc != c; tc = &(*tc)->next);
+  *tc = c->next;
+}
+
+void detachstack(Client *c) {
+  Client **tc, *t;
+
+  for (tc = &c->monitor->stack; *tc && *tc != c; tc = &(*tc)->next_stack);
+  *tc = c->next_stack;
+
+  if (c == c->monitor->selected_client) {
+    for (t = c->monitor->stack; t && !ISVISIBLE(t); t = t->next_stack);
+    c->monitor->selected_client = t;
+  }
+}
+
+void focus(Client *client) {
+  if (!client || !ISVISIBLE(client)) {
+    for (client = selected_monitor->stack; client && !ISVISIBLE(client); client = client->next_stack);
+  }
+  if (selected_monitor->selected_client && selected_monitor->selected_client != client) {
+    unfocus(selected_monitor->selected_client, 0);
+  }
+  if (client) {
+    if (client->monitor != selected_monitor) {
+      selected_monitor = client->monitor;
+	  }
+    if (client->is_urgent) {
+      seturgent(client, 0);
+	  }
+
+    detachstack(client);
+    attachstack(client);
+    grabbuttons(client, 1);
+    XSetWindowBorder(display, client->window, scheme[SchemeSel][ColBorder].pixel);
+    setfocus(client);
+  } else {
+    XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);
+    XDeleteProperty(display, root, netatom[NetActiveWindow]);
+  }
+  selected_monitor->selected_client = client;
+  drawbars();
+}
+
+Client *nexttiled(Client *client) {
+  for (; client && (client->is_floating || !ISVISIBLE(client)); client = client->next);
+  return client;
+}
+
+void pop(Client *client) {
+  detach(client);
+  attach(client);
+  focus(client);
+  arrange(client->monitor);
+}
+
+void resize(Client *c, Area *area, int interact) {
+  if (applysizehints(c, area, interact)) {
+    resizeclient(c, area);
+  }
+}
+
+void resizeclient(Client *c, Area *area) {
+  XWindowChanges window_changes;
+
+  c->old_area.position.x = c->area.position.x;
+  c->area.position.x = window_changes.x = area->position.x;
+
+  c->old_area.position.y = c->area.position.y;
+  c->area.position.y = window_changes.y = area->position.y;
+
+  c->old_area.size.w = c->area.size.w;
+  c->area.size.w = window_changes.width = area->size.w;
+
+  c->old_area.size.h = c->area.size.h;
+  c->area.size.h = window_changes.height = area->size.h;
+
+  window_changes.border_width = c->border_width;
+  XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
+  configure(c);
+  XSync(display, False);
 }
 
 void sendmon(Client *client, Monitor *monitor){
@@ -818,37 +1018,6 @@ void showhide(Client *client) {
   }
 }
 
-void togglefloating(const Arg *arg) {
-  Area area;
-
-  if (!selected_monitor->selected_client) {
-    return;
-  }
-
-  /* no support for fullscreen windows */
-  if (selected_monitor->selected_client->is_fullscreen) {
-    return;
-  }
-
-  selected_monitor->selected_client->is_floating = !selected_monitor->selected_client->is_floating || selected_monitor->selected_client->is_fixed;
-  if (selected_monitor->selected_client->is_floating) {
-    area.position.x = selected_monitor->selected_client->area.position.x;
-    area.position.y = selected_monitor->selected_client->area.position.y;
-    area.size.w = selected_monitor->selected_client->area.size.w;
-    area.size.h = selected_monitor->selected_client->area.size.h;
-
-    resize(selected_monitor->selected_client, &area, 0);
-  }
-
-  arrange(selected_monitor);
-}
-
-void togglefullscreen(const Arg *arg) {
-  if (selected_monitor->selected_client) {
-    setfullscreen(selected_monitor->selected_client, !selected_monitor->selected_client->is_fullscreen);
-  }
-}
-
 void unfocus(Client *client, int setfocus) {
   if (!client) {
     return;
@@ -860,144 +1029,6 @@ void unfocus(Client *client, int setfocus) {
     XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);
     XDeleteProperty(display, root, netatom[NetActiveWindow]);
   }
-}
-
-void unmanage(Client *client, int destroyed) {
-  Monitor *monitor = client->monitor;
-  XWindowChanges window_changes;
-
-  detach(client);
-  detachstack(client);
-  if (!destroyed) {
-    window_changes.border_width = client->old_border_width;
-    XGrabServer(display); /* avoid race conditions */
-    XSetErrorHandler(xerrordummy);
-    XSelectInput(display, client->window, NoEventMask);
-    XConfigureWindow(display, client->window, CWBorderWidth, &window_changes); /* restore border */
-    XUngrabButton(display, AnyButton, AnyModifier, client->window);
-    setclientstate(client, WithdrawnState);
-    XSync(display, False);
-    XSetErrorHandler(xerror);
-    XUngrabServer(display);
-  }
-  free(client);
-  focus(NULL);
-  updateclientlist();
-  arrange(monitor);
-}
-
-void updateclientlist() {
-  Client *client;
-  Monitor *monitor;
-
-  XDeleteProperty(display, root, netatom[NetClientList]);
-  for (monitor = monitors; monitor; monitor = monitor->next) {
-    for (client = monitor->clients; client; client = client->next) {
-      XChangeProperty(display, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(client->window), 1);
-	  }
-  }
-}
-
-int updategeom(void) {
-  int dirty = 0;
-
-#ifdef XINERAMA
-  if (XineramaIsActive(display)) {
-    int i, j, n, nn;
-    Client *c;
-    Monitor *m;
-    XineramaScreenInfo *info = XineramaQueryScreens(display, &nn);
-    XineramaScreenInfo *unique = NULL;
-
-    for (n = 0, m = monitors; m; m = m->next, n++)
-      ;
-    /* only consider unique geometries as separate screens */
-    unique = ecalloc(nn, sizeof(XineramaScreenInfo));
-    for (i = 0, j = 0; i < nn; i++) {
-      if (isuniquegeom(unique, j, &info[i])){
-        memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
-	  }
-	}
-    XFree(info);
-    nn = j;
-
-    /* new monitors if nn > n */
-    for (i = n; i < nn; i++) {
-      for (m = monitors; m && m->next; m = m->next)
-        ;
-      if (m) {
-        m->next = createmon();
-	  } else {
-        monitors = createmon();
-	  }
-    }
-    for (i = 0, m = monitors; i < nn && m; m = m->next, i++){
-      if (i >= n || unique[i].x_org != m->monitor_area.position.x || unique[i].y_org != m->monitor_area.position.y || unique[i].width != m->monitor_area.size.w || unique[i].height != m->monitor_area.size.h) {
-        dirty = 1;
-        m->num = i;
-        m->monitor_area.position.x = m->window_area.position.x = unique[i].x_org;
-        m->monitor_area.position.y = m->window_area.position.y = unique[i].y_org;
-        m->monitor_area.size.w = m->window_area.size.w = unique[i].width;
-        m->monitor_area.size.h = m->window_area.size.h = unique[i].height;
-        update_bar_position(m);
-      }
-	}
-
-    /* removed monitors if n > nn */
-    for (i = nn; i < n; i++) {
-      for (m = monitors; m && m->next; m = m->next)
-        ;
-      while ((c = m->clients)) {
-        dirty = 1;
-        m->clients = c->next;
-        detachstack(c);
-        c->monitor = monitors;
-        attach(c);
-        attachstack(c);
-      }
-      if (m == selected_monitor) {
-        selected_monitor = monitors;
-	  }
-      cleanupmon(m);
-    }
-    free(unique);
-  } else
-#endif /* XINERAMA */
-  {    /* default monitor setup */
-    if (!monitors) {
-      monitors = createmon();
-	}
-    if (monitors->monitor_area.size.w != screen_width || monitors->monitor_area.size.h != screen_height) {
-      dirty = 1;
-      monitors->monitor_area.size.w = monitors->window_area.size.w = screen_width;
-      monitors->monitor_area.size.h = monitors->window_area.size.h = screen_height;
-      update_bar_position(monitors);
-    }
-  }
-  if (dirty) {
-    selected_monitor = monitors;
-    selected_monitor = wintomon(root);
-  }
-
-  return dirty;
-}
-
-void updatenumlockmask(void) {
-  unsigned int i, j;
-  XModifierKeymap *modmap;
-
-  numlockmask = 0;
-  modmap = XGetModifierMapping(display);
-
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < modmap->max_keypermod; j++) {
-      if (modmap->modifiermap[i * modmap->max_keypermod + j] == XKeysymToKeycode(display, XK_Num_Lock)) {
-        numlockmask = (1 << i);
-	    }
-	  }
-  }
-
-  XFreeModifiermap(modmap);
 }
 
 void updatesizehints(Client *client) {
@@ -1094,89 +1125,6 @@ void updatewmhints(Client *client) {
 
     XFree(hints);
   }
-}
-
-void view(const Arg *arg) {
-  if ((arg->ui & TAGMASK) == selected_monitor->tag_set[selected_monitor->selected_tags]) {
-    return;
-  }
-
-  selected_monitor->selected_tags ^= 1; /* toggle sel tagset */
-  if (arg->ui & TAGMASK) {
-    selected_monitor->tag_set[selected_monitor->selected_tags] = arg->ui & TAGMASK;
-  }
-
-  focus(NULL);
-  arrange(selected_monitor);
-}
-
-Client *wintoclient(Window window) {
-  Client *client;
-  Monitor *monitor;
-
-  for (monitor = monitors; monitor; monitor = monitor->next) {
-    for (client = monitor->clients; client; client = client->next) {
-      if (client->window == window){
-        return client;
-	    }
-	  }
-  }
-
-  return NULL;
-}
-
-Client *wintosystrayicon(Window window) {
-  Client *icons = NULL;
-
-  if (!systray_enabled || !window) {
-    return icons;
-  }
-
-  for (icons = systray->icons; icons && icons->window != window; icons = icons->next);
-
-  return icons;
-}
-
-Monitor *wintomon(Window window) {
-  int x, y;
-  Client *client;
-  Monitor *monitor;
-  Area area;
-
-  area.position.x = 0;
-  area.position.y = 0;
-  area.size.w = 1;
-  area.size.h = 1;
-
-  if (window == root && getrootptr(&x, &y)) {
-    return recttomon(&area);
-  }
-
-  for (monitor = monitors; monitor; monitor = monitor->next) {
-    if (window == monitor->bar_window){
-      return monitor;
-	  }
-  }
-
-  if ((client = wintoclient(window))) {
-    return client->monitor;
-  }
-
-  return selected_monitor;
-}
-
-void zoom(const Arg *arg) {
-  Client *c = selected_monitor->selected_client;
-
-  if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || !c || c->is_floating) {
-    return;
-  }
-
-  if (c == nexttiled(selected_monitor->clients) && !(c = nexttiled(c->next))) {
-    return;
-  }
-
-  pop(c);
 }
 
 // -- Events -------------------------------------------------------------------
@@ -1940,6 +1888,59 @@ void cleanup(void) {
   XSync(display, False);
   XSetInputFocus(display, PointerRoot, RevertToPointerRoot, CurrentTime);
   XDeleteProperty(display, root, netatom[NetActiveWindow]);
+}
+
+void zoom(const Arg *arg) {
+  Client *c = selected_monitor->selected_client;
+
+  if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || !c || c->is_floating) {
+    return;
+  }
+
+  if (c == nexttiled(selected_monitor->clients) && !(c = nexttiled(c->next))) {
+    return;
+  }
+
+  pop(c);
+}
+
+void view(const Arg *arg) {
+  if ((arg->ui & TAGMASK) == selected_monitor->tag_set[selected_monitor->selected_tags]) {
+    return;
+  }
+
+  selected_monitor->selected_tags ^= 1; /* toggle sel tagset */
+  if (arg->ui & TAGMASK) {
+    selected_monitor->tag_set[selected_monitor->selected_tags] = arg->ui & TAGMASK;
+  }
+
+  focus(NULL);
+  arrange(selected_monitor);
+}
+
+Atom getatomprop(Client *c, Atom prop) {
+  int di;
+  unsigned long dl;
+  unsigned char *p = NULL;
+  Atom da, atom = None;
+
+  /* FIXME getatomprop should return the number of items and a pointer to
+   * the stored data instead of this workaround */
+  Atom req = XA_ATOM;
+  if (prop == xatom[XembedInfo]){
+    req = xatom[XembedInfo];
+  }
+
+  if (XGetWindowProperty(display, c->window, prop, 0L, sizeof atom, False, req, &da, &di, &dl, &dl, &p) == Success && p) {
+    atom = *(Atom *)p;
+    if (da == xatom[XembedInfo] && dl == 2) {
+      atom = ((Atom *)p)[1];
+	  }
+
+    XFree(p);
+  }
+
+  return atom;
 }
 
 // -- Main ---------------------------------------------------------------------
