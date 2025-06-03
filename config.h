@@ -70,7 +70,8 @@ const char *tags[15] = {
 	"f"
 };
 
-static const Rule rules[] = {
+// FIXME: When adding rules, you need to update the count in client.c:apply_config_rules()
+Rule rules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title

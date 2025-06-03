@@ -8,7 +8,7 @@
 
 /* variables */
 Systray *systray = NULL;
-const char broken[] = "broken";                                          // default window title
+char broken[] = "broken";                                                // default window title
 char status_text[256];                                                   // right side bar text
 int screen;
 int screen_width;

@@ -583,56 +583,6 @@ Monitor *wintomon(Window window) {
 
 
 
-void apply_config_rules(Client *client) {
-  const char *class;
-  const char *instance;
-  unsigned int i;
-  const Rule *rule;
-  Monitor *monitor;
-  XClassHint class_hint = {NULL, NULL};
-
-  bool is_title_match;
-  bool is_class_match;
-  bool is_instance_match;
-
-  /* rule matching */
-  client->is_floating = 0;
-  client->tags = 0;
-  XGetClassHint(display, client->window, &class_hint);
-  class = class_hint.res_class ? class_hint.res_class : broken;
-  instance = class_hint.res_name ? class_hint.res_name : broken;
-
-  // for every rule in config
-  for (i = 0; i < LENGTH(rules); i++) {
-    rule = &rules[i];
-
-    is_title_match = (!rule->title || strstr(client->name, rule->title));
-    is_class_match = (!rule->class_name || strstr(class, rule->class_name));
-    is_instance_match = (!rule->instance || strstr(instance, rule->instance));
-
-    if (is_title_match && is_class_match && is_instance_match) {
-      client->is_floating = rule->is_floating;
-      client->tags |= rule->tags;
-
-      // find monitor the rule applies to
-      for (monitor = monitors; monitor && monitor->num != rule->monitor; monitor = monitor->next);
-
-      if (monitor){
-        client->monitor = monitor;
-	    }
-    }
-  }
-
-  if (class_hint.res_class){
-    XFree(class_hint.res_class);
-  }
-
-  if (class_hint.res_name){
-    XFree(class_hint.res_name);
-  }
-
-  client->tags = client->tags & TAGMASK ? client->tags & TAGMASK : client->monitor->tag_set[client->monitor->selected_tags];
-}
 
 void attach(Client *client) {
   client->next = client->monitor->clients;
