@@ -16,7 +16,8 @@ SRC = src/drw.c \
  src/process.c \
  src/tagging.c \
  src/client.c \
- src/stacking.c
+ src/stacking.c \
+ src/window.c
 
 OBJ = ${SRC:.c=.o}
 

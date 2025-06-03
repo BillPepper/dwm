@@ -11,9 +11,9 @@ void tile(Monitor *m);
 
 // -- Appearance ---------------------------------------------------------------
 
-static const int border_width = 3;
+int border_width = 3;
 int gap = 15;
-static const int snap = 32;
+int snap = 32;
 
 
 // -- Tray ---------------------------------------------------------------------

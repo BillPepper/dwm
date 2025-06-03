@@ -2,7 +2,11 @@
 #define WINDOW_H
 
 #include <X11/Xlib.h>
+
 #include "definitions.h"
+#include "stacking.h"
+
+extern int border_width;
 
 // window (X11)
 void unmanage(Client *client, int destroyed);                            // detach, unfocus, update and re-arrange clients
