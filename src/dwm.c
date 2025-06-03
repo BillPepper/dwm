@@ -388,7 +388,7 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   Window trans = None;
   XWindowChanges window_changes;
 
-  int client_x, client_y, client_w, client_h;
+  int client_x, client_y;
   int win_area_x, win_area_y, win_area_w, win_area_h;
   int monitor_area_x, monitor_area_y, monitor_area_w, monitor_area_h;
 
