@@ -1,7 +1,19 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+
+#include <X11/Xlib.h>
+
+
+#include "events.h"
+#include "error.h"
+
 #include "definitions.h"
+
+// defined in config.h and global.h
+extern Monitor *selected_monitor;
+extern Display *display;
+extern Atom wmatom[WMLast];
 
 // @desc: close client window
 // @arg0: arg -> unused

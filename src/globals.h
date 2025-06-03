@@ -31,5 +31,26 @@ Monitor *selected_monitor;                                               // curr
 Window root;                                                             // root window of dwn
 Window wmcheckwin;
 
+// Array of function pointers
+#define EVENT_COUNT LASTEvent
+void (*handler[EVENT_COUNT])(XEvent *) = {
+  // handler[index] = callback
+  [ButtonPress] = buttonpress,
+  [ClientMessage] = clientmessage,
+  [ConfigureRequest] = configurerequest,
+  [ConfigureNotify] = configurenotify,
+  [DestroyNotify] = destroynotify,
+  [EnterNotify] = enternotify,
+  [Expose] = expose,
+  [FocusIn] = focusin,
+  [KeyPress] = keypress,
+  [MappingNotify] = mappingnotify,
+  [MapRequest] = maprequest,
+  [MotionNotify] = motionnotify,
+  [PropertyNotify] = propertynotify,
+  [ResizeRequest] = resizerequest,
+  [UnmapNotify] = unmapnotify
+};
+
 
 #endif
