@@ -102,48 +102,48 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 
 int key_count = 39;
 Key keys[] = {
-	{ MODKEY, XK_b, togglebar, {0} },
+	{ MODKEY, XK_b, togglebar, {0} },																							// Mod + B
 
 	// command
-	{ MODKEY,           XK_p,         spawn, {.v = dmenucmd } },
-	{ MODKEY|ShiftMask, XK_Return,    spawn, {.v = termcmd } },
-	{ MODKEY|ShiftMask, XK_BackSpace, spawn, {.v = termaltcmd } },
+	{ MODKEY,           XK_p,         spawn, {.v = dmenucmd } },									// Mod + P
+	{ MODKEY|ShiftMask, XK_Return,    spawn, {.v = termcmd } },										// Mod + Shift + Enter
+	{ MODKEY|ShiftMask, XK_BackSpace, spawn, {.v = termaltcmd } },								// Mod + Shift + Backspace
 
 	// stacking
-	{ MODKEY, XK_j, focusstack, {.i = +1 } },
-	{ MODKEY, XK_k, focusstack, {.i = -1 } },
-	{ MODKEY, XK_i, incnmaster, {.i = +1 } },
-	{ MODKEY, XK_d, incnmaster, {.i = -1 } },
-	{ MODKEY, XK_h, setmfact,   {.f = -0.05} },
-	{ MODKEY, XK_l, setmfact,   {.f = +0.05} },
+	{ MODKEY, XK_j, focusstack, {.i = +1 } },																			// Mod + J
+	{ MODKEY, XK_k, focusstack, {.i = -1 } },																			// Mod + K
+	{ MODKEY, XK_i, incnmaster, {.i = +1 } },																			// Mod + I
+	{ MODKEY, XK_d, incnmaster, {.i = -1 } },																			// Mod + D
+	{ MODKEY, XK_h, setmfact,   {.f = -0.05} },																		// Mod + H
+	{ MODKEY, XK_l, setmfact,   {.f = +0.05} },																		// Mod + L
 
 	// client
-	{ MODKEY,           XK_Return, zoom,           {0} },
-	{ MODKEY,           XK_Tab,    view,           {0} },
-	{ MODKEY|ShiftMask, XK_c,      killclient,     {0} },
+	{ MODKEY,           XK_Return, zoom,           {0} },													// Mod + Return
+	{ MODKEY,           XK_Tab,    view,           {0} },													// Mod + Tab
+	{ MODKEY|ShiftMask, XK_c,      killclient,     {0} },													// Mod + Shift + C
 
 	// layout
-	{ MODKEY,           XK_t,     setlayout,        {.v = &layouts[0]} },
-	{ MODKEY,           XK_f,     setlayout,        {.v = &layouts[1]} },
-	{ MODKEY,           XK_m,     setlayout,        {.v = &layouts[2]} },
-	{ MODKEY,           XK_space, setlayout,        {0} },
-	{ MODKEY|ShiftMask, XK_space, togglefloating,   {0} },
-	{ MODKEY|ShiftMask, XK_f,     togglefullscreen, {0} },
+	{ MODKEY,           XK_t,     setlayout,        {.v = &layouts[0]} },					// Mod + T
+	{ MODKEY,           XK_f,     setlayout,        {.v = &layouts[1]} },					// Mod + F
+	{ MODKEY,           XK_m,     setlayout,        {.v = &layouts[2]} },					// Mod + M
+	{ MODKEY,           XK_space, setlayout,        {0} },												// Mod + Shift + Space
+	{ MODKEY|ShiftMask, XK_space, togglefloating,   {0} },												// Mod + Shift + Space
+	{ MODKEY|ShiftMask, XK_f,     togglefullscreen, {0} },												// Mod + Shift + F
 
 	// monitor
-	{ MODKEY, XK_comma,  focusmon, {.i = -1 } },
-	{ MODKEY, XK_period, focusmon, {.i = +1 } },
+	{ MODKEY, XK_comma,  focusmon, {.i = -1 } },																	// Mod + ,
+	{ MODKEY, XK_period, focusmon, {.i = +1 } },																	// Mod + .
 
 	// tagging
-	{ MODKEY,           XK_0,      view,   {.ui = ~0 } },
-	{ MODKEY|ShiftMask, XK_0,      tag,    {.ui = ~0 } },
-	{ MODKEY|ShiftMask, XK_comma,  tagmon, {.i = -1 } },
-	{ MODKEY|ShiftMask, XK_period, tagmon, {.i = +1 } },
+	{ MODKEY,           XK_0,      view,   {.ui = ~0 } },													// Mod + 0
+	{ MODKEY|ShiftMask, XK_0,      tag,    {.ui = ~0 } },													// Mod + Shift + 0
+	{ MODKEY|ShiftMask, XK_comma,  tagmon, {.i = -1 } },													// Mod + Shift + ,
+	{ MODKEY|ShiftMask, XK_period, tagmon, {.i = +1 } },													// Mod + Shift + .
 
 	// gap control
-	{ MODKEY,           XK_minus, setgaps, {.i = -1 } },
-	{ MODKEY,           XK_equal, setgaps, {.i = +1 } },
-	{ MODKEY|ShiftMask, XK_equal, setgaps, {.i = 0  } },
+	{ MODKEY,           XK_minus, setgaps, {.i = -1 } },													// Mod + -
+	{ MODKEY,           XK_equal, setgaps, {.i = +1 } },													// Mod + =
+	{ MODKEY|ShiftMask, XK_equal, setgaps, {.i = 0  } },													// Mod + Shift + =
 
 	TAGKEYS(XK_1, 0)
 	TAGKEYS(XK_2, 1)
@@ -155,8 +155,8 @@ Key keys[] = {
 	TAGKEYS(XK_8, 7)
 	TAGKEYS(XK_9, 8)
 
-	{ MODKEY|ShiftMask, XK_q, exitdwm, {0} },
-	{ MODKEY|ShiftMask, XK_w, _debug, {0}},
+	{ MODKEY|ShiftMask, XK_q, exitdwm, {0} },																			// Mod + Shift + Q
+	{ MODKEY|ShiftMask, XK_w, _debug, {0}},																				// Mod + Shift + W
 };
 
 /* button definitions */
