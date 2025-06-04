@@ -19,7 +19,6 @@
 #include "monitor.h"
 
 // defined in config.h and global.h
-extern void arrange(Monitor *monitor);
 extern int systray_enabled;
 extern Monitor *selected_monitor;
 extern int bar_height;

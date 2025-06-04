@@ -17,8 +17,6 @@
 #include "tagging.h"
 
 // defined in config.h and global.h
-extern void arrange(Monitor *monitor);
-
 extern int resize_hints_enabled;
 extern Rule rules[];
 extern const char *tags[15];
