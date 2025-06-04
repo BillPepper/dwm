@@ -2,8 +2,6 @@
 #include <X11/keysym.h>
 #include "src/exitdwm.c"
 
-#include "src/dwm.h"
-
 #include "src/debug.h"
 #include "src/layout.h"
 
@@ -91,8 +89,8 @@ const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb",
 static const char *termcmd[]  = { "alacritty", NULL };
 static const char *termaltcmd[]  = { "urxvt", NULL };
 
-/* Keys */
-/*- modifier                key        function        argument */
+/* -- Keys -- */
+/* -- modifier                key        function        argument -- */
 #define MODKEY Mod1Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,	view,       {.ui = 1 << TAG} }, \
