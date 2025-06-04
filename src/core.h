@@ -1,11 +1,36 @@
 #ifndef CORE_H
 #define CORE_H
 
-extern int restart;
-extern int running;
+#include <signal.h>
+
+#include <X11/Xlib.h>
+#include <X11/Xft/Xft.h>
 
 #include "definitions.h"
+#include "drw.h"
+#include "macro.h"
+#include "process.h"
+#include "tray.h"
 
+extern int restart;
+extern int running;
+extern int screen;
+extern int screen_width;
+extern int screen_height;
+extern int padding;
+extern int bar_height;
+extern Atom wmatom[WMLast];
+extern Atom netatom[NetLast];
+extern Window root;
+extern Drw *drw;
+extern Display *display;
+extern int font_count;
+extern const char *fonts[];
+extern Atom xatom[XLast];
+extern Cur *cursor[];
+extern Window wmcheckwin;
+extern const char *colors[][3];
+extern int color_count;
 
 // @desc: init dwm, bar, tray, screen, etc...
 void setup(void);

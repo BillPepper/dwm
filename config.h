@@ -33,8 +33,9 @@ int status_monitor = 1; // index
 
 
 // -- Fonts --------------------------------------------------------------------
-static const char *fonts[] = { "monospace:size=10" };
-static const char dmenufont[] = "monospace:size=10";
+int font_count = 1;
+const char *fonts[] = { "monospace:size=10" };
+char dmenufont[] = "monospace:size=10";
 
 
 // - Colors --------------------------------------------------------------------
@@ -45,7 +46,8 @@ static const char col_light_green[] = "#90a955";
 static const char col_orange[] = "#fb8500";
 static const char col_light_orange[] = "#ffb703";
 
-static const char *colors[][3] = {
+int color_count = 2;
+const char *colors[][3] = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { col_orange, col_gray, col_gray},
 	[SchemeSel]  = { col_light_orange, col_gray,  col_light_orange  },
@@ -53,21 +55,7 @@ static const char *colors[][3] = {
 
 /* tagging */
 const char *tags[15] = {
-	"1",
-	"2",
-	"3",
-	"4",
-	"5",
-	"6",
-	"7",
-	"8",
-	"9",
-	"a",
-	"b",
-	"c",
-	"d",
-	"e",
-	"f"
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d","e", "f"
 };
 
 // FIXME: When adding rules, you need to update the count in client.c:apply_config_rules()

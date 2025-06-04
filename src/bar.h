@@ -7,6 +7,9 @@
 #include <X11/Xatom.h>
 #include <string.h>
 
+#include <sys/types.h>
+#include <sys/wait.h>
+
 #include "macro.h"
 
 #include "definitions.h"
