@@ -11,12 +11,8 @@
 #include <X11/Xft/Xft.h>
 
 // stdlib
-#include <stdio.h>
 #include <unistd.h>
 #include <locale.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
 
 // kernel
@@ -30,24 +26,6 @@
 
 //dwm
 #include "globals.h"
-#include "drw.h"
-#include "util.h"
-#include "macro.h"
-#include "definitions.h"
-#include "core.h"
-#include "monitor.h"
-#include "layout.h"
-#include "events.h"
-#include "stacking.h"
-#include "input.h"
-#include "debug.h"
-#include "process.h"
-#include "tagging.h"
-#include "bar.h"
-#include "tray.h"
-#include "client.h"
-#include "window.h"
-#include "error.h"
 
 #include "../config.h"
 
