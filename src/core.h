@@ -6,6 +6,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
 
+// XINERAMA
+#ifdef XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
+
 #include "definitions.h"
 #include "drw.h"
 #include "macro.h"
@@ -31,6 +36,7 @@ extern Cur *cursor[];
 extern Window wmcheckwin;
 extern const char *colors[][3];
 extern int color_count;
+
 
 // @desc: init dwm, bar, tray, screen, etc...
 void setup(void);
@@ -64,5 +70,9 @@ Atom getatomprop(Client *client, Atom prop);
 
 // @desc: some multi screen stuff, related to xinerama
 int updategeom(void);
+
+#ifdef XINERAMA
+int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
+#endif /* XINERAMA */
 
 #endif
