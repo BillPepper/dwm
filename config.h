@@ -98,7 +98,7 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 	{ MODKEY|ShiftMask,             KEY,	tag,        {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,  {.ui = 1 << TAG} },
 
-int key_count = 39;
+int key_count = 66;
 Key keys[] = {
 	{ MODKEY, XK_b, togglebar, {0} },																							// Mod + B
 
