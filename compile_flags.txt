@@ -1,0 +1,2 @@
+-I/usr/X11R6/include
+-I/usr/include/freetype2
