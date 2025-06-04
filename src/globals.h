@@ -1,9 +1,10 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "drw.h"
+#include <X11/Xft/Xft.h>
 
 #include "definitions.h"
+#include "drw.h"
 #include "events.h"
 
 /* variables */
