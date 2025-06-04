@@ -1,4 +1,5 @@
-#include "dwm.h"
+#include "definitions.h"
+#include "core.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
