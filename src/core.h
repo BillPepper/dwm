@@ -1,22 +1,15 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <signal.h>
-
-#include <X11/Xlib.h>
-#include <X11/Xft/Xft.h>
-
 // XINERAMA
 #ifdef XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
 
 #include "definitions.h"
-
+#include "globals.h"
 #include "process.h"
 #include "tray.h"
-
-#include "globals.h"
 
 // @desc: init dwm, bar, tray, screen, etc...
 void setup(void);

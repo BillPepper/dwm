@@ -1,6 +1,5 @@
 #include "monitor.h"
 
-
 Monitor *createmon(void) {
   Monitor *monitor;
 
@@ -56,7 +55,6 @@ Monitor *recttomon(Area *area) {
   return r;
 }
 
-
 void focusmon(const Arg *arg) {
   Monitor *m;
 
@@ -71,7 +69,6 @@ void focusmon(const Arg *arg) {
   selected_monitor = m;
   focus(NULL);
 }
-
 
 void arrange(Monitor *monitor) {
   // if monitor specified

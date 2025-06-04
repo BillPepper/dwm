@@ -5,7 +5,6 @@
 #include <X11/Xft/Xft.h>
 
 #include "util.h"
-
 #include "globals.h"
 
 // Error

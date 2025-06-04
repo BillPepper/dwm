@@ -1,9 +1,6 @@
 #ifndef STACKING_H
 #define STACKING_H
 
-#include <X11/Xlib.h>
-
-#include "definitions.h"
 #include "bar.h"
 
 void restack(Monitor *monitor);                                          // restack clients on monitor

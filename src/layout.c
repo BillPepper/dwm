@@ -1,6 +1,5 @@
 #include "layout.h"
 
-
 void monocle(Monitor *monitor){
 	unsigned int client_count = 0;
 	Client *client;

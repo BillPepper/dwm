@@ -1,6 +1,5 @@
 #include "tray.h"
 
-
 void updatesystray(void) {
   XSetWindowAttributes window_attributes;
   XWindowChanges window_changes;

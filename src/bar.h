@@ -1,25 +1,12 @@
 #ifndef BAR_H
 #define BAR_H
 
-#include <X11/Xlib.h>
-#include <X11/Xft/Xft.h>
-#include <X11/keysym.h>
-#include <X11/Xatom.h>
-#include <string.h>
-
-#include <sys/types.h>
 #include <sys/wait.h>
 
-#include "macro.h"
-
 #include "definitions.h"
-#include "drw.h"
-#include "tray.h"
-#include "window.h"
-#include "monitor.h"
-
-
 #include "globals.h"
+#include "tray.h"
+
 
 // @descr: Enable/disable bar on current screen
 // @param: arg -> unsed

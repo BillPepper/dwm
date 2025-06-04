@@ -1,10 +1,7 @@
 #ifndef TAGGING_H
 #define TAGGING_H
 
-#include "definitions.h"
-#include "client.h"
 #include "monitor.h"
-#include "macro.h"
 
 // @descr: Set currently active client tag
 // @param: arg -> tag number

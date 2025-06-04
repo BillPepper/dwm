@@ -1,12 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <X11/Xlib.h>
-
-#include "definitions.h"
 #include "stacking.h"
-
-#include "globals.h"
 
 // window (X11)
 void unmanage(Client *client, int destroyed);                            // detach, unfocus, update and re-arrange clients

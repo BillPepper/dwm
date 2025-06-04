@@ -2,14 +2,7 @@
 #ifndef MONITOR_H
 #define MONITOR_H
 
-#include <X11/Xlib.h>
-#include <string.h>
 #include <stdlib.h>
-
-#include "definitions.h"
-#include "util.h"
-#include "macro.h"
-#include "client.h"
 #include "stacking.h"
 
 Monitor *createmon(void);                        // create Monitor struct

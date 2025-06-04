@@ -1,12 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <X11/Xlib.h>
-
-#include "definitions.h"
 #include "stacking.h"
-
-#include "globals.h"
 
 // -- Mouse --------------------------------------------------------------------
 

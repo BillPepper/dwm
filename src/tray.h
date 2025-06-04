@@ -1,17 +1,9 @@
 #ifndef TRAY_H
 #define TRAY_H
 
-#include <X11/Xlib.h>
-#include <X11/Xft/Xft.h>
 #include <X11/Xatom.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "definitions.h"
 #include "core.h"
-#include "drw.h"
-#include "util.h"
 #include "macro.h"
 #include "client.h"
 

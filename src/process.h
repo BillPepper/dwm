@@ -1,13 +1,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
-#include <X11/Xlib.h>
-
-#include <stdlib.h>
 #include <unistd.h>
-
-#include "definitions.h"
-#include "util.h"
 #include "core.h"
 
 // processes and signals

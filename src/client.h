@@ -2,20 +2,12 @@
 #define CLIENT_H
 
 #include <stdbool.h>
-#include <string.h>
-
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-
-#include "events.h"
-#include "error.h"
-#include "macro.h"
-#include "input.h"
-#include "bar.h"
 
 #include "definitions.h"
+#include "events.h"
+#include "error.h"
+#include "input.h"
 #include "tagging.h"
-
 
 // @desc: close client window
 // @arg0: arg -> unused

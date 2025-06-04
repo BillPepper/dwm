@@ -1,6 +1,4 @@
-#include "events.h"
 #include "input.h"
-
 
 void buttonpress(XEvent *e) {
   unsigned int i, x, click;
@@ -46,7 +44,6 @@ void buttonpress(XEvent *e) {
 	  }
   }
 }
-
 
 void clientmessage(XEvent *event) {
   XWindowAttributes window_attributes;
@@ -120,8 +117,6 @@ void clientmessage(XEvent *event) {
 	  }
   }
 }
-
-
 
 void configurenotify(XEvent *e) {
   Monitor *m;
@@ -269,7 +264,6 @@ void focusin(XEvent *e) {
   }
 }
 
-
 void keypress(XEvent *e) {
   unsigned int i;
   KeySym keysym;
@@ -283,7 +277,6 @@ void keypress(XEvent *e) {
 	  }
   }
 }
-
 
 void mappingnotify(XEvent *e) {
   XMappingEvent *ev = &e->xmapping;
@@ -312,7 +305,6 @@ void maprequest(XEvent *e) {
     manage(ev->window, &wa);
   }
 }
-
 
 void motionnotify(XEvent *e) {
   static Monitor *mon = NULL;

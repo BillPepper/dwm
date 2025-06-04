@@ -1,6 +1,5 @@
 #include "stacking.h"
 
-
 void restack(Monitor *monitor) {
   Client *client;
   XEvent event;
@@ -34,7 +33,6 @@ void restack(Monitor *monitor) {
   while (XCheckMaskEvent(display, EnterWindowMask, &event));
 }
 
-
 void focusstack(const Arg *arg) {
   Client *c = NULL, *i;
 
@@ -67,13 +65,10 @@ void focusstack(const Arg *arg) {
   }
 }
 
-
 void incnmaster(const Arg *arg) {
   selected_monitor->master_count = MAX(selected_monitor->master_count + arg->i, 0);
   arrange(selected_monitor);
 }
-
-
 
 void setgaps(const Arg *arg) {
   if ((arg->i == 0) || (selected_monitor->gap + arg->i < 0)) {

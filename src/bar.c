@@ -1,8 +1,5 @@
 #include "bar.h"
 
-extern unsigned int getsystraywidth();
-extern int systray_on_left;
-
 void togglebar(const Arg *arg) {
   selected_monitor->bar_enabled = !selected_monitor->bar_enabled;
   update_bar_position(selected_monitor);

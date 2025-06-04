@@ -1,9 +1,6 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
-#include <X11/Xlib.h>
-
-#include "definitions.h"
 #include "window.h"
 
 extern int button_count;

@@ -246,7 +246,6 @@ void configure(Client *client) {
   XSendEvent(display, client->window, False, StructureNotifyMask, (XEvent *)&event);
 }
 
-
 void detach(Client *c) {
   Client **tc;
 
@@ -293,8 +292,6 @@ void focus(Client *client) {
   selected_monitor->selected_client = client;
   drawbars();
 }
-
-
 
 Client *nexttiled(Client *client) {
   for (; client && (client->is_floating || !ISVISIBLE(client)); client = client->next);
@@ -350,7 +347,6 @@ void sendmon(Client *client, Monitor *monitor){
   focus(NULL);
   arrange(NULL);
 }
-
 
 void setclientstate(Client *c, long state){
   long data[] = {state, None};
@@ -442,8 +438,6 @@ void showhide(Client *client) {
     XMoveWindow(display, client->window, WIDTH(client) * -2, client->area.position.y);
   }
 }
-
-
 
 void unfocus(Client *client, int setfocus) {
   if (!client) {
