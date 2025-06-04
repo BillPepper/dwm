@@ -16,22 +16,6 @@
 #include "definitions.h"
 #include "tagging.h"
 
-// defined in config.h and global.h
-extern int resize_hints_enabled;
-extern Rule rules[];
-extern const char *tags[15];
-
-extern Monitor *selected_monitor;
-extern Display *display;
-extern Atom wmatom[WMLast];
-extern Atom netatom[NetLast];
-extern Display *display;
-extern Window root;
-extern Monitor *monitors;
-extern int screen_width;
-extern int screen_height;
-extern int bar_height;
-extern char broken[];
 
 // @desc: close client window
 // @arg0: arg -> unused

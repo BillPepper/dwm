@@ -6,7 +6,7 @@
 
 #include "util.h"
 
-extern int (*xerrorxlib)(Display *, XErrorEvent *);
+#include "globals.h"
 
 // Error
 int xerror(Display *display, XErrorEvent *event);                               // handle errors

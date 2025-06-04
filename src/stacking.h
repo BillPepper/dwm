@@ -6,8 +6,6 @@
 #include "definitions.h"
 #include "bar.h"
 
-extern int is_fullscreen_locked;
-
 void restack(Monitor *monitor);                                          // restack clients on monitor
 void focusstack(const Arg *arg);                                         // focus stack by index
 void incnmaster(const Arg *arg);                                         // increment master area

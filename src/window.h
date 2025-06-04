@@ -6,7 +6,7 @@
 #include "definitions.h"
 #include "stacking.h"
 
-extern int border_width;
+#include "globals.h"
 
 // window (X11)
 void unmanage(Client *client, int destroyed);                            // detach, unfocus, update and re-arrange clients

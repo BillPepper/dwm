@@ -18,23 +18,8 @@
 #include "window.h"
 #include "monitor.h"
 
-// defined in config.h and global.h
-extern int systray_enabled;
-extern Monitor *selected_monitor;
-extern int bar_height;
-extern Systray *systray;
-extern Display *display;
-extern Drw *drw;
-extern Monitor *monitors;
-extern char status_text[256];
-extern int status_monitor;
-extern int padding;
-extern Clr **scheme;
-extern Window root;
-extern Cur *cursor[];
-extern int screen;
-extern const char *tags[15];
-extern int systray_on_left;
+
+#include "globals.h"
 
 // @descr: Enable/disable bar on current screen
 // @param: arg -> unsed

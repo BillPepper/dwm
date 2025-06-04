@@ -6,9 +6,6 @@
 #include "monitor.h"
 #include "macro.h"
 
-extern Monitor *selected_monitor;
-extern const char *tags[15];
-
 // @descr: Set currently active client tag
 // @param: arg -> tag number
 void tag(const Arg *arg);

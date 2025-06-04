@@ -6,14 +6,7 @@
 #include "definitions.h"
 #include "stacking.h"
 
-extern Window root;
-extern Display *display;
-extern int snap;
-extern unsigned int numlockmask;
-extern int button_count;
-extern Button buttons[];
-extern int key_count;
-extern Key keys[];
+#include "globals.h"
 
 // -- Mouse --------------------------------------------------------------------
 

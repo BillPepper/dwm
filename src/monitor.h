@@ -12,16 +12,6 @@
 #include "client.h"
 #include "stacking.h"
 
-extern int is_bar_enabled;
-extern int is_top_bar;
-extern float mfact;
-extern int nmaster;
-extern int gap;
-extern Layout layouts[3];
-extern Monitor *selected_monitor;
-extern Monitor *monitors;
-extern Display *display;
-
 Monitor *createmon(void);                        // create Monitor struct
 Monitor *dirtomon(int dir);                      // get monitor in direction?
 Monitor *recttomon(Area *area);                  // return the monitor given rect should be rendered on
