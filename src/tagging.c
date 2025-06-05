@@ -13,7 +13,7 @@ void tag_monitor(const Arg *arg) {
     return;
   }
 
-  sendmon(selected_monitor->selected_client, dir_to_monitor(arg->i));
+  send_to_monitor(selected_monitor->selected_client, dir_to_monitor(arg->i));
 }
 
 void toggle_tag(const Arg *arg) {

@@ -158,7 +158,7 @@ void update_systray_icon_geom(Client *client, Size *size) {
     area.size.w = client->area.size.w;
     area.size.h = client->area.size.h;
 
-    applysizehints(client, &area, False);
+    apply_size_hints(client, &area, False);
     /* force icons into the systray dimensions if they don't want to */
     if (client->area.size.h > bar_height) {
       if (client->area.size.w == client->area.size.h) {
@@ -184,12 +184,12 @@ void update_systray_icon_state(Client *client, XPropertyEvent *event) {
     client->tags = 1;
     code = XEMBED_WINDOW_ACTIVATE;
     XMapRaised(display, client->window);
-    setclientstate(client, NormalState);
+    set_client_state(client, NormalState);
   } else if (!(flags & XEMBED_MAPPED) && client->tags) {
     client->tags = 0;
     code = XEMBED_WINDOW_DEACTIVATE;
     XUnmapWindow(display, client->window);
-    setclientstate(client, WithdrawnState);
+    set_client_state(client, WithdrawnState);
   } else {
     return;
   }

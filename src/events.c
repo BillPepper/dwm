@@ -79,7 +79,7 @@ void client_message(XEvent *event) {
       client->is_floating = True;
       /* reuse tags field as mapped status */
       client->tags = 1;
-      updatesizehints(client);
+      update_size_hints(client);
       size.w = window_attributes.width;
       size.h = window_attributes.height;
       update_systray_icon_geom(client, &size);
@@ -97,7 +97,7 @@ void client_message(XEvent *event) {
       XSync(display, False);
       resize_bar_win(selected_monitor);
       update_systray();
-      setclientstate(client, NormalState);
+      set_client_state(client, NormalState);
     }
     return;
   }
@@ -107,13 +107,13 @@ void client_message(XEvent *event) {
   }
   if (client_msg->message_type == netatom[NetWMState]) {
     if (client_msg->data.l[1] == netatom[NetWMFullscreen] || client_msg->data.l[2] == netatom[NetWMFullscreen]){
-      setfullscreen(client, (client_msg->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
+      set_fullscreen(client, (client_msg->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
                         || (client_msg->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */ &&
                             !client->is_fullscreen)));
 	  }
   } else if (client_msg->message_type == netatom[NetActiveWindow]) {
     if (client != selected_monitor->selected_client && !client->is_urgent){
-      seturgent(client, 1);
+      set_urgent(client, 1);
 	  }
   }
 }
@@ -140,7 +140,7 @@ void configure_notify(XEvent *e) {
             area.position.y = m->monitor_area.position.y;
             area.size.w = m->monitor_area.size.w;
             area.size.h = m->monitor_area.size.h;
-            resizeclient(c, &area);
+            resize_client(c, &area);
 		      }
 		    }
 
@@ -260,7 +260,7 @@ void focus_in(XEvent *e) {
   XFocusChangeEvent *ev = &e->xfocus;
 
   if (selected_monitor->selected_client && ev->window != selected_monitor->selected_client->window) {
-    setfocus(selected_monitor->selected_client);
+    set_focus(selected_monitor->selected_client);
   }
 }
 
@@ -337,7 +337,7 @@ void property_notify(XEvent *event) {
 
   if ((client = window_to_systray_icon(event_prop->window))) {
     if (event_prop->atom == XA_WM_NORMAL_HINTS) {
-      updatesizehints(client);
+      update_size_hints(client);
       size.w = client->area.size.w;
       size.h = client->area.size.h;
       update_systray_icon_geom(client, &size);
@@ -365,18 +365,18 @@ void property_notify(XEvent *event) {
       client->hintsvalid = 0;
       break;
     case XA_WM_HINTS:
-      updatewmhints(client);
+      update_wm_hints(client);
       draw_bars();
       break;
     }
     if (event_prop->atom == XA_WM_NAME || event_prop->atom == netatom[NetWMName]) {
-      updatetitle(client);
+      update_title(client);
       if (client == client->monitor->selected_client) {
         draw_bar(client->monitor);
 	  }
     }
     if (event_prop->atom == netatom[NetWMWindowType]) {
-      updatewindowtype(client);
+      update_window_type(client);
 	  }
   }
 }
@@ -403,7 +403,7 @@ void unmap_notify(XEvent *e) {
 
   if ((c = window_to_client(ev->window))) {
     if (ev->send_event){
-      setclientstate(c, WithdrawnState);
+      set_client_state(c, WithdrawnState);
     } else {
         unmanage(c, 0);
     }

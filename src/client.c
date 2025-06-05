@@ -1,6 +1,6 @@
 #include "client.h"
 
-void killclient(const Arg *arg) {
+void kill_client(const Arg *arg) {
   if (!selected_monitor->selected_client) {
     return;
   }
@@ -16,7 +16,7 @@ void killclient(const Arg *arg) {
   }
 }
 
-void togglefloating(const Arg *arg) {
+void toggle_floating(const Arg *arg) {
   Area area;
 
   if (!selected_monitor->selected_client) {
@@ -41,13 +41,13 @@ void togglefloating(const Arg *arg) {
   arrange(selected_monitor);
 }
 
-void togglefullscreen(const Arg *arg) {
+void toggle_fullscreen(const Arg *arg) {
   if (selected_monitor->selected_client) {
-    setfullscreen(selected_monitor->selected_client, !selected_monitor->selected_client->is_fullscreen);
+    set_fullscreen(selected_monitor->selected_client, !selected_monitor->selected_client->is_fullscreen);
   }
 }
 
-void updateclientlist() {
+void update_client_list() {
   Client *client;
   Monitor *monitor;
 
@@ -59,7 +59,7 @@ void updateclientlist() {
   }
 }
 
-int applysizehints(Client *client, Area *area, int interact) {
+int apply_size_hints(Client *client, Area *area, int interact) {
   int baseismin;
   Monitor *monitor = client->monitor;
 
@@ -115,7 +115,7 @@ int applysizehints(Client *client, Area *area, int interact) {
   // (?) deal with floating windows
   if (resize_hints_enabled || client->is_floating || !client->monitor->layout[client->monitor->selected_layout]->arrange_func) {
     if (!client->hintsvalid){
-      updatesizehints(client);
+      update_size_hints(client);
 	  }
     /* see last two sentences in ICCCM 4.1.2.3 */
     baseismin = client->base.w == client->min.w && client->base.h == client->min.h;
@@ -223,7 +223,7 @@ void attach(Client *client) {
   client->monitor->clients = client;
 }
 
-void attachstack(Client *client) {
+void attach_stack(Client *client) {
   client->next_stack = client->monitor->stack;
   client->monitor->stack = client;
 }
@@ -253,7 +253,7 @@ void detach(Client *client) {
   *tc = client->next;
 }
 
-void detachstack(Client *client) {
+void detach_stack(Client *client) {
   Client **tc, *t;
 
   for (tc = &client->monitor->stack; *tc && *tc != client; tc = &(*tc)->next_stack);
@@ -277,14 +277,14 @@ void focus(Client *client) {
       selected_monitor = client->monitor;
 	  }
     if (client->is_urgent) {
-      seturgent(client, 0);
+      set_urgent(client, 0);
 	  }
 
-    detachstack(client);
-    attachstack(client);
+    detach_stack(client);
+    attach_stack(client);
     grab_buttons(client, 1);
     XSetWindowBorder(display, client->window, scheme[SchemeSel][ColBorder].pixel);
-    setfocus(client);
+    set_focus(client);
   } else {
     XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);
     XDeleteProperty(display, root, netatom[NetActiveWindow]);
@@ -293,7 +293,7 @@ void focus(Client *client) {
   draw_bars();
 }
 
-Client *nexttiled(Client *client) {
+Client *next_tiled(Client *client) {
   for (; client && (client->is_floating || !ISVISIBLE(client)); client = client->next);
   return client;
 }
@@ -306,12 +306,12 @@ void pop(Client *client) {
 }
 
 void resize(Client *client, Area *area, int interact) {
-  if (applysizehints(client, area, interact)) {
-    resizeclient(client, area);
+  if (apply_size_hints(client, area, interact)) {
+    resize_client(client, area);
   }
 }
 
-void resizeclient(Client *client, Area *area) {
+void resize_client(Client *client, Area *area) {
   XWindowChanges window_changes;
 
   client->old_area.position.x = client->area.position.x;
@@ -332,29 +332,29 @@ void resizeclient(Client *client, Area *area) {
   XSync(display, False);
 }
 
-void sendmon(Client *client, Monitor *monitor){
+void send_to_monitor(Client *client, Monitor *monitor){
   if (client->monitor == monitor) {
     return;
   }
 
   unfocus(client, 1);
   detach(client);
-  detachstack(client);
+  detach_stack(client);
   client->monitor = monitor;
   client->tags = monitor->tag_set[monitor->selected_tags]; /* assign tags of target monitor */
   attach(client);
-  attachstack(client);
+  attach_stack(client);
   focus(NULL);
   arrange(NULL);
 }
 
-void setclientstate(Client *client, long state){
+void set_client_state(Client *client, long state){
   long data[] = {state, None};
 
   XChangeProperty(display, client->window, wmatom[WMState], wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
 }
 
-void setfocus(Client *client) {
+void set_focus(Client *client) {
   if (!client->never_focus) {
     XSetInputFocus(display, client->window, RevertToPointerRoot, CurrentTime);
     XChangeProperty(display, root, netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(client->window), 1);
@@ -362,7 +362,7 @@ void setfocus(Client *client) {
   send_event(client->window, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
 }
 
-void setfullscreen(Client *client, int fullscreen) {
+void set_fullscreen(Client *client, int fullscreen) {
   Area area;
 
   if (fullscreen && !client->is_fullscreen) {
@@ -378,7 +378,7 @@ void setfullscreen(Client *client, int fullscreen) {
     area.size.w = client->monitor->monitor_area.size.w;
     area.size.h = client->monitor->monitor_area.size.h;
 
-    resizeclient(client, &area);
+    resize_client(client, &area);
     XRaiseWindow(display, client->window);
   } else if (!fullscreen && client->is_fullscreen) {
     XChangeProperty(display, client->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
@@ -395,12 +395,12 @@ void setfullscreen(Client *client, int fullscreen) {
     area.size.w = client->area.size.w;
     area.size.h = client->area.size.h;
 
-    resizeclient(client, &area);
+    resize_client(client, &area);
     arrange(client->monitor);
   }
 }
 
-void seturgent(Client *client, int urgency_state) {
+void set_urgent(Client *client, int urgency_state) {
   XWMHints *hints;
 
   client->is_urgent = urgency_state;
@@ -413,7 +413,7 @@ void seturgent(Client *client, int urgency_state) {
   XFree(hints);
 }
 
-void showhide(Client *client) {
+void show_hide(Client *client) {
   Area area;
 
   if (!client){
@@ -431,10 +431,10 @@ void showhide(Client *client) {
 
       resize(client, &area, 0);
 	  }
-    showhide(client->next_stack);
+    show_hide(client->next_stack);
   } else {
     /* hide clients bottom up */
-    showhide(client->next_stack);
+    show_hide(client->next_stack);
     XMoveWindow(display, client->window, WIDTH(client) * -2, client->area.position.y);
   }
 }
@@ -452,7 +452,7 @@ void unfocus(Client *client, int setfocus) {
   }
 }
 
-void updatesizehints(Client *client) {
+void update_size_hints(Client *client) {
   long master_size;
   XSizeHints size;
 
@@ -503,7 +503,7 @@ void updatesizehints(Client *client) {
   client->hintsvalid = 1;
 }
 
-void updatetitle(Client *client) {
+void update_title(Client *client) {
   if (!get_text_prop(client->window, netatom[NetWMName], client->name, sizeof client->name)) {
     get_text_prop(client->window, XA_WM_NAME, client->name, sizeof client->name);
   }
@@ -514,19 +514,19 @@ void updatetitle(Client *client) {
   }
 }
 
-void updatewindowtype(Client *client) {
+void update_window_type(Client *client) {
   Atom state = get_atom_prop(client, netatom[NetWMState]);
   Atom type = get_atom_prop(client, netatom[NetWMWindowType]);
 
   if (state == netatom[NetWMFullscreen]) {
-    setfullscreen(client, 1);
+    set_fullscreen(client, 1);
   }
   if (type == netatom[NetWMWindowTypeDialog]) {
     client->is_floating = 1;
   }
 }
 
-void updatewmhints(Client *client) {
+void update_wm_hints(Client *client) {
   XWMHints *hints;
 
   if ((hints = XGetWMHints(display, client->window))) {

@@ -74,7 +74,7 @@ void move_mouse(const Arg *arg) {
 	    }
 
       if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(area.position.x - client->area.position.x) > snap || abs(area.position.x - client->area.position.y) > snap)) {
-        togglefloating(NULL);
+        toggle_floating(NULL);
 	    }
 
       if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || client->is_floating) {
@@ -93,7 +93,7 @@ void move_mouse(const Arg *arg) {
   area.size.h = client->area.size.h;
 
   if ((monitor = rect_to_monitor(&area)) != selected_monitor) {
-    sendmon(client, monitor);
+    send_to_monitor(client, monitor);
     selected_monitor = monitor;
     focus(NULL);
   }
@@ -152,7 +152,7 @@ void resize_mouse(const Arg *arg) {
 
 			if (client->monitor->window_area.position.x + nw >= selected_monitor->window_area.position.x && client->monitor->window_area.position.x + nw <= selected_monitor->window_area.position.x + selected_monitor->window_area.size.w && client->monitor->window_area.position.y + nh >= selected_monitor->window_area.position.y && client->monitor->window_area.position.y + nh <= selected_monitor->window_area.position.y + selected_monitor->window_area.size.h) {
 				if (!client->is_floating && selected_monitor->layout[selected_monitor->selected_layout]->arrange_func && (abs(nw - client->area.size.w) > snap || abs(nh - client->area.size.h) > snap)) {
-				togglefloating(NULL);
+				toggle_floating(NULL);
 				}
 			}
 			if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || client->is_floating) {
@@ -172,7 +172,7 @@ void resize_mouse(const Arg *arg) {
   area.size.h = client->area.size.h;
 
   if ((monitor = rect_to_monitor(&area)) != selected_monitor) {
-    sendmon(client, monitor);
+    send_to_monitor(client, monitor);
     selected_monitor = monitor;
     focus(NULL);
   }

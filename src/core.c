@@ -208,7 +208,7 @@ void zoom(const Arg *arg) {
     return;
   }
 
-  if (c == nexttiled(selected_monitor->clients) && !(c = nexttiled(c->next))) {
+  if (c == next_tiled(selected_monitor->clients) && !(c = next_tiled(c->next))) {
     return;
   }
 
@@ -306,10 +306,10 @@ int update_geom(void) {
       while ((c = m->clients)) {
         dirty = 1;
         m->clients = c->next;
-        detachstack(c);
+        detach_stack(c);
         c->monitor = monitors;
         attach(c);
-        attachstack(c);
+        attach_stack(c);
       }
       if (m == selected_monitor) {
         selected_monitor = monitors;

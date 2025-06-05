@@ -5,7 +5,7 @@ void unmanage(Client *client, int destroyed) {
   XWindowChanges window_changes;
 
   detach(client);
-  detachstack(client);
+  detach_stack(client);
   if (!destroyed) {
     window_changes.border_width = client->old_border_width;
     XGrabServer(display); /* avoid race conditions */
@@ -13,14 +13,14 @@ void unmanage(Client *client, int destroyed) {
     XSelectInput(display, client->window, NoEventMask);
     XConfigureWindow(display, client->window, CWBorderWidth, &window_changes); /* restore border */
     XUngrabButton(display, AnyButton, AnyModifier, client->window);
-    setclientstate(client, WithdrawnState);
+    set_client_state(client, WithdrawnState);
     XSync(display, False);
     XSetErrorHandler(x_error);
     XUngrabServer(display);
   }
   free(client);
   focus(NULL);
-  updateclientlist();
+  update_client_list();
   arrange(monitor);
 }
 
@@ -55,7 +55,7 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   client->old_border_width = window_attributes->border_width;
 
   // Update the client struct's title with current one of the x window
-  updatetitle(client);
+  update_title(client);
 
   // (?) if window is a transient, find client by it's window to set position
   if (XGetTransientForHint(display, window, &trans) && (t = window_to_client(trans))){
@@ -90,9 +90,9 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   XConfigureWindow(display, window, CWBorderWidth, &window_changes);
   XSetWindowBorder(display, window, scheme[SchemeNorm][ColBorder].pixel);
   configure(client); /* propagates border_width, if size doesn't change */
-  updatewindowtype(client);
-  updatesizehints(client);
-  updatewmhints(client);
+  update_window_type(client);
+  update_size_hints(client);
+  update_wm_hints(client);
 
   monitor_area_x = client->monitor->monitor_area.position.x;
   monitor_area_y = client->monitor->monitor_area.position.y;
@@ -113,11 +113,11 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   }
 
   attach(client);
-  attachstack(client);
+  attach_stack(client);
 
   XChangeProperty(display, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(client->window), 1);
   XMoveResizeWindow(display, client->window, client_x + 2 * screen_width, client_y, client->area.size.w, client->area.size.h); /* some windows require this */
-  setclientstate(client, NormalState);
+  set_client_state(client, NormalState);
 
   if (client->monitor == selected_monitor) {
     unfocus(selected_monitor->selected_client, 0);

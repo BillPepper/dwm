@@ -20,8 +20,8 @@ void monocle(Monitor *monitor){
   }
 
   // resize all visible clients to window area
-  client = nexttiled(monitor->clients);
-	for (; client; client = nexttiled(client->next)){
+  client = next_tiled(monitor->clients);
+	for (; client; client = next_tiled(client->next)){
     area.position.x = monitor->window_area.position.x;
     area.position.y = monitor->window_area.position.y;
     area.size.w = monitor->window_area.size.w - (client->border_width * 2);
@@ -36,7 +36,7 @@ void tile(Monitor *m) {
   Client *c;
   Area area;
 
-  for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+  for (n = 0, c = next_tiled(m->clients); c; c = next_tiled(c->next), n++);
 
   if (n == 0){
     return;
@@ -48,7 +48,7 @@ void tile(Monitor *m) {
     mw = m->window_area.size.w - m->gap;
   }
 
-  for (i = 0, my = ty = m->gap, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+  for (i = 0, my = ty = m->gap, c = next_tiled(m->clients); c; c = next_tiled(c->next), i++) {
     if (i < m->master_count) {
       h = (m->window_area.size.h - my) / (MIN(n, m->master_count) - i) - m->gap;
 

@@ -73,13 +73,13 @@ void focus_monitor(const Arg *arg) {
 void arrange(Monitor *monitor) {
   // if monitor specified
   if (monitor){
-    showhide(monitor->stack);
+    show_hide(monitor->stack);
   }
 
   // otherwise, do it for all
   else {
     for (monitor = monitors; monitor; monitor = monitor->next){
-      showhide(monitor->stack);
+      show_hide(monitor->stack);
 	  }
   }
 

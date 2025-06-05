@@ -118,15 +118,15 @@ Key keys[] = {
 	// client
 	{ MODKEY,           XK_Return, zoom,           {0} },													// Mod + Return
 	{ MODKEY,           XK_Tab,    view,           {0} },													// Mod + Tab
-	{ MODKEY|ShiftMask, XK_c,      killclient,     {0} },													// Mod + Shift + C
+	{ MODKEY|ShiftMask, XK_c,      kill_client,     {0} },													// Mod + Shift + C
 
 	// layout
 	{ MODKEY,           XK_t,     set_layout,        {.v = &layouts[0]} },					// Mod + T
 	{ MODKEY,           XK_f,     set_layout,        {.v = &layouts[1]} },					// Mod + F
 	{ MODKEY,           XK_m,     set_layout,        {.v = &layouts[2]} },					// Mod + M
 	{ MODKEY,           XK_space, set_layout,        {0} },												// Mod + Shift + Space
-	{ MODKEY|ShiftMask, XK_space, togglefloating,   {0} },												// Mod + Shift + Space
-	{ MODKEY|ShiftMask, XK_f,     togglefullscreen, {0} },												// Mod + Shift + F
+	{ MODKEY|ShiftMask, XK_space, toggle_floating,   {0} },												// Mod + Shift + Space
+	{ MODKEY|ShiftMask, XK_f,     toggle_fullscreen, {0} },												// Mod + Shift + F
 
 	// monitor
 	{ MODKEY, XK_comma,  focus_monitor, {.i = -1 } },																	// Mod + ,
@@ -167,7 +167,7 @@ Button buttons[] = {
 	{ ClkWinTitle,  0,      Button2, zoom,           {0} },
 	{ ClkStatusText,0,      Button2, spawn,          {.v = termcmd } },
 	{ ClkClientWin, MODKEY, Button1, move_mouse,      {0} },
-	{ ClkClientWin, MODKEY, Button2, togglefloating, {0} },
+	{ ClkClientWin, MODKEY, Button2, toggle_floating, {0} },
 	{ ClkClientWin, MODKEY, Button3, resize_mouse,    {0} },
 	{ ClkTagBar,    0,      Button1, view,           {0} },
 	{ ClkTagBar,    0,      Button3, toggle_view,     {0} },
