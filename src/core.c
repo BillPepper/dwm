@@ -303,13 +303,13 @@ int update_geometry(void) {
 	  }
     }
     for (i = 0, monitor = monitors; i < nn && monitor; monitor = monitor->next, i++){
-      if (i >= n || unique[i].x_org != m->monitor_area.position.x || unique[i].y_org != m->monitor_area.position.y || unique[i].width != m->monitor_area.size.w || unique[i].height != m->monitor_area.size.h) {
+      if (i >= n || unique[i].x_org != monitor->monitor_area.position.x || unique[i].y_org != monitor->monitor_area.position.y || unique[i].width != monitor->monitor_area.size.w || unique[i].height != monitor->monitor_area.size.h) {
         dirty = 1;
         monitor->num = i;
-        m->monitor_area.position.x = m->window_area.position.x = unique[i].x_org;
-        m->monitor_area.position.y = m->window_area.position.y = unique[i].y_org;
-        m->monitor_area.size.w = m->window_area.size.w = unique[i].width;
-        m->monitor_area.size.h = m->window_area.size.h = unique[i].height;
+        monitor->monitor_area.position.x = monitor->window_area.position.x = unique[i].x_org;
+        monitor->monitor_area.position.y = monitor->window_area.position.y = unique[i].y_org;
+        monitor->monitor_area.size.w = monitor->window_area.size.w = unique[i].width;
+        monitor->monitor_area.size.h = monitor->window_area.size.h = unique[i].height;
         update_bar_position(monitor);
       }
 	}
