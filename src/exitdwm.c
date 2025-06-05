@@ -39,7 +39,6 @@ void exitdwm(const Arg *arg){
   #define S_FORMAT_CLEAR "sed 's/^..//'"
 
   char *a = "echo \"" S_FORMAT(LOCK) "\n" S_FORMAT(RESTART_DWM) "\n" S_FORMAT(OFFSCREEN) "\n" S_FORMAT(EXIT) "\n" S_FORMAT(REBOOT) "\n" S_FORMAT(SHUTDOWN) "\" | dmenu -p exit: | " S_FORMAT_CLEAR;
-  printf("command:\n%s\n", a);
   FILE *exit_menu = popen(a, "r");
 
   char exit_action[16];
