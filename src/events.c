@@ -95,7 +95,7 @@ void clientmessage(XEvent *event) {
       sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       XSync(display, False);
-      resizebarwin(selected_monitor);
+      resize_bar_win(selected_monitor);
       updatesystray();
       setclientstate(client, NormalState);
     }
@@ -132,7 +132,7 @@ void configurenotify(XEvent *e) {
     screen_height = ev->height;
     if (updategeom() || dirty) {
       drw_resize(drw, screen_width, bar_height);
-      updatebars();
+      update_bars();
       for (m = monitors; m; m = m->next) {
         for (c = m->clients; c; c = c->next){
           if (c->is_fullscreen){
@@ -144,7 +144,7 @@ void configurenotify(XEvent *e) {
 		      }
 		    }
 
-        resizebarwin(m);
+        resize_bar_win(m);
       }
 
       focus(NULL);
@@ -218,7 +218,7 @@ void destroynotify(XEvent *e) {
   }
   else if ((c = wintosystrayicon(ev->window))) {
     removesystrayicon(c);
-    resizebarwin(selected_monitor);
+    resize_bar_win(selected_monitor);
     updatesystray();
   }
 }
@@ -248,7 +248,7 @@ void expose(XEvent *e) {
   XExposeEvent *ev = &e->xexpose;
 
   if (ev->count == 0 && (m = wintomon(ev->window))) {
-    drawbar(m);
+    draw_bar(m);
     if (m == selected_monitor){
       updatesystray();
 	  }
@@ -294,7 +294,7 @@ void maprequest(XEvent *e) {
   Client *i;
   if ((i = wintosystrayicon(ev->window))) {
     sendevent(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
-    resizebarwin(selected_monitor);
+    resize_bar_win(selected_monitor);
     updatesystray();
   }
 
@@ -345,12 +345,12 @@ void propertynotify(XEvent *event) {
       updatesystrayiconstate(client, event_prop);
 	}
 
-    resizebarwin(selected_monitor);
+    resize_bar_win(selected_monitor);
     updatesystray();
   }
 
   if ((event_prop->window == root) && (event_prop->atom == XA_WM_NAME)) {
-    updatestatus();
+    update_status();
   }
   else if (event_prop->state == PropertyDelete) {
     return; /* ignore */
@@ -366,13 +366,13 @@ void propertynotify(XEvent *event) {
       break;
     case XA_WM_HINTS:
       updatewmhints(client);
-      drawbars();
+      draw_bars();
       break;
     }
     if (event_prop->atom == XA_WM_NAME || event_prop->atom == netatom[NetWMName]) {
       updatetitle(client);
       if (client == client->monitor->selected_client) {
-        drawbar(client->monitor);
+        draw_bar(client->monitor);
 	  }
     }
     if (event_prop->atom == netatom[NetWMWindowType]) {
@@ -392,7 +392,7 @@ void resizerequest(XEvent *event) {
   if ((icon = wintosystrayicon(request_event->window))) {
 
     updatesystrayicongeom(icon, &size);
-    resizebarwin(selected_monitor);
+    resize_bar_win(selected_monitor);
     updatesystray();
   }
 }

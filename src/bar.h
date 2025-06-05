@@ -10,7 +10,7 @@
 
 // @descr: Enable/disable bar on current screen
 // @param: arg -> unsed
-void togglebar(const Arg *arg);
+void toggle_bar(const Arg *arg);
 
 // @descr: Recalculate bar position, depending on bar visibility
 // @param: monitor -> Target monitor on which the bar should be updated
@@ -18,23 +18,23 @@ void update_bar_position(Monitor *monitor);
 
 // @descr: Draw bar, tags, layout and title
 // @param: monitor -> Target monitor on which the bar should be drawn
-void drawbar(Monitor *monitor);
+void draw_bar(Monitor *monitor);
 
-// @descr: Wrapper calling drawbar() for all monitors
+// @descr: Wrapper calling draw_bar() for all monitors
 // @param: none
-void drawbars(void);
+void draw_bars(void);
 
 // @descr: Resize the bar window, depending on wheter the tray is shown or not
 // @param: monitor -> Target monitor the bar is on
-void resizebarwin(Monitor *monitor);
+void resize_bar_win(Monitor *monitor);
 
 // @descr: Render current status text or fallback then update tray
 // @param: none
-void updatestatus(void);
+void update_status(void);
 
 // @descr: Set bar class hints, then render bar (top most) for each monitor
 // @param: none
-void updatebars(void);
+void update_bars(void);
 
 
 #endif

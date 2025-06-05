@@ -89,8 +89,8 @@ void setup(void) {
   updatesystray();
 
   /* init bars */
-  updatebars();
-  updatestatus();
+  update_bars();
+  update_status();
 
   /* supporting window for NetWMCheck */
   wmcheckwin = XCreateSimpleWindow(display, root, 0, 0, 1, 1, 0, 0, 0);

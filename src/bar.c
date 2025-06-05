@@ -1,9 +1,9 @@
 #include "bar.h"
 
-void togglebar(const Arg *arg) {
+void toggle_bar(const Arg *arg) {
   selected_monitor->bar_enabled = !selected_monitor->bar_enabled;
   update_bar_position(selected_monitor);
-  resizebarwin(selected_monitor);
+  resize_bar_win(selected_monitor);
 
   if (systray_enabled) {
     XWindowChanges wc;
@@ -34,7 +34,7 @@ void update_bar_position(Monitor *monitor) {
   }
 }
 
-void drawbar(Monitor *m) {
+void draw_bar(Monitor *m) {
   int x, w, text_width = 0, tray_width = 0;
   int boxs = drw->fonts->h / 9;
   int boxw = drw->fonts->h / 6 + 2;
@@ -54,7 +54,7 @@ void drawbar(Monitor *m) {
   text_width = TEXTW(status_text) - padding / 2 + 2; /* 2px extra right padding */
   drw_text(drw, m->window_area.size.w - text_width - tray_width, 0, text_width, bar_height, padding / 2 - 2, status_text, 0);
 
-  resizebarwin(m);
+  resize_bar_win(m);
 
   // mark urgent tags
   for (c = m->clients; c; c = c->next) {
@@ -107,15 +107,15 @@ void drawbar(Monitor *m) {
   drw_map(drw, m->bar_window, 0, 0, m->window_area.size.w - tray_width, bar_height);
 }
 
-void drawbars(void) {
+void draw_bars(void) {
   Monitor *m;
 
   for (m = monitors; m; m = m->next){
-    drawbar(m);
+    draw_bar(m);
   }
 }
 
-void resizebarwin(Monitor *monitor) {
+void resize_bar_win(Monitor *monitor) {
   unsigned int width = monitor->window_area.size.w;
 
   if (systray_enabled && monitor == systraytomon(monitor) && !systray_on_left) {
@@ -125,7 +125,7 @@ void resizebarwin(Monitor *monitor) {
   XMoveResizeWindow(display, monitor->bar_window, monitor->window_area.position.x, monitor->bar_y, width, bar_height);
 }
 
-void updatestatus(void) {
+void update_status(void) {
   // default status text
   if (!gettextprop(root, XA_WM_NAME, status_text, sizeof(status_text))) {
     strcpy(status_text, "pdwm-" VERSION);
@@ -136,19 +136,19 @@ void updatestatus(void) {
     Monitor *m;
 
     for (m = monitors; m; m = m->next) {
-      drawbar(m);
+      draw_bar(m);
     }
   }
 
   // show bar on selected screen
   else {
-    drawbar(selected_monitor);
+    draw_bar(selected_monitor);
   }
 
   updatesystray();
 }
 
-void updatebars(void) {
+void update_bars(void) {
   unsigned int width;
   Monitor *monitor;
   XSetWindowAttributes window_attributes = {.override_redirect = True, .background_pixmap = ParentRelative, .event_mask = ButtonPressMask | ExposureMask};

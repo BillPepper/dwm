@@ -290,7 +290,7 @@ void focus(Client *client) {
     XDeleteProperty(display, root, netatom[NetActiveWindow]);
   }
   selected_monitor->selected_client = client;
-  drawbars();
+  draw_bars();
 }
 
 Client *nexttiled(Client *client) {

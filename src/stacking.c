@@ -5,7 +5,7 @@ void restack(Monitor *monitor) {
   XEvent event;
   XWindowChanges window_changes;
 
-  drawbar(monitor);
+  draw_bar(monitor);
 
   if (!monitor->selected_client){
     return;
@@ -98,7 +98,7 @@ void setlayout(const Arg *arg) {
   if (selected_monitor->selected_client) {
     arrange(selected_monitor);
   } else {
-    drawbar(selected_monitor);
+    draw_bar(selected_monitor);
   }
 }
 

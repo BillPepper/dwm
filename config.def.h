@@ -108,7 +108,7 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,  {.ui = 1 << TAG} },
 
 static const Key keys[] = {
-	{ MODKEY, XK_b, togglebar, {0} },
+	{ MODKEY, XK_b, toggle_bar, {0} },
 
 	// command
 	{ MODKEY,           XK_p,         spawn, {.v = dmenucmd } },
