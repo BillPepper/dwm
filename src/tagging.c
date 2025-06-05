@@ -8,7 +8,7 @@ void tag(const Arg *arg) {
   }
 }
 
-void tagmon(const Arg *arg) {
+void tag_monitor(const Arg *arg) {
   if (!selected_monitor->selected_client || !monitors->next){
     return;
   }
@@ -16,7 +16,7 @@ void tagmon(const Arg *arg) {
   sendmon(selected_monitor->selected_client, dir_to_monitor(arg->i));
 }
 
-void toggletag(const Arg *arg) {
+void toggle_tag(const Arg *arg) {
   unsigned int newtags;
 
   if (!selected_monitor->selected_client) {
@@ -31,7 +31,7 @@ void toggletag(const Arg *arg) {
   }
 }
 
-void toggleview(const Arg *arg) {
+void toggle_view(const Arg *arg) {
   unsigned int newtagset = selected_monitor->tag_set[selected_monitor->selected_tags] ^ (arg->ui & TAGMASK);
 
   if (newtagset) {

@@ -94,9 +94,9 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 #define MODKEY Mod1Mask
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,	view,       {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask,           KEY,	toggleview, {.ui = 1 << TAG} }, \
+	{ MODKEY|ControlMask,           KEY,	toggle_view, {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,	tag,        {.ui = 1 << TAG} }, \
-	{ MODKEY|ControlMask|ShiftMask, KEY,	toggletag,  {.ui = 1 << TAG} },
+	{ MODKEY|ControlMask|ShiftMask, KEY,	toggle_tag,  {.ui = 1 << TAG} },
 
 int key_count = 66;
 Key keys[] = {
@@ -135,8 +135,8 @@ Key keys[] = {
 	// tagging
 	{ MODKEY,           XK_0,      view,   {.ui = ~0 } },													// Mod + 0
 	{ MODKEY|ShiftMask, XK_0,      tag,    {.ui = ~0 } },													// Mod + Shift + 0
-	{ MODKEY|ShiftMask, XK_comma,  tagmon, {.i = -1 } },													// Mod + Shift + ,
-	{ MODKEY|ShiftMask, XK_period, tagmon, {.i = +1 } },													// Mod + Shift + .
+	{ MODKEY|ShiftMask, XK_comma,  tag_monitor, {.i = -1 } },													// Mod + Shift + ,
+	{ MODKEY|ShiftMask, XK_period, tag_monitor, {.i = +1 } },													// Mod + Shift + .
 
 	// gap control
 	{ MODKEY,           XK_minus, set_gaps, {.i = -1 } },													// Mod + -
@@ -170,7 +170,7 @@ Button buttons[] = {
 	{ ClkClientWin, MODKEY, Button2, togglefloating, {0} },
 	{ ClkClientWin, MODKEY, Button3, resize_mouse,    {0} },
 	{ ClkTagBar,    0,      Button1, view,           {0} },
-	{ ClkTagBar,    0,      Button3, toggleview,     {0} },
+	{ ClkTagBar,    0,      Button3, toggle_view,     {0} },
 	{ ClkTagBar,    MODKEY, Button1, tag,            {0} },
-	{ ClkTagBar,    MODKEY, Button3, toggletag,      {0} },
+	{ ClkTagBar,    MODKEY, Button3, toggle_tag,      {0} },
 };

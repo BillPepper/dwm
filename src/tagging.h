@@ -9,14 +9,14 @@ void tag(const Arg *arg);
 
 // @descr: Move client to another monitor
 // @param: arg -> direction (left=-1, right=1)
-void tagmon(const Arg *arg);
+void tag_monitor(const Arg *arg);
 
 // @descr: Toggle tags for current client
 // @param: arg -> tag number
-void toggletag(const Arg *arg);
+void toggle_tag(const Arg *arg);
 
 // @descr: Toggle if clients with this tag are shown
 // @param: arg -> tag number
-void toggleview(const Arg *arg);
+void toggle_view(const Arg *arg);
 
 #endif
