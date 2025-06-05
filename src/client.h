@@ -64,7 +64,7 @@ void resize(Client *client, Area *area, int interact);
 void resizeclient(Client *client, Area *area);
 
 // @descr: send client to montior
-void sendmon(Client *client, Monitor *m);
+void sendmon(Client *client, Monitor *monitor);
 
 // @descr: set the client state (normal/icon/withdrawn)
 void setclientstate(Client *client, long state);

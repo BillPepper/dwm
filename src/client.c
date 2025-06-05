@@ -246,22 +246,22 @@ void configure(Client *client) {
   XSendEvent(display, client->window, False, StructureNotifyMask, (XEvent *)&event);
 }
 
-void detach(Client *c) {
+void detach(Client *client) {
   Client **tc;
 
-  for (tc = &c->monitor->clients; *tc && *tc != c; tc = &(*tc)->next);
-  *tc = c->next;
+  for (tc = &client->monitor->clients; *tc && *tc != client; tc = &(*tc)->next);
+  *tc = client->next;
 }
 
-void detachstack(Client *c) {
+void detachstack(Client *client) {
   Client **tc, *t;
 
-  for (tc = &c->monitor->stack; *tc && *tc != c; tc = &(*tc)->next_stack);
-  *tc = c->next_stack;
+  for (tc = &client->monitor->stack; *tc && *tc != client; tc = &(*tc)->next_stack);
+  *tc = client->next_stack;
 
-  if (c == c->monitor->selected_client) {
-    for (t = c->monitor->stack; t && !ISVISIBLE(t); t = t->next_stack);
-    c->monitor->selected_client = t;
+  if (client == client->monitor->selected_client) {
+    for (t = client->monitor->stack; t && !ISVISIBLE(t); t = t->next_stack);
+    client->monitor->selected_client = t;
   }
 }
 
@@ -305,30 +305,30 @@ void pop(Client *client) {
   arrange(client->monitor);
 }
 
-void resize(Client *c, Area *area, int interact) {
-  if (applysizehints(c, area, interact)) {
-    resizeclient(c, area);
+void resize(Client *client, Area *area, int interact) {
+  if (applysizehints(client, area, interact)) {
+    resizeclient(client, area);
   }
 }
 
-void resizeclient(Client *c, Area *area) {
+void resizeclient(Client *client, Area *area) {
   XWindowChanges window_changes;
 
-  c->old_area.position.x = c->area.position.x;
-  c->area.position.x = window_changes.x = area->position.x;
+  client->old_area.position.x = client->area.position.x;
+  client->area.position.x = window_changes.x = area->position.x;
 
-  c->old_area.position.y = c->area.position.y;
-  c->area.position.y = window_changes.y = area->position.y;
+  client->old_area.position.y = client->area.position.y;
+  client->area.position.y = window_changes.y = area->position.y;
 
-  c->old_area.size.w = c->area.size.w;
-  c->area.size.w = window_changes.width = area->size.w;
+  client->old_area.size.w = client->area.size.w;
+  client->area.size.w = window_changes.width = area->size.w;
 
-  c->old_area.size.h = c->area.size.h;
-  c->area.size.h = window_changes.height = area->size.h;
+  client->old_area.size.h = client->area.size.h;
+  client->area.size.h = window_changes.height = area->size.h;
 
-  window_changes.border_width = c->border_width;
-  XConfigureWindow(display, c->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
-  configure(c);
+  window_changes.border_width = client->border_width;
+  XConfigureWindow(display, client->window, CWX | CWY | CWWidth | CWHeight | CWBorderWidth, &window_changes);
+  configure(client);
   XSync(display, False);
 }
 
@@ -348,10 +348,10 @@ void sendmon(Client *client, Monitor *monitor){
   arrange(NULL);
 }
 
-void setclientstate(Client *c, long state){
+void setclientstate(Client *client, long state){
   long data[] = {state, None};
 
-  XChangeProperty(display, c->window, wmatom[WMState], wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
+  XChangeProperty(display, client->window, wmatom[WMState], wmatom[WMState], 32, PropModeReplace, (unsigned char *)data, 2);
 }
 
 void setfocus(Client *client) {
@@ -362,41 +362,41 @@ void setfocus(Client *client) {
   send_event(client->window, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
 }
 
-void setfullscreen(Client *c, int fullscreen) {
+void setfullscreen(Client *client, int fullscreen) {
   Area area;
 
-  if (fullscreen && !c->is_fullscreen) {
-    XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&netatom[NetWMFullscreen], 1);
-    c->is_fullscreen = 1;
-    c->old_state = c->is_floating;
-    c->old_border_width = c->border_width;
-    c->border_width = 0;
-    c->is_floating = 1;
+  if (fullscreen && !client->is_fullscreen) {
+    XChangeProperty(display, client->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)&netatom[NetWMFullscreen], 1);
+    client->is_fullscreen = 1;
+    client->old_state = client->is_floating;
+    client->old_border_width = client->border_width;
+    client->border_width = 0;
+    client->is_floating = 1;
 
-    area.position.x = c->monitor->monitor_area.position.x;
-    area.position.y = c->monitor->monitor_area.position.y;
-    area.size.w = c->monitor->monitor_area.size.w;
-    area.size.h = c->monitor->monitor_area.size.h;
+    area.position.x = client->monitor->monitor_area.position.x;
+    area.position.y = client->monitor->monitor_area.position.y;
+    area.size.w = client->monitor->monitor_area.size.w;
+    area.size.h = client->monitor->monitor_area.size.h;
 
-    resizeclient(c, &area);
-    XRaiseWindow(display, c->window);
-  } else if (!fullscreen && c->is_fullscreen) {
-    XChangeProperty(display, c->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
-    c->is_fullscreen = 0;
-    c->is_floating = c->old_state;
-    c->border_width = c->old_border_width;
-    c->area.position.x = c->old_area.position.x;
-    c->area.position.y = c->old_area.position.y;
-    c->area.size.w = c->old_area.size.w;
-    c->area.size.h = c->old_area.size.h;
+    resizeclient(client, &area);
+    XRaiseWindow(display, client->window);
+  } else if (!fullscreen && client->is_fullscreen) {
+    XChangeProperty(display, client->window, netatom[NetWMState], XA_ATOM, 32, PropModeReplace, (unsigned char *)0, 0);
+    client->is_fullscreen = 0;
+    client->is_floating = client->old_state;
+    client->border_width = client->old_border_width;
+    client->area.position.x = client->old_area.position.x;
+    client->area.position.y = client->old_area.position.y;
+    client->area.size.w = client->old_area.size.w;
+    client->area.size.h = client->old_area.size.h;
 
-    area.position.x = c->area.position.x;;
-    area.position.y = c->area.position.y;;
-    area.size.w = c->area.size.w;
-    area.size.h = c->area.size.h;
+    area.position.x = client->area.position.x;;
+    area.position.y = client->area.position.y;;
+    area.size.w = client->area.size.w;
+    area.size.h = client->area.size.h;
 
-    resizeclient(c, &area);
-    arrange(c->monitor);
+    resizeclient(client, &area);
+    arrange(client->monitor);
   }
 }
 
