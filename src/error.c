@@ -26,13 +26,13 @@ int x_error(Display *display, XErrorEvent *error_event) {
 
 
 
-int x_error_dummy(Display *dpy, XErrorEvent *ee) {
+int x_error_dummy(Display *display, XErrorEvent *error_event) {
 	return 0;
 }
 
 /* Startup Error handler to check if another window manager
  * is already running. */
-int x_error_start(Display *dpy, XErrorEvent *ee) {
+int x_error_start(Display *display, XErrorEvent *error_event) {
   die("dwm: another window manager is already running");
   return -1;
 }
