@@ -7,11 +7,11 @@ void killclient(const Arg *arg) {
 
   if (!sendevent(selected_monitor->selected_client->window, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
     XGrabServer(display);
-    XSetErrorHandler(xerrordummy);
+    XSetErrorHandler(x_error_dummy);
     XSetCloseDownMode(display, DestroyAll);
     XKillClient(display, selected_monitor->selected_client->window);
     XSync(display, False);
-    XSetErrorHandler(xerror);
+    XSetErrorHandler(x_error);
     XUngrabServer(display);
   }
 }

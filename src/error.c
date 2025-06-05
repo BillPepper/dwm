@@ -2,7 +2,7 @@
 
 
 
-int xerror(Display *display, XErrorEvent *error_event) {
+int x_error(Display *display, XErrorEvent *error_event) {
   /* There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's). Other types of errors call Xlibs
  * default error handler, which may call exit. */
@@ -26,13 +26,13 @@ int xerror(Display *display, XErrorEvent *error_event) {
 
 
 
-int xerrordummy(Display *dpy, XErrorEvent *ee) {
+int x_error_dummy(Display *dpy, XErrorEvent *ee) {
 	return 0;
 }
 
 /* Startup Error handler to check if another window manager
  * is already running. */
-int xerrorstart(Display *dpy, XErrorEvent *ee) {
+int x_error_start(Display *dpy, XErrorEvent *ee) {
   die("dwm: another window manager is already running");
   return -1;
 }

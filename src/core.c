@@ -153,11 +153,11 @@ void scan(void) {
 }
 
 void check_other_wm(void) {
-  xerrorxlib = XSetErrorHandler(xerrorstart);
+  xerrorxlib = XSetErrorHandler(x_error_start);
   /* this causes an error if some other window manager is running */
   XSelectInput(display, DefaultRootWindow(display), SubstructureRedirectMask);
   XSync(display, False);
-  XSetErrorHandler(xerror);
+  XSetErrorHandler(x_error);
   XSync(display, False);
 }
 

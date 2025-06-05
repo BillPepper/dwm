@@ -9,13 +9,13 @@ void unmanage(Client *client, int destroyed) {
   if (!destroyed) {
     window_changes.border_width = client->old_border_width;
     XGrabServer(display); /* avoid race conditions */
-    XSetErrorHandler(xerrordummy);
+    XSetErrorHandler(x_error_dummy);
     XSelectInput(display, client->window, NoEventMask);
     XConfigureWindow(display, client->window, CWBorderWidth, &window_changes); /* restore border */
     XUngrabButton(display, AnyButton, AnyModifier, client->window);
     setclientstate(client, WithdrawnState);
     XSync(display, False);
-    XSetErrorHandler(xerror);
+    XSetErrorHandler(x_error);
     XUngrabServer(display);
   }
   free(client);

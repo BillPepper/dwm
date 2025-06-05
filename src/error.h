@@ -8,9 +8,8 @@
 #include "globals.h"
 
 // Error
-int xerror(Display *display, XErrorEvent *event);                               // handle errors
-int xerrordummy(Display *display, XErrorEvent *event);                          // returns 0
-int xerrorstart(Display *display, XErrorEvent *event);                          // called when other wm is running
-
+int x_error(Display *display, XErrorEvent *event);                               // handle errors
+int x_error_dummy(Display *display, XErrorEvent *event);                          // returns 0
+int x_error_start(Display *display, XErrorEvent *event);                          // called when other wm is running
 
 #endif
