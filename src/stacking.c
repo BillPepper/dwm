@@ -33,7 +33,7 @@ void restack(Monitor *monitor) {
   while (XCheckMaskEvent(display, EnterWindowMask, &event));
 }
 
-void focusstack(const Arg *arg) {
+void focus_stack(const Arg *arg) {
   Client *c = NULL, *i;
 
   if (!selected_monitor->selected_client || (selected_monitor->selected_client->is_fullscreen && is_fullscreen_locked)) {
@@ -65,12 +65,12 @@ void focusstack(const Arg *arg) {
   }
 }
 
-void incnmaster(const Arg *arg) {
+void increment_master(const Arg *arg) {
   selected_monitor->master_count = MAX(selected_monitor->master_count + arg->i, 0);
   arrange(selected_monitor);
 }
 
-void setgaps(const Arg *arg) {
+void set_gaps(const Arg *arg) {
   if ((arg->i == 0) || (selected_monitor->gap + arg->i < 0)) {
     selected_monitor->gap = 0;
   } else {
@@ -80,7 +80,7 @@ void setgaps(const Arg *arg) {
   arrange(selected_monitor);
 }
 
-void setlayout(const Arg *arg) {
+void set_layout(const Arg *arg) {
   // has no or invalid arg, reset to default?
   if (!arg || !arg->v || arg->v != selected_monitor->layout[selected_monitor->selected_layout]) {
     selected_monitor->selected_layout ^= 1;
@@ -102,7 +102,7 @@ void setlayout(const Arg *arg) {
   }
 }
 
-void setmfact(const Arg *arg) {
+void set_master_factor(const Arg *arg) {
   /* arg > 1.0 will set mfact absolutely */
 
   float f;

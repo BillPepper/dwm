@@ -108,12 +108,12 @@ Key keys[] = {
 	{ MODKEY|ShiftMask, XK_BackSpace, spawn, {.v = termaltcmd } },								// Mod + Shift + Backspace
 
 	// stacking
-	{ MODKEY, XK_j, focusstack, {.i = +1 } },																			// Mod + J
-	{ MODKEY, XK_k, focusstack, {.i = -1 } },																			// Mod + K
-	{ MODKEY, XK_i, incnmaster, {.i = +1 } },																			// Mod + I
-	{ MODKEY, XK_d, incnmaster, {.i = -1 } },																			// Mod + D
-	{ MODKEY, XK_h, setmfact,   {.f = -0.05} },																		// Mod + H
-	{ MODKEY, XK_l, setmfact,   {.f = +0.05} },																		// Mod + L
+	{ MODKEY, XK_j, focus_stack, {.i = +1 } },																			// Mod + J
+	{ MODKEY, XK_k, focus_stack, {.i = -1 } },																			// Mod + K
+	{ MODKEY, XK_i, increment_master, {.i = +1 } },																			// Mod + I
+	{ MODKEY, XK_d, increment_master, {.i = -1 } },																			// Mod + D
+	{ MODKEY, XK_h, set_master_factor,   {.f = -0.05} },																		// Mod + H
+	{ MODKEY, XK_l, set_master_factor,   {.f = +0.05} },																		// Mod + L
 
 	// client
 	{ MODKEY,           XK_Return, zoom,           {0} },													// Mod + Return
@@ -121,10 +121,10 @@ Key keys[] = {
 	{ MODKEY|ShiftMask, XK_c,      killclient,     {0} },													// Mod + Shift + C
 
 	// layout
-	{ MODKEY,           XK_t,     setlayout,        {.v = &layouts[0]} },					// Mod + T
-	{ MODKEY,           XK_f,     setlayout,        {.v = &layouts[1]} },					// Mod + F
-	{ MODKEY,           XK_m,     setlayout,        {.v = &layouts[2]} },					// Mod + M
-	{ MODKEY,           XK_space, setlayout,        {0} },												// Mod + Shift + Space
+	{ MODKEY,           XK_t,     set_layout,        {.v = &layouts[0]} },					// Mod + T
+	{ MODKEY,           XK_f,     set_layout,        {.v = &layouts[1]} },					// Mod + F
+	{ MODKEY,           XK_m,     set_layout,        {.v = &layouts[2]} },					// Mod + M
+	{ MODKEY,           XK_space, set_layout,        {0} },												// Mod + Shift + Space
 	{ MODKEY|ShiftMask, XK_space, togglefloating,   {0} },												// Mod + Shift + Space
 	{ MODKEY|ShiftMask, XK_f,     togglefullscreen, {0} },												// Mod + Shift + F
 
@@ -139,9 +139,9 @@ Key keys[] = {
 	{ MODKEY|ShiftMask, XK_period, tagmon, {.i = +1 } },													// Mod + Shift + .
 
 	// gap control
-	{ MODKEY,           XK_minus, setgaps, {.i = -1 } },													// Mod + -
-	{ MODKEY,           XK_equal, setgaps, {.i = +1 } },													// Mod + =
-	{ MODKEY|ShiftMask, XK_equal, setgaps, {.i = 0  } },													// Mod + Shift + =
+	{ MODKEY,           XK_minus, set_gaps, {.i = -1 } },													// Mod + -
+	{ MODKEY,           XK_equal, set_gaps, {.i = +1 } },													// Mod + =
+	{ MODKEY|ShiftMask, XK_equal, set_gaps, {.i = 0  } },													// Mod + Shift + =
 
 	TAGKEYS(XK_1, 0)
 	TAGKEYS(XK_2, 1)
@@ -162,8 +162,8 @@ Key keys[] = {
 int button_count = 11;
 Button buttons[] = {
 	/* click                event mask      button          function        argument */
-	{ ClkLtSymbol,  0,      Button1, setlayout,      {0} },
-	{ ClkLtSymbol,  0,      Button3, setlayout,      {.v = &layouts[2]} },
+	{ ClkLtSymbol,  0,      Button1, set_layout,      {0} },
+	{ ClkLtSymbol,  0,      Button3, set_layout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,  0,      Button2, zoom,           {0} },
 	{ ClkStatusText,0,      Button2, spawn,          {.v = termcmd } },
 	{ ClkClientWin, MODKEY, Button1, move_mouse,      {0} },
