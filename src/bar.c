@@ -34,33 +34,33 @@ void update_bar_position(Monitor *monitor) {
   }
 }
 
-void draw_bar(Monitor *m) {
+void draw_bar(Monitor *monitor) {
   int x, w, text_width = 0, tray_width = 0;
   int boxs = drw->fonts->h / 9;
   int boxw = drw->fonts->h / 6 + 2;
   unsigned int i, occ = 0, is_urgent = 0;
-  Client *c;
+  Client *client;
 
-  if (!m->bar_enabled){
+  if (!monitor->bar_enabled){
     return;
   }
 
-  if (systray_enabled && m == systray_to_mon(m) && !systray_on_left){
+  if (systray_enabled && monitor == systray_to_mon(monitor) && !systray_on_left){
     tray_width = get_systray_width();
   }
 
   /* draw status first so it can be overdrawn by tags later */
   drw_setscheme(drw, scheme[SchemeNorm]);
   text_width = TEXTW(status_text) - padding / 2 + 2; /* 2px extra right padding */
-  drw_text(drw, m->window_area.size.w - text_width - tray_width, 0, text_width, bar_height, padding / 2 - 2, status_text, 0);
+  drw_text(drw, monitor->window_area.size.w - text_width - tray_width, 0, text_width, bar_height, padding / 2 - 2, status_text, 0);
 
-  resize_bar_win(m);
+  resize_bar_win(monitor);
 
   // mark urgent tags
-  for (c = m->clients; c; c = c->next) {
-    occ |= c->tags;
-    if (c->is_urgent){
-      is_urgent |= c->tags;
+  for (client = monitor->clients; client; client = client->next) {
+    occ |= client->tags;
+    if (client->is_urgent){
+      is_urgent |= client->tags;
 	  }
   }
 
@@ -70,12 +70,12 @@ void draw_bar(Monitor *m) {
     w = TEXTW(tags[i]);
 
     // render the tag
-    drw_setscheme(drw, scheme[m->tag_set[m->selected_tags] & 1 << i ? SchemeSel : SchemeNorm]);
+    drw_setscheme(drw, scheme[monitor->tag_set[monitor->selected_tags] & 1 << i ? SchemeSel : SchemeNorm]);
     drw_text(drw, x, 0, w, bar_height, padding / 2, tags[i], is_urgent & 1 << i);
 
     // draw inverted tag if urgent
     if (occ & 1 << i) {
-      drw_rect(drw, x + boxs, boxs, boxw, boxw, m == selected_monitor && selected_monitor->selected_client && selected_monitor->selected_client->tags & 1 << i, is_urgent & 1 << i);
+      drw_rect(drw, x + boxs, boxs, boxw, boxw, monitor == selected_monitor && selected_monitor->selected_client && selected_monitor->selected_client->tags & 1 << i, is_urgent & 1 << i);
 	  }
 
     // set position for next tag
@@ -83,19 +83,19 @@ void draw_bar(Monitor *m) {
   }
 
   // render layout
-  w = TEXTW(m->layout_symbol);
+  w = TEXTW(monitor->layout_symbol);
   drw_setscheme(drw, scheme[SchemeNorm]);
-  x = drw_text(drw, x, 0, w, bar_height, padding / 2, m->layout_symbol, 0);
+  x = drw_text(drw, x, 0, w, bar_height, padding / 2, monitor->layout_symbol, 0);
 
   // render title of last highlighted client
-  if ((w = m->window_area.size.w - text_width - tray_width - x) > bar_height) {
-    if (m->selected_client) {
-      drw_setscheme(drw, scheme[m == selected_monitor ? SchemeSel : SchemeNorm]);
-      drw_text(drw, x, 0, w, bar_height, padding / 2, m->selected_client->name, 0);
+  if ((w = monitor->window_area.size.w - text_width - tray_width - x) > bar_height) {
+    if (monitor->selected_client) {
+      drw_setscheme(drw, scheme[monitor == selected_monitor ? SchemeSel : SchemeNorm]);
+      drw_text(drw, x, 0, w, bar_height, padding / 2, monitor->selected_client->name, 0);
 
       // render the small indicator when client is floating
-      if (m->selected_client->is_floating){
-        drw_rect(drw, x + boxs, boxs, boxw, boxw, m->selected_client->is_fixed, 0);
+      if (monitor->selected_client->is_floating){
+        drw_rect(drw, x + boxs, boxs, boxw, boxw, monitor->selected_client->is_fixed, 0);
 	    }
     } else {
       drw_setscheme(drw, scheme[SchemeNorm]);
@@ -104,7 +104,7 @@ void draw_bar(Monitor *m) {
   }
 
   // not sure what this does...
-  drw_map(drw, m->bar_window, 0, 0, m->window_area.size.w - tray_width, bar_height);
+  drw_map(drw, monitor->bar_window, 0, 0, monitor->window_area.size.w - tray_width, bar_height);
 }
 
 void draw_bars(void) {
