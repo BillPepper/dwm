@@ -42,21 +42,21 @@ int running = 1;                                                         // 1 if
 #define EVENT_COUNT LASTEvent
 void (*handler[EVENT_COUNT])(XEvent *) = {
   // handler[index] = callback
-  [ButtonPress] = buttonpress,
-  [ClientMessage] = clientmessage,
-  [ConfigureRequest] = configurerequest,
-  [ConfigureNotify] = configurenotify,
-  [DestroyNotify] = destroynotify,
-  [EnterNotify] = enternotify,
+  [ButtonPress] = button_press,
+  [ClientMessage] = client_message,
+  [ConfigureRequest] = configure_request,
+  [ConfigureNotify] = configure_notify,
+  [DestroyNotify] = destroy_notify,
+  [EnterNotify] = enter_notify,
   [Expose] = expose,
-  [FocusIn] = focusin,
-  [KeyPress] = keypress,
-  [MappingNotify] = mappingnotify,
-  [MapRequest] = maprequest,
-  [MotionNotify] = motionnotify,
-  [PropertyNotify] = propertynotify,
-  [ResizeRequest] = resizerequest,
-  [UnmapNotify] = unmapnotify
+  [FocusIn] = focus_in,
+  [KeyPress] = key_press,
+  [MappingNotify] = mapping_notify,
+  [MapRequest] = map_request,
+  [MotionNotify] = motion_notify,
+  [PropertyNotify] = property_notify,
+  [ResizeRequest] = resize_request,
+  [UnmapNotify] = unmap_notify
 };
 
 // ----

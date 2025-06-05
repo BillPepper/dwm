@@ -5,7 +5,7 @@ void killclient(const Arg *arg) {
     return;
   }
 
-  if (!sendevent(selected_monitor->selected_client->window, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
+  if (!send_event(selected_monitor->selected_client->window, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
     XGrabServer(display);
     XSetErrorHandler(x_error_dummy);
     XSetCloseDownMode(display, DestroyAll);
@@ -359,7 +359,7 @@ void setfocus(Client *client) {
     XSetInputFocus(display, client->window, RevertToPointerRoot, CurrentTime);
     XChangeProperty(display, root, netatom[NetActiveWindow], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&(client->window), 1);
   }
-  sendevent(client->window, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
+  send_event(client->window, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
 }
 
 void setfullscreen(Client *c, int fullscreen) {

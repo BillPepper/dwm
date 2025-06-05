@@ -1,6 +1,6 @@
 #include "input.h"
 
-void buttonpress(XEvent *e) {
+void button_press(XEvent *e) {
   unsigned int i, x, click;
   Arg arg = {0};
   Client *c;
@@ -45,7 +45,7 @@ void buttonpress(XEvent *e) {
   }
 }
 
-void clientmessage(XEvent *event) {
+void client_message(XEvent *event) {
   XWindowAttributes window_attributes;
   XSetWindowAttributes set_window_attributes;
   XClientMessageEvent *client_msg = &event->xclient;
@@ -89,11 +89,11 @@ void clientmessage(XEvent *event) {
       /* use parents background color */
       set_window_attributes.background_pixel = scheme[SchemeNorm][ColBg].pixel;
       XChangeWindowAttributes(display, client->window, CWBackPixel, &set_window_attributes);
-      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      send_event(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       /* FIXME not sure if I have to send these events, too */
-      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_FOCUS_IN, 0, systray->window, XEMBED_EMBEDDED_VERSION);
-      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
-      sendevent(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      send_event(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_FOCUS_IN, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      send_event(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+      send_event(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       XSync(display, False);
       resize_bar_win(selected_monitor);
       updatesystray();
@@ -118,7 +118,7 @@ void clientmessage(XEvent *event) {
   }
 }
 
-void configurenotify(XEvent *e) {
+void configure_notify(XEvent *e) {
   Monitor *m;
   Client *c;
   XConfigureEvent *ev = &e->xconfigure;
@@ -153,7 +153,7 @@ void configurenotify(XEvent *e) {
   }
 }
 
-void configurerequest(XEvent *e) {
+void configure_request(XEvent *e) {
   Client *c;
   Monitor *m;
   XConfigureRequestEvent *ev = &e->xconfigurerequest;
@@ -209,7 +209,7 @@ void configurerequest(XEvent *e) {
   XSync(display, False);
 }
 
-void destroynotify(XEvent *e) {
+void destroy_notify(XEvent *e) {
   Client *c;
   XDestroyWindowEvent *ev = &e->xdestroywindow;
 
@@ -223,7 +223,7 @@ void destroynotify(XEvent *e) {
   }
 }
 
-void enternotify(XEvent *e) {
+void enter_notify(XEvent *e) {
   Client *c;
   Monitor *m;
   XCrossingEvent *ev = &e->xcrossing;
@@ -256,7 +256,7 @@ void expose(XEvent *e) {
 }
 
 /* there are some broken focus acquiring clients needing extra handling */
-void focusin(XEvent *e) {
+void focus_in(XEvent *e) {
   XFocusChangeEvent *ev = &e->xfocus;
 
   if (selected_monitor->selected_client && ev->window != selected_monitor->selected_client->window) {
@@ -264,7 +264,7 @@ void focusin(XEvent *e) {
   }
 }
 
-void keypress(XEvent *e) {
+void key_press(XEvent *e) {
   unsigned int i;
   KeySym keysym;
   XKeyEvent *ev;
@@ -278,7 +278,7 @@ void keypress(XEvent *e) {
   }
 }
 
-void mappingnotify(XEvent *e) {
+void mapping_notify(XEvent *e) {
   XMappingEvent *ev = &e->xmapping;
 
   XRefreshKeyboardMapping(ev);
@@ -287,13 +287,13 @@ void mappingnotify(XEvent *e) {
   }
 }
 
-void maprequest(XEvent *e) {
+void map_request(XEvent *e) {
   static XWindowAttributes wa;
   XMapRequestEvent *ev = &e->xmaprequest;
 
   Client *i;
   if ((i = wintosystrayicon(ev->window))) {
-    sendevent(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+    send_event(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
     resize_bar_win(selected_monitor);
     updatesystray();
   }
@@ -306,7 +306,7 @@ void maprequest(XEvent *e) {
   }
 }
 
-void motionnotify(XEvent *e) {
+void motion_notify(XEvent *e) {
   static Monitor *mon = NULL;
   Monitor *m;
   XMotionEvent *ev = &e->xmotion;
@@ -329,7 +329,7 @@ void motionnotify(XEvent *e) {
   mon = m;
 }
 
-void propertynotify(XEvent *event) {
+void property_notify(XEvent *event) {
   Client *client;
   Window trans;
   XPropertyEvent *event_prop = &event->xproperty;
@@ -381,7 +381,7 @@ void propertynotify(XEvent *event) {
   }
 }
 
-void resizerequest(XEvent *event) {
+void resize_request(XEvent *event) {
   XResizeRequestEvent *request_event = &event->xresizerequest;
   Client *icon;
   Size size;
@@ -397,7 +397,7 @@ void resizerequest(XEvent *event) {
   }
 }
 
-void unmapnotify(XEvent *e) {
+void unmap_notify(XEvent *e) {
   Client *c;
   XUnmapEvent *ev = &e->xunmap;
 
@@ -415,7 +415,7 @@ void unmapnotify(XEvent *e) {
   }
 }
 
-int sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4) {
+int send_event(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4) {
   int n;
   Atom *protocols, mt;
   int exists = 0;

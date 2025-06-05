@@ -41,7 +41,7 @@ void updatesystray(void) {
     XSetSelectionOwner(display, netatom[NetSystemTray], systray->window, CurrentTime);
 
     if (XGetSelectionOwner(display, netatom[NetSystemTray]) == systray->window) {
-      sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->window, 0, 0);
+      send_event(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->window, 0, 0);
       XSync(display, False);
     } else {
       fprintf(stderr, "dwm: unable to obtain system tray.\n");
@@ -194,5 +194,5 @@ void updatesystrayiconstate(Client *client, XPropertyEvent *event) {
     return;
   }
 
-  sendevent(client->window, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0, systray->window, XEMBED_EMBEDDED_VERSION);
+  send_event(client->window, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0, systray->window, XEMBED_EMBEDDED_VERSION);
 }

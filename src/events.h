@@ -9,21 +9,21 @@ extern int key_count;
 #define EVENT_COUNT LASTEvent
 extern void (*handler[EVENT_COUNT])(XEvent *);
 
-void buttonpress(XEvent *event);
-void clientmessage(XEvent *event);
-void configurenotify(XEvent *event);
-void configurerequest(XEvent *event);
-void destroynotify(XEvent *event);
-void enternotify(XEvent *event);
+void button_press(XEvent *event);
+void client_message(XEvent *event);
+void configure_notify(XEvent *event);
+void configure_request(XEvent *event);
+void destroy_notify(XEvent *event);
+void enter_notify(XEvent *event);
 void expose(XEvent *event);
-void focusin(XEvent *event);
-void keypress(XEvent *event);
-void mappingnotify(XEvent *event);
-void maprequest(XEvent *event);
-void motionnotify(XEvent *event);
-void propertynotify(XEvent *event);
-void resizerequest(XEvent *event);
-void unmapnotify(XEvent *event);
-int sendevent(Window window, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
+void focus_in(XEvent *event);
+void key_press(XEvent *event);
+void mapping_notify(XEvent *event);
+void map_request(XEvent *event);
+void motion_notify(XEvent *event);
+void property_notify(XEvent *event);
+void resize_request(XEvent *event);
+void unmap_notify(XEvent *event);
+int send_event(Window window, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
 
 #endif
