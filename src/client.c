@@ -504,8 +504,8 @@ void updatesizehints(Client *client) {
 }
 
 void updatetitle(Client *client) {
-  if (!gettextprop(client->window, netatom[NetWMName], client->name, sizeof client->name)) {
-    gettextprop(client->window, XA_WM_NAME, client->name, sizeof client->name);
+  if (!get_text_prop(client->window, netatom[NetWMName], client->name, sizeof client->name)) {
+    get_text_prop(client->window, XA_WM_NAME, client->name, sizeof client->name);
   }
 
   /* hack to mark broken clients */

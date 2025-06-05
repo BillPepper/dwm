@@ -132,7 +132,7 @@ void scan(void) {
       if (!XGetWindowAttributes(display, wins[i], &wa) || wa.override_redirect || XGetTransientForHint(display, wins[i], &d1)) {
         continue;
 	    }
-      if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
+      if (wa.map_state == IsViewable || get_state(wins[i]) == IconicState) {
         manage(wins[i], &wa);
 	    }
     }
@@ -142,7 +142,7 @@ void scan(void) {
       if (!XGetWindowAttributes(display, wins[i], &wa)) {
         continue;
 	    }
-      if (XGetTransientForHint(display, wins[i], &d1) && (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)) {
+      if (XGetTransientForHint(display, wins[i], &d1) && (wa.map_state == IsViewable || get_state(wins[i]) == IconicState)) {
         manage(wins[i], &wa);
 	    }
     }
@@ -333,7 +333,7 @@ int update_geom(void) {
   }
   if (dirty) {
     selected_monitor = monitors;
-    selected_monitor = wintomon(root);
+    selected_monitor = window_to_monitor(root);
   }
 
   return dirty;

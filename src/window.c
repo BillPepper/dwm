@@ -58,7 +58,7 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   updatetitle(client);
 
   // (?) if window is a transient, find client by it's window to set position
-  if (XGetTransientForHint(display, window, &trans) && (t = wintoclient(trans))){
+  if (XGetTransientForHint(display, window, &trans) && (t = window_to_client(trans))){
     client->monitor = t->monitor;
     client->tags = t->tags;
   } else {
@@ -130,7 +130,7 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   focus(NULL);
 }
 
-long getstate(Window window) {
+long get_state(Window window) {
   int format;
   long result = -1;
   unsigned char *ptr = NULL;
@@ -149,7 +149,7 @@ long getstate(Window window) {
   return result;
 }
 
-int gettextprop(Window window, Atom atom, char *text, unsigned int size) {
+int get_text_prop(Window window, Atom atom, char *text, unsigned int size) {
   char **list = NULL;
   int n;
   XTextProperty name;
@@ -174,7 +174,7 @@ int gettextprop(Window window, Atom atom, char *text, unsigned int size) {
   return 1;
 }
 
-Client *wintoclient(Window window) {
+Client *window_to_client(Window window) {
   Client *client;
   Monitor *monitor;
 
@@ -189,7 +189,7 @@ Client *wintoclient(Window window) {
   return NULL;
 }
 
-Monitor *wintomon(Window window) {
+Monitor *window_to_monitor(Window window) {
   int x, y;
   Client *client;
   Monitor *monitor;
@@ -210,14 +210,14 @@ Monitor *wintomon(Window window) {
 	  }
   }
 
-  if ((client = wintoclient(window))) {
+  if ((client = window_to_client(window))) {
     return client->monitor;
   }
 
   return selected_monitor;
 }
 
-Client *wintosystrayicon(Window window) {
+Client *window_to_systray_icon(Window window) {
   Client *icons = NULL;
 
   if (!systray_enabled || !window) {

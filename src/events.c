@@ -9,7 +9,7 @@ void button_press(XEvent *e) {
 
   click = ClkRootWin;
   /* focus monitor if necessary */
-  if ((m = wintomon(ev->window)) && m != selected_monitor) {
+  if ((m = window_to_monitor(ev->window)) && m != selected_monitor) {
     unfocus(selected_monitor->selected_client, 1);
     selected_monitor = m;
     focus(NULL);
@@ -32,7 +32,7 @@ void button_press(XEvent *e) {
 	} else {
       click = ClkWinTitle;
 	}
-  } else if ((c = wintoclient(ev->window))) {
+  } else if ((c = window_to_client(ev->window))) {
     focus(c);
     restack(selected_monitor);
     XAllowEvents(display, ReplayPointer, CurrentTime);
@@ -49,7 +49,7 @@ void client_message(XEvent *event) {
   XWindowAttributes window_attributes;
   XSetWindowAttributes set_window_attributes;
   XClientMessageEvent *client_msg = &event->xclient;
-  Client *client = wintoclient(client_msg->window);
+  Client *client = window_to_client(client_msg->window);
   Size size;
 
   if (systray_enabled && client_msg->window == systray->window && client_msg->message_type == netatom[NetSystemTrayOP]) {
@@ -159,7 +159,7 @@ void configure_request(XEvent *e) {
   XConfigureRequestEvent *ev = &e->xconfigurerequest;
   XWindowChanges wc;
 
-  if ((c = wintoclient(ev->window))) {
+  if ((c = window_to_client(ev->window))) {
     if (ev->value_mask & CWBorderWidth){
       c->border_width = ev->border_width;
 	  }
@@ -213,10 +213,10 @@ void destroy_notify(XEvent *e) {
   Client *c;
   XDestroyWindowEvent *ev = &e->xdestroywindow;
 
-  if ((c = wintoclient(ev->window))){
+  if ((c = window_to_client(ev->window))){
     unmanage(c, 1);
   }
-  else if ((c = wintosystrayicon(ev->window))) {
+  else if ((c = window_to_systray_icon(ev->window))) {
     remove_systray_icon(c);
     resize_bar_win(selected_monitor);
     update_systray();
@@ -232,8 +232,8 @@ void enter_notify(XEvent *e) {
     return;
   }
 
-  c = wintoclient(ev->window);
-  m = c ? c->monitor : wintomon(ev->window);
+  c = window_to_client(ev->window);
+  m = c ? c->monitor : window_to_monitor(ev->window);
   if (m != selected_monitor) {
     unfocus(selected_monitor->selected_client, 1);
     selected_monitor = m;
@@ -247,7 +247,7 @@ void expose(XEvent *e) {
   Monitor *m;
   XExposeEvent *ev = &e->xexpose;
 
-  if (ev->count == 0 && (m = wintomon(ev->window))) {
+  if (ev->count == 0 && (m = window_to_monitor(ev->window))) {
     draw_bar(m);
     if (m == selected_monitor){
       update_systray();
@@ -292,7 +292,7 @@ void map_request(XEvent *e) {
   XMapRequestEvent *ev = &e->xmaprequest;
 
   Client *i;
-  if ((i = wintosystrayicon(ev->window))) {
+  if ((i = window_to_systray_icon(ev->window))) {
     send_event(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
     resize_bar_win(selected_monitor);
     update_systray();
@@ -301,7 +301,7 @@ void map_request(XEvent *e) {
   if (!XGetWindowAttributes(display, ev->window, &wa) || wa.override_redirect) {
     return;
   }
-  if (!wintoclient(ev->window)) {
+  if (!window_to_client(ev->window)) {
     manage(ev->window, &wa);
   }
 }
@@ -335,7 +335,7 @@ void property_notify(XEvent *event) {
   XPropertyEvent *event_prop = &event->xproperty;
   Size size;
 
-  if ((client = wintosystrayicon(event_prop->window))) {
+  if ((client = window_to_systray_icon(event_prop->window))) {
     if (event_prop->atom == XA_WM_NORMAL_HINTS) {
       updatesizehints(client);
       size.w = client->area.size.w;
@@ -354,12 +354,12 @@ void property_notify(XEvent *event) {
   }
   else if (event_prop->state == PropertyDelete) {
     return; /* ignore */
-  } else if ((client = wintoclient(event_prop->window))) {
+  } else if ((client = window_to_client(event_prop->window))) {
     switch (event_prop->atom) {
     default:
       break;
     case XA_WM_TRANSIENT_FOR:
-      if (!client->is_floating && (XGetTransientForHint(display, client->window, &trans)) && (client->is_floating = (wintoclient(trans)) != NULL)) arrange(client->monitor);
+      if (!client->is_floating && (XGetTransientForHint(display, client->window, &trans)) && (client->is_floating = (window_to_client(trans)) != NULL)) arrange(client->monitor);
       break;
     case XA_WM_NORMAL_HINTS:
       client->hintsvalid = 0;
@@ -389,7 +389,7 @@ void resize_request(XEvent *event) {
   size.w = request_event->width;
   size.h = request_event->height;
 
-  if ((icon = wintosystrayicon(request_event->window))) {
+  if ((icon = window_to_systray_icon(request_event->window))) {
 
     update_systray_icon_geom(icon, &size);
     resize_bar_win(selected_monitor);
@@ -401,13 +401,13 @@ void unmap_notify(XEvent *e) {
   Client *c;
   XUnmapEvent *ev = &e->xunmap;
 
-  if ((c = wintoclient(ev->window))) {
+  if ((c = window_to_client(ev->window))) {
     if (ev->send_event){
       setclientstate(c, WithdrawnState);
     } else {
         unmanage(c, 0);
     }
-  } else if ((c = wintosystrayicon(ev->window))) {
+  } else if ((c = window_to_systray_icon(ev->window))) {
     /* KLUDGE! sometimes icons occasionally unmap their windows, but do
      * _not_ destroy them. We map those windows back */
     XMapRaised(display, c->window);

@@ -127,7 +127,7 @@ void resize_bar_win(Monitor *monitor) {
 
 void update_status(void) {
   // default status text
-  if (!gettextprop(root, XA_WM_NAME, status_text, sizeof(status_text))) {
+  if (!get_text_prop(root, XA_WM_NAME, status_text, sizeof(status_text))) {
     strcpy(status_text, "pdwm-" VERSION);
   }
 
