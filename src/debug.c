@@ -1,5 +1,6 @@
 #include "debug.h"
 
 void _debug(const Arg *arg){
-  printf("debug\n");
+  printf("screen w: %d\n", screen_width);
+  printf("screen h: %d\n", screen_height);
 }

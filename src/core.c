@@ -254,7 +254,6 @@ Atom get_atom_prop(Client *c, Atom prop) {
   return atom;
 }
 
-
 int update_geom(void) {
   int dirty = 0;
 
