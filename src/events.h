@@ -24,6 +24,6 @@ void motion_notify(XEvent *event);
 void property_notify(XEvent *event);
 void resize_request(XEvent *event);
 void unmap_notify(XEvent *event);
-int send_event(Window window, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
+int send_event(Window window, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4);
 
 #endif

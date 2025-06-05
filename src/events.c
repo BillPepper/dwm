@@ -1,11 +1,11 @@
 #include "input.h"
 
-void button_press(XEvent *e) {
+void button_press(XEvent *event) {
   unsigned int i, x, click;
   Arg arg = {0};
   Client *c;
   Monitor *m;
-  XButtonPressedEvent *ev = &e->xbutton;
+  XButtonPressedEvent *ev = &event->xbutton;
 
   click = ClkRootWin;
   /* focus monitor if necessary */
@@ -118,10 +118,10 @@ void client_message(XEvent *event) {
   }
 }
 
-void configure_notify(XEvent *e) {
+void configure_notify(XEvent *event) {
   Monitor *m;
   Client *c;
-  XConfigureEvent *ev = &e->xconfigure;
+  XConfigureEvent *ev = &event->xconfigure;
   int dirty;
   Area area;
 
@@ -130,7 +130,7 @@ void configure_notify(XEvent *e) {
     dirty = (screen_width != ev->width || screen_height != ev->height);
     screen_width = ev->width;
     screen_height = ev->height;
-    if (update_geom() || dirty) {
+    if (update_geometry() || dirty) {
       drw_resize(drw, screen_width, bar_height);
       update_bars();
       for (m = monitors; m; m = m->next) {
@@ -153,10 +153,10 @@ void configure_notify(XEvent *e) {
   }
 }
 
-void configure_request(XEvent *e) {
+void configure_request(XEvent *event) {
   Client *c;
   Monitor *m;
-  XConfigureRequestEvent *ev = &e->xconfigurerequest;
+  XConfigureRequestEvent *ev = &event->xconfigurerequest;
   XWindowChanges wc;
 
   if ((c = window_to_client(ev->window))) {
@@ -209,9 +209,9 @@ void configure_request(XEvent *e) {
   XSync(display, False);
 }
 
-void destroy_notify(XEvent *e) {
+void destroy_notify(XEvent *event) {
   Client *c;
-  XDestroyWindowEvent *ev = &e->xdestroywindow;
+  XDestroyWindowEvent *ev = &event->xdestroywindow;
 
   if ((c = window_to_client(ev->window))){
     unmanage(c, 1);
@@ -223,10 +223,10 @@ void destroy_notify(XEvent *e) {
   }
 }
 
-void enter_notify(XEvent *e) {
+void enter_notify(XEvent *event) {
   Client *c;
   Monitor *m;
-  XCrossingEvent *ev = &e->xcrossing;
+  XCrossingEvent *ev = &event->xcrossing;
 
   if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root) {
     return;
@@ -243,9 +243,9 @@ void enter_notify(XEvent *e) {
   focus(c);
 }
 
-void expose(XEvent *e) {
+void expose(XEvent *event) {
   Monitor *m;
-  XExposeEvent *ev = &e->xexpose;
+  XExposeEvent *ev = &event->xexpose;
 
   if (ev->count == 0 && (m = window_to_monitor(ev->window))) {
     draw_bar(m);
@@ -256,20 +256,20 @@ void expose(XEvent *e) {
 }
 
 /* there are some broken focus acquiring clients needing extra handling */
-void focus_in(XEvent *e) {
-  XFocusChangeEvent *ev = &e->xfocus;
+void focus_in(XEvent *event) {
+  XFocusChangeEvent *ev = &event->xfocus;
 
   if (selected_monitor->selected_client && ev->window != selected_monitor->selected_client->window) {
     set_focus(selected_monitor->selected_client);
   }
 }
 
-void key_press(XEvent *e) {
+void key_press(XEvent *event) {
   unsigned int i;
   KeySym keysym;
   XKeyEvent *ev;
 
-  ev = &e->xkey;
+  ev = &event->xkey;
   keysym = XKeycodeToKeysym(display, (KeyCode)ev->keycode, 0);
   for (i = 0; i < key_count; i++){
     if (keysym == keys[i].keysym && CLEANMASK(keys[i].mod) == CLEANMASK(ev->state) && keys[i].func){
@@ -278,8 +278,8 @@ void key_press(XEvent *e) {
   }
 }
 
-void mapping_notify(XEvent *e) {
-  XMappingEvent *ev = &e->xmapping;
+void mapping_notify(XEvent *event) {
+  XMappingEvent *ev = &event->xmapping;
 
   XRefreshKeyboardMapping(ev);
   if (ev->request == MappingKeyboard) {
@@ -287,9 +287,9 @@ void mapping_notify(XEvent *e) {
   }
 }
 
-void map_request(XEvent *e) {
+void map_request(XEvent *event) {
   static XWindowAttributes wa;
-  XMapRequestEvent *ev = &e->xmaprequest;
+  XMapRequestEvent *ev = &event->xmaprequest;
 
   Client *i;
   if ((i = window_to_systray_icon(ev->window))) {
@@ -306,10 +306,10 @@ void map_request(XEvent *e) {
   }
 }
 
-void motion_notify(XEvent *e) {
+void motion_notify(XEvent *event) {
   static Monitor *mon = NULL;
   Monitor *m;
-  XMotionEvent *ev = &e->xmotion;
+  XMotionEvent *ev = &event->xmotion;
   Area area;
 
   if (ev->window != root) {
@@ -397,9 +397,9 @@ void resize_request(XEvent *event) {
   }
 }
 
-void unmap_notify(XEvent *e) {
+void unmap_notify(XEvent *event) {
   Client *c;
-  XUnmapEvent *ev = &e->xunmap;
+  XUnmapEvent *ev = &event->xunmap;
 
   if ((c = window_to_client(ev->window))) {
     if (ev->send_event){
@@ -415,7 +415,7 @@ void unmap_notify(XEvent *e) {
   }
 }
 
-int send_event(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4) {
+int send_event(Window window, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4) {
   int n;
   Atom *protocols, mt;
   int exists = 0;
@@ -423,7 +423,7 @@ int send_event(Window w, Atom proto, int mask, long d0, long d1, long d2, long d
 
   if (proto == wmatom[WMTakeFocus] || proto == wmatom[WMDelete]) {
     mt = wmatom[WMProtocols];
-    if (XGetWMProtocols(display, w, &protocols, &n)) {
+    if (XGetWMProtocols(display, window, &protocols, &n)) {
       while (!exists && n--){
         exists = protocols[n] == proto;
 	    }
@@ -436,7 +436,7 @@ int send_event(Window w, Atom proto, int mask, long d0, long d1, long d2, long d
 
   if (exists) {
     ev.type = ClientMessage;
-    ev.xclient.window = w;
+    ev.xclient.window = window;
     ev.xclient.message_type = mt;
     ev.xclient.format = 32;
     ev.xclient.data.l[0] = d0;
@@ -444,7 +444,7 @@ int send_event(Window w, Atom proto, int mask, long d0, long d1, long d2, long d
     ev.xclient.data.l[2] = d2;
     ev.xclient.data.l[3] = d3;
     ev.xclient.data.l[4] = d4;
-    XSendEvent(display, w, False, mask, &ev);
+    XSendEvent(display, window, False, mask, &ev);
   }
   return exists;
 }

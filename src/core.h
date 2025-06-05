@@ -42,10 +42,10 @@ void zoom(const Arg *arg);
 Atom get_atom_prop(Client *client, Atom prop);
 
 // @desc: some multi screen stuff, related to xinerama
-int update_geom(void);
+int update_geometry(void);
 
 #ifdef XINERAMA
-int is_unique_geom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
+int is_unique_geometry(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
 #endif /* XINERAMA */
 
 #endif

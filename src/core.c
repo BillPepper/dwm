@@ -33,14 +33,14 @@ void setup(void) {
   root = RootWindow(display, screen);
   drw = drw_create(display, screen, root, screen_width, screen_height);
 
-  // font stuff
+  // create fontset
   if (!drw_fontset_create(drw, fonts, font_count)) {
     die("no fonts could be loaded.");
   }
 
   padding = drw->fonts->h;
   bar_height = drw->fonts->h + 2;
-  update_geom();
+  update_geometry();
 
   /* init wm atoms */
   utf8string = XInternAtom(display, "UTF8_STRING", False);
@@ -112,43 +112,53 @@ void setup(void) {
 }
 
 void run(void) {
-  XEvent ev;
+  XEvent event;
   /* main event loop */
   XSync(display, False);
-  while (running && !XNextEvent(display, &ev)) {
-    if (handler[ev.type]) {
-      handler[ev.type](&ev); /* call handler */
+  while (running && !XNextEvent(display, &event)) {
+    if (handler[event.type]) {
+      handler[event.type](&event); /* call handler */
 	  }
   }
 }
 
 void scan(void) {
-  unsigned int i, num;
-  Window d1, d2, *wins = NULL;
-  XWindowAttributes wa;
+  unsigned int i;
+  unsigned int child_count;
+  Window root_return;
+  Window parent_return;
+  Window *children = NULL;
+  XWindowAttributes window_attributes;
 
-  if (XQueryTree(display, root, &d1, &d2, &wins, &num)) {
-    for (i = 0; i < num; i++) {
-      if (!XGetWindowAttributes(display, wins[i], &wa) || wa.override_redirect || XGetTransientForHint(display, wins[i], &d1)) {
+  // query windows
+  if (XQueryTree(display, root, &root_return, &parent_return, &children, &child_count)) {
+
+    for (i = 0; i < child_count; i++) {
+
+      // (?) if child has not attributes, is overriden or is a transient, skip
+      if (!XGetWindowAttributes(display, children[i], &window_attributes) || window_attributes.override_redirect || XGetTransientForHint(display, children[i], &root_return)) {
         continue;
 	    }
-      if (wa.map_state == IsViewable || get_state(wins[i]) == IconicState) {
-        manage(wins[i], &wa);
+
+      // create a client for the window
+      if (window_attributes.map_state == IsViewable || get_state(children[i]) == IconicState) {
+        manage(children[i], &window_attributes);
 	    }
     }
 
     /* now the transients */
-    for (i = 0; i < num; i++) {
-      if (!XGetWindowAttributes(display, wins[i], &wa)) {
+    for (i = 0; i < child_count; i++) {
+      if (!XGetWindowAttributes(display, children[i], &window_attributes)) {
         continue;
 	    }
-      if (XGetTransientForHint(display, wins[i], &d1) && (wa.map_state == IsViewable || get_state(wins[i]) == IconicState)) {
-        manage(wins[i], &wa);
+      if (XGetTransientForHint(display, children[i], &root_return) && (window_attributes.map_state == IsViewable || get_state(children[i]) == IconicState)) {
+        manage(children[i], &window_attributes);
 	    }
     }
-    if (wins) {
-      XFree(wins);
-	}
+
+    if (children) {
+      XFree(children);
+	  }
   }
 }
 
@@ -174,6 +184,7 @@ void cleanup(void) {
       unmanage(monitor->stack, 0);
 	  }
   }
+
   XUngrabKey(display, AnyKey, AnyModifier, root);
   while (monitors){
     cleanup_monitor(monitors);
@@ -202,17 +213,21 @@ void cleanup(void) {
 }
 
 void zoom(const Arg *arg) {
-  Client *c = selected_monitor->selected_client;
+  Client *client = selected_monitor->selected_client;
 
-  if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func || !c || c->is_floating) {
+  if (!selected_monitor->layout[selected_monitor->selected_layout]->arrange_func) {
     return;
   }
 
-  if (c == next_tiled(selected_monitor->clients) && !(c = next_tiled(c->next))) {
+  if (!client || client->is_floating){
     return;
   }
 
-  pop(c);
+  if (client == next_tiled(selected_monitor->clients) && !(client = next_tiled(client->next))) {
+    return;
+  }
+
+  pop(client);
 }
 
 void view(const Arg *arg) {
@@ -229,10 +244,10 @@ void view(const Arg *arg) {
   arrange(selected_monitor);
 }
 
-Atom get_atom_prop(Client *c, Atom prop) {
+Atom get_atom_prop(Client *client, Atom prop) {
   int di;
   unsigned long dl;
-  unsigned char *p = NULL;
+  unsigned char *return_property = NULL;
   Atom da, atom = None;
 
   /* FIXME get_atom_prop should return the number of items and a pointer to
@@ -242,35 +257,35 @@ Atom get_atom_prop(Client *c, Atom prop) {
     req = xatom[XembedInfo];
   }
 
-  if (XGetWindowProperty(display, c->window, prop, 0L, sizeof atom, False, req, &da, &di, &dl, &dl, &p) == Success && p) {
-    atom = *(Atom *)p;
+  if (XGetWindowProperty(display, client->window, prop, 0L, sizeof atom, False, req, &da, &di, &dl, &dl, &return_property) == Success && return_property) {
+    atom = *(Atom *)return_property;
     if (da == xatom[XembedInfo] && dl == 2) {
-      atom = ((Atom *)p)[1];
+      atom = ((Atom *)return_property)[1];
 	  }
 
-    XFree(p);
+    XFree(return_property);
   }
 
   return atom;
 }
 
-int update_geom(void) {
+int update_geometry(void) {
   int dirty = 0;
 
   #ifdef XINERAMA
   if (XineramaIsActive(display)) {
     int i, j, n, nn;
-    Client *c;
-    Monitor *m;
+    Client *client;
+    Monitor *monitor;
     XineramaScreenInfo *info = XineramaQueryScreens(display, &nn);
     XineramaScreenInfo *unique = NULL;
 
-    for (n = 0, m = monitors; m; m = m->next, n++)
+    for (n = 0, monitor = monitors; monitor; monitor = monitor->next, n++)
       ;
     /* only consider unique geometries as separate screens */
     unique = ecalloc(nn, sizeof(XineramaScreenInfo));
     for (i = 0, j = 0; i < nn; i++) {
-      if (is_unique_geom(unique, j, &info[i])){
+      if (is_unique_geometry(unique, j, &info[i])){
         memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
 	  }
 	}
@@ -279,42 +294,42 @@ int update_geom(void) {
 
     /* new monitors if nn > n */
     for (i = n; i < nn; i++) {
-      for (m = monitors; m && m->next; m = m->next)
+      for (monitor = monitors; monitor && monitor->next; monitor = monitor->next)
         ;
-      if (m) {
-        m->next = create_monitor();
+      if (monitor) {
+        monitor->next = create_monitor();
 	  } else {
         monitors = create_monitor();
 	  }
     }
-    for (i = 0, m = monitors; i < nn && m; m = m->next, i++){
+    for (i = 0, monitor = monitors; i < nn && monitor; monitor = monitor->next, i++){
       if (i >= n || unique[i].x_org != m->monitor_area.position.x || unique[i].y_org != m->monitor_area.position.y || unique[i].width != m->monitor_area.size.w || unique[i].height != m->monitor_area.size.h) {
         dirty = 1;
-        m->num = i;
+        monitor->num = i;
         m->monitor_area.position.x = m->window_area.position.x = unique[i].x_org;
         m->monitor_area.position.y = m->window_area.position.y = unique[i].y_org;
         m->monitor_area.size.w = m->window_area.size.w = unique[i].width;
         m->monitor_area.size.h = m->window_area.size.h = unique[i].height;
-        update_bar_position(m);
+        update_bar_position(monitor);
       }
 	}
 
     /* removed monitors if n > nn */
     for (i = nn; i < n; i++) {
-      for (m = monitors; m && m->next; m = m->next)
+      for (monitor = monitors; monitor && monitor->next; monitor = monitor->next)
         ;
-      while ((c = m->clients)) {
+      while ((client = monitor->clients)) {
         dirty = 1;
-        m->clients = c->next;
-        detach_stack(c);
-        c->monitor = monitors;
-        attach(c);
-        attach_stack(c);
+        monitor->clients = client->next;
+        detach_stack(client);
+        client->monitor = monitors;
+        attach(client);
+        attach_stack(client);
       }
-      if (m == selected_monitor) {
+      if (monitor == selected_monitor) {
         selected_monitor = monitors;
 	  }
-      cleanup_monitor(m);
+      cleanup_monitor(monitor);
     }
     free(unique);
   } else
@@ -339,7 +354,7 @@ int update_geom(void) {
 }
 
 #ifdef XINERAMA
-int is_unique_geom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info) {
+int is_unique_geometry(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info) {
   while (n--)
     if (unique[n].x_org == info->x_org && unique[n].y_org == info->y_org &&
         unique[n].width == info->width && unique[n].height == info->height)
