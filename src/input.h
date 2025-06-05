@@ -7,30 +7,30 @@
 
 // @descr: Get the monitor root window index of cursor position (TODO: use position struct)
 // @param: x -> mouse x position, y -> mouse y position
-int getrootptr(int *x, int *y);
+int get_root_ptr(int *x, int *y);
 
 // @descr: Move mouse to another screen (arg not used?)
 // @param: unused
-void movemouse(const Arg *arg);
+void move_mouse(const Arg *arg);
 
 // @descr: Handle mouse resizing
 // @param: unused
-void resizemouse(const Arg *arg);
+void resize_mouse(const Arg *arg);
 
 // @descr: Passivly grab mouse buttons
 // @param: client -> the client buttons should be grabbed for (?)
 // @param: focused -> ?
-void grabbuttons(Client *client, int focused);
+void grab_buttons(Client *client, int focused);
 
 
 // -- Keys ---------------------------------------------------------------------
 
 // @descr: Passivly grab key inputs
 // @param: none
-void grabkeys(void);
+void grab_keys(void);
 
 // @descr:
 // @param:
-void updatenumlockmask(void);                                            // numlock stuff
+void update_numlock_mask(void);                                            // numlock stuff
 
 #endif

@@ -282,7 +282,7 @@ void focus(Client *client) {
 
     detachstack(client);
     attachstack(client);
-    grabbuttons(client, 1);
+    grab_buttons(client, 1);
     XSetWindowBorder(display, client->window, scheme[SchemeSel][ColBorder].pixel);
     setfocus(client);
   } else {
@@ -444,7 +444,7 @@ void unfocus(Client *client, int setfocus) {
     return;
   }
 
-  grabbuttons(client, 0);
+  grab_buttons(client, 0);
   XSetWindowBorder(display, client->window, scheme[SchemeNorm][ColBorder].pixel);
   if (setfocus) {
     XSetInputFocus(display, root, RevertToPointerRoot, CurrentTime);

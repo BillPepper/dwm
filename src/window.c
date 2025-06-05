@@ -104,7 +104,7 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   client->area.position.y = monitor_area_y + (monitor_area_h - HEIGHT(client)) / 2;
 
   XSelectInput(display, window, EnterWindowMask | FocusChangeMask | PropertyChangeMask | StructureNotifyMask);
-  grabbuttons(client, 0);
+  grab_buttons(client, 0);
   if (!client->is_floating) {
     client->is_floating = client->old_state = trans != None || client->is_fixed;
   }
@@ -200,7 +200,7 @@ Monitor *wintomon(Window window) {
   area.size.w = 1;
   area.size.h = 1;
 
-  if (window == root && getrootptr(&x, &y)) {
+  if (window == root && get_root_ptr(&x, &y)) {
     return recttomon(&area);
   }
 

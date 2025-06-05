@@ -283,7 +283,7 @@ void mapping_notify(XEvent *e) {
 
   XRefreshKeyboardMapping(ev);
   if (ev->request == MappingKeyboard) {
-    grabkeys();
+    grab_keys();
   }
 }
 

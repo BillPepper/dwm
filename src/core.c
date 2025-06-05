@@ -107,7 +107,7 @@ void setup(void) {
   window_attributes.event_mask = SubstructureRedirectMask | SubstructureNotifyMask | ButtonPressMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PropertyChangeMask;
   XChangeWindowAttributes(display, root, CWEventMask | CWCursor, &window_attributes);
   XSelectInput(display, root, window_attributes.event_mask);
-  grabkeys();
+  grab_keys();
   focus(NULL);
 }
 

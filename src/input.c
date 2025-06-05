@@ -1,6 +1,6 @@
 #include "input.h"
 
-int getrootptr(int *x, int *y) {
+int get_root_ptr(int *x, int *y) {
   int di;
   unsigned int dui;
   Window dummy;
@@ -8,7 +8,7 @@ int getrootptr(int *x, int *y) {
   return XQueryPointer(display, root, &dummy, &dummy, x, y, &di, &di, &dui);
 }
 
-void movemouse(const Arg *arg) {
+void move_mouse(const Arg *arg) {
   // arg not used?
 
   int x, y, old_client_x, old_client_y;
@@ -36,7 +36,7 @@ void movemouse(const Arg *arg) {
     return;
   }
 
-  if (!getrootptr(&x, &y)) {
+  if (!get_root_ptr(&x, &y)) {
     return;
   }
 
@@ -99,7 +99,7 @@ void movemouse(const Arg *arg) {
   }
 }
 
-void resizemouse(const Arg *arg) {
+void resize_mouse(const Arg *arg) {
   int ocx, ocy, nw, nh;
   Client *client;
   Monitor *monitor;
@@ -178,8 +178,8 @@ void resizemouse(const Arg *arg) {
   }
 }
 
-void grabbuttons(Client *client, int focused) {
-  updatenumlockmask();
+void grab_buttons(Client *client, int focused) {
+  update_numlock_mask();
   {
     unsigned int i, j;
     unsigned int modifiers[] = {0, LockMask, numlockmask, numlockmask | LockMask};
@@ -198,8 +198,8 @@ void grabbuttons(Client *client, int focused) {
   }
 }
 
-void grabkeys(void) {
-  updatenumlockmask();
+void grab_keys(void) {
+  update_numlock_mask();
   {
     unsigned int i, j, k;
     unsigned int modifiers[] = {
@@ -232,7 +232,7 @@ void grabkeys(void) {
   }
 }
 
-void updatenumlockmask(void) {
+void update_numlock_mask(void) {
   unsigned int i, j;
   XModifierKeymap *modmap;
 
