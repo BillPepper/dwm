@@ -92,7 +92,7 @@ void move_mouse(const Arg *arg) {
   area.size.w = client->area.size.w;
   area.size.h = client->area.size.h;
 
-  if ((monitor = recttomon(&area)) != selected_monitor) {
+  if ((monitor = rect_to_monitor(&area)) != selected_monitor) {
     sendmon(client, monitor);
     selected_monitor = monitor;
     focus(NULL);
@@ -171,7 +171,7 @@ void resize_mouse(const Arg *arg) {
   area.size.w = client->area.size.w;
   area.size.h = client->area.size.h;
 
-  if ((monitor = recttomon(&area)) != selected_monitor) {
+  if ((monitor = rect_to_monitor(&area)) != selected_monitor) {
     sendmon(client, monitor);
     selected_monitor = monitor;
     focus(NULL);

@@ -176,7 +176,7 @@ void cleanup(void) {
   }
   XUngrabKey(display, AnyKey, AnyModifier, root);
   while (monitors){
-    cleanupmon(monitors);
+    cleanup_monitor(monitors);
   }
 
   if (systray_enabled) {
@@ -283,9 +283,9 @@ int update_geom(void) {
       for (m = monitors; m && m->next; m = m->next)
         ;
       if (m) {
-        m->next = createmon();
+        m->next = create_monitor();
 	  } else {
-        monitors = createmon();
+        monitors = create_monitor();
 	  }
     }
     for (i = 0, m = monitors; i < nn && m; m = m->next, i++){
@@ -315,14 +315,14 @@ int update_geom(void) {
       if (m == selected_monitor) {
         selected_monitor = monitors;
 	  }
-      cleanupmon(m);
+      cleanup_monitor(m);
     }
     free(unique);
   } else
   #endif /* XINERAMA */
   {    /* default monitor setup */
     if (!monitors) {
-      monitors = createmon();
+      monitors = create_monitor();
 	}
     if (monitors->monitor_area.size.w != screen_width || monitors->monitor_area.size.h != screen_height) {
       dirty = 1;

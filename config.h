@@ -129,8 +129,8 @@ Key keys[] = {
 	{ MODKEY|ShiftMask, XK_f,     togglefullscreen, {0} },												// Mod + Shift + F
 
 	// monitor
-	{ MODKEY, XK_comma,  focusmon, {.i = -1 } },																	// Mod + ,
-	{ MODKEY, XK_period, focusmon, {.i = +1 } },																	// Mod + .
+	{ MODKEY, XK_comma,  focus_monitor, {.i = -1 } },																	// Mod + ,
+	{ MODKEY, XK_period, focus_monitor, {.i = +1 } },																	// Mod + .
 
 	// tagging
 	{ MODKEY,           XK_0,      view,   {.ui = ~0 } },													// Mod + 0

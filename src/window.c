@@ -201,7 +201,7 @@ Monitor *wintomon(Window window) {
   area.size.h = 1;
 
   if (window == root && get_root_ptr(&x, &y)) {
-    return recttomon(&area);
+    return rect_to_monitor(&area);
   }
 
   for (monitor = monitors; monitor; monitor = monitor->next) {

@@ -321,7 +321,7 @@ void motion_notify(XEvent *e) {
   area.size.w = 1;
   area.size.h = 1;
 
-  if ((m = recttomon(&area)) != mon && mon) {
+  if ((m = rect_to_monitor(&area)) != mon && mon) {
     unfocus(selected_monitor->selected_client, 1);
     selected_monitor = m;
     focus(NULL);

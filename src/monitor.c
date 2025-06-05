@@ -1,6 +1,6 @@
 #include "monitor.h"
 
-Monitor *createmon(void) {
+Monitor *create_monitor(void) {
   Monitor *monitor;
 
   monitor = ecalloc(1, sizeof(Monitor));
@@ -17,7 +17,7 @@ Monitor *createmon(void) {
   return monitor;
 }
 
-Monitor *dirtomon(int dir) {
+Monitor *dir_to_monitor(int dir) {
   Monitor *monitor = NULL;
 
   if (dir > 0) {
@@ -34,7 +34,7 @@ Monitor *dirtomon(int dir) {
   return monitor;
 }
 
-Monitor *recttomon(Area *area) {
+Monitor *rect_to_monitor(Area *area) {
   Monitor *monitor, *r = selected_monitor;
   int a;
   int area_val = 0; // used to be 'area' until I used the area struct as arg
@@ -55,13 +55,13 @@ Monitor *recttomon(Area *area) {
   return r;
 }
 
-void focusmon(const Arg *arg) {
+void focus_monitor(const Arg *arg) {
   Monitor *m;
 
   if (!monitors->next) {
     return;
   }
-  if ((m = dirtomon(arg->i)) == selected_monitor) {
+  if ((m = dir_to_monitor(arg->i)) == selected_monitor) {
     return;
   }
 
@@ -85,26 +85,26 @@ void arrange(Monitor *monitor) {
 
   // again, if monitor specified
   if (monitor) {
-    arrangemon(monitor);
+    arrange_monitor(monitor);
     restack(monitor);
   }
 
   // again, do it for all if not specified
   else {
     for (monitor = monitors; monitor; monitor = monitor->next){
-      arrangemon(monitor);
+      arrange_monitor(monitor);
 	  }
   }
 }
 
-void arrangemon(Monitor *monitor) {
+void arrange_monitor(Monitor *monitor) {
   strncpy(monitor->layout_symbol, monitor->layout[monitor->selected_layout]->symbol, sizeof monitor->layout_symbol);
   if (monitor->layout[monitor->selected_layout]->arrange_func){
     monitor->layout[monitor->selected_layout]->arrange_func(monitor);
   }
 }
 
-void cleanupmon(Monitor *mon) {
+void cleanup_monitor(Monitor *mon) {
   Monitor *m;
 
   if (mon == monitors){
