@@ -27,7 +27,7 @@ void button_press(XEvent *e) {
     } else if (ev->x < x + TEXTW(selected_monitor->layout_symbol)){
       click = ClkLtSymbol;
 	}
-    else if (ev->x > selected_monitor->window_area.size.w - (int)TEXTW(status_text) - getsystraywidth()){
+    else if (ev->x > selected_monitor->window_area.size.w - (int)TEXTW(status_text) - get_systray_width()){
       click = ClkStatusText;
 	} else {
       click = ClkWinTitle;
@@ -82,7 +82,7 @@ void client_message(XEvent *event) {
       updatesizehints(client);
       size.w = window_attributes.width;
       size.h = window_attributes.height;
-      updatesystrayicongeom(client, &size);
+      update_systray_icon_geom(client, &size);
       XAddToSaveSet(display, client->window);
       XSelectInput(display, client->window, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
       XReparentWindow(display, client->window, systray->window, 0, 0);
@@ -96,7 +96,7 @@ void client_message(XEvent *event) {
       send_event(client->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_MODALITY_ON, 0, systray->window, XEMBED_EMBEDDED_VERSION);
       XSync(display, False);
       resize_bar_win(selected_monitor);
-      updatesystray();
+      update_systray();
       setclientstate(client, NormalState);
     }
     return;
@@ -217,9 +217,9 @@ void destroy_notify(XEvent *e) {
     unmanage(c, 1);
   }
   else if ((c = wintosystrayicon(ev->window))) {
-    removesystrayicon(c);
+    remove_systray_icon(c);
     resize_bar_win(selected_monitor);
-    updatesystray();
+    update_systray();
   }
 }
 
@@ -250,7 +250,7 @@ void expose(XEvent *e) {
   if (ev->count == 0 && (m = wintomon(ev->window))) {
     draw_bar(m);
     if (m == selected_monitor){
-      updatesystray();
+      update_systray();
 	  }
   }
 }
@@ -295,7 +295,7 @@ void map_request(XEvent *e) {
   if ((i = wintosystrayicon(ev->window))) {
     send_event(i->window, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->window, XEMBED_EMBEDDED_VERSION);
     resize_bar_win(selected_monitor);
-    updatesystray();
+    update_systray();
   }
 
   if (!XGetWindowAttributes(display, ev->window, &wa) || wa.override_redirect) {
@@ -340,13 +340,13 @@ void property_notify(XEvent *event) {
       updatesizehints(client);
       size.w = client->area.size.w;
       size.h = client->area.size.h;
-      updatesystrayicongeom(client, &size);
+      update_systray_icon_geom(client, &size);
     } else {
-      updatesystrayiconstate(client, event_prop);
+      update_systray_icon_state(client, event_prop);
 	}
 
     resize_bar_win(selected_monitor);
-    updatesystray();
+    update_systray();
   }
 
   if ((event_prop->window == root) && (event_prop->atom == XA_WM_NAME)) {
@@ -391,9 +391,9 @@ void resize_request(XEvent *event) {
 
   if ((icon = wintosystrayicon(request_event->window))) {
 
-    updatesystrayicongeom(icon, &size);
+    update_systray_icon_geom(icon, &size);
     resize_bar_win(selected_monitor);
-    updatesystray();
+    update_systray();
   }
 }
 
@@ -411,7 +411,7 @@ void unmap_notify(XEvent *e) {
     /* KLUDGE! sometimes icons occasionally unmap their windows, but do
      * _not_ destroy them. We map those windows back */
     XMapRaised(display, c->window);
-    updatesystray();
+    update_systray();
   }
 }
 

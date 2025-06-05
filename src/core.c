@@ -86,7 +86,7 @@ void setup(void) {
   }
 
   /* init system tray */
-  updatesystray();
+  update_systray();
 
   /* init bars */
   update_bars();

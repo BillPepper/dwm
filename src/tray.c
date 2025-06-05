@@ -1,10 +1,10 @@
 #include "tray.h"
 
-void updatesystray(void) {
+void update_systray(void) {
   XSetWindowAttributes window_attributes;
   XWindowChanges window_changes;
   Client *client;
-  Monitor *monitor = systraytomon(NULL);
+  Monitor *monitor = systray_to_mon(NULL);
   unsigned int x = monitor->monitor_area.position.x + monitor->monitor_area.size.w;
   unsigned int status_width = TEXTW(status_text) - padding + systray_spacing;
   unsigned int width = 1;
@@ -85,7 +85,7 @@ void updatesystray(void) {
   XSync(display, False);
 }
 
-unsigned int getsystraywidth() {
+unsigned int get_systray_width() {
   unsigned int w = 0;
   Client *i;
 
@@ -96,7 +96,7 @@ unsigned int getsystraywidth() {
   return w ? w + systray_spacing : 1;
 }
 
-Monitor *systraytomon(Monitor *monitor) {
+Monitor *systray_to_mon(Monitor *monitor) {
   Monitor *current_monitor;
   int i, n;
 
@@ -119,7 +119,7 @@ Monitor *systraytomon(Monitor *monitor) {
   return current_monitor;
 }
 
-void removesystrayicon(Client *client) {
+void remove_systray_icon(Client *client) {
   Client **client2;
 
   // systray disabled
@@ -136,7 +136,7 @@ void removesystrayicon(Client *client) {
   free(client);
 }
 
-void updatesystrayicongeom(Client *client, Size *size) {
+void update_systray_icon_geom(Client *client, Size *size) {
   Area area;
   int w, h;
 
@@ -172,7 +172,7 @@ void updatesystrayicongeom(Client *client, Size *size) {
   }
 }
 
-void updatesystrayiconstate(Client *client, XPropertyEvent *event) {
+void update_systray_icon_state(Client *client, XPropertyEvent *event) {
   long flags;
   int code = 0;
 

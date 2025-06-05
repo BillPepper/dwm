@@ -45,8 +45,8 @@ void draw_bar(Monitor *m) {
     return;
   }
 
-  if (systray_enabled && m == systraytomon(m) && !systray_on_left){
-    tray_width = getsystraywidth();
+  if (systray_enabled && m == systray_to_mon(m) && !systray_on_left){
+    tray_width = get_systray_width();
   }
 
   /* draw status first so it can be overdrawn by tags later */
@@ -118,8 +118,8 @@ void draw_bars(void) {
 void resize_bar_win(Monitor *monitor) {
   unsigned int width = monitor->window_area.size.w;
 
-  if (systray_enabled && monitor == systraytomon(monitor) && !systray_on_left) {
-    width -= getsystraywidth();
+  if (systray_enabled && monitor == systray_to_mon(monitor) && !systray_on_left) {
+    width -= get_systray_width();
   }
 
   XMoveResizeWindow(display, monitor->bar_window, monitor->window_area.position.x, monitor->bar_y, width, bar_height);
@@ -145,7 +145,7 @@ void update_status(void) {
     draw_bar(selected_monitor);
   }
 
-  updatesystray();
+  update_systray();
 }
 
 void update_bars(void) {
@@ -164,8 +164,8 @@ void update_bars(void) {
 
     // calculate how long the bar is without the systray
     width = monitor->window_area.size.w;
-    if (systray_enabled && monitor == systraytomon(monitor)){
-      width -= getsystraywidth();
+    if (systray_enabled && monitor == systray_to_mon(monitor)){
+      width -= get_systray_width();
 	  }
 
     // create bar
@@ -175,7 +175,7 @@ void update_bars(void) {
     XDefineCursor(display, monitor->bar_window, cursor[CurNormal]->cursor);
 
     // raise bar parts
-    if (systray_enabled && monitor == systraytomon(monitor)){
+    if (systray_enabled && monitor == systray_to_mon(monitor)){
       XMapRaised(display, systray->window);
 	  }
     XMapRaised(display, monitor->bar_window);
