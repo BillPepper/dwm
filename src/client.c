@@ -515,8 +515,8 @@ void updatetitle(Client *client) {
 }
 
 void updatewindowtype(Client *client) {
-  Atom state = getatomprop(client, netatom[NetWMState]);
-  Atom type = getatomprop(client, netatom[NetWMWindowType]);
+  Atom state = get_atom_prop(client, netatom[NetWMState]);
+  Atom type = get_atom_prop(client, netatom[NetWMWindowType]);
 
   if (state == netatom[NetWMFullscreen]) {
     setfullscreen(client, 1);

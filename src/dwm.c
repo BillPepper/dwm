@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     die("dwm: cannot open display");
   }
 
-  checkotherwm(); // check if another wm is running
+  check_other_wm(); // check if another wm is running
   setup();        // init systray, bars, screens, etc.
   scan();         // scan for windows and mangage() them
   run(); 			    // event loop

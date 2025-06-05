@@ -21,7 +21,7 @@ void run(void);
 void scan(void);
 
 // @descr: check if another wm is running
-void checkotherwm(void);
+void check_other_wm(void);
 
 // @descr: ungrab keys, destroy windows, etc...
 void cleanup(void);
@@ -39,13 +39,13 @@ void view(const Arg *arg);
 void zoom(const Arg *arg);
 
 // @desc: get prop of given client
-Atom getatomprop(Client *client, Atom prop);
+Atom get_atom_prop(Client *client, Atom prop);
 
 // @desc: some multi screen stuff, related to xinerama
-int updategeom(void);
+int update_geom(void);
 
 #ifdef XINERAMA
-int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
+int is_unique_geom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info);
 #endif /* XINERAMA */
 
 #endif

@@ -40,7 +40,7 @@ void setup(void) {
 
   padding = drw->fonts->h;
   bar_height = drw->fonts->h + 2;
-  updategeom();
+  update_geom();
 
   /* init wm atoms */
   utf8string = XInternAtom(display, "UTF8_STRING", False);
@@ -152,7 +152,7 @@ void scan(void) {
   }
 }
 
-void checkotherwm(void) {
+void check_other_wm(void) {
   xerrorxlib = XSetErrorHandler(xerrorstart);
   /* this causes an error if some other window manager is running */
   XSelectInput(display, DefaultRootWindow(display), SubstructureRedirectMask);
@@ -229,13 +229,13 @@ void view(const Arg *arg) {
   arrange(selected_monitor);
 }
 
-Atom getatomprop(Client *c, Atom prop) {
+Atom get_atom_prop(Client *c, Atom prop) {
   int di;
   unsigned long dl;
   unsigned char *p = NULL;
   Atom da, atom = None;
 
-  /* FIXME getatomprop should return the number of items and a pointer to
+  /* FIXME get_atom_prop should return the number of items and a pointer to
    * the stored data instead of this workaround */
   Atom req = XA_ATOM;
   if (prop == xatom[XembedInfo]){
@@ -255,7 +255,7 @@ Atom getatomprop(Client *c, Atom prop) {
 }
 
 
-int updategeom(void) {
+int update_geom(void) {
   int dirty = 0;
 
   #ifdef XINERAMA
@@ -271,7 +271,7 @@ int updategeom(void) {
     /* only consider unique geometries as separate screens */
     unique = ecalloc(nn, sizeof(XineramaScreenInfo));
     for (i = 0, j = 0; i < nn; i++) {
-      if (isuniquegeom(unique, j, &info[i])){
+      if (is_unique_geom(unique, j, &info[i])){
         memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
 	  }
 	}
@@ -340,7 +340,7 @@ int updategeom(void) {
 }
 
 #ifdef XINERAMA
-int isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info) {
+int is_unique_geom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info) {
   while (n--)
     if (unique[n].x_org == info->x_org && unique[n].y_org == info->y_org &&
         unique[n].width == info->width && unique[n].height == info->height)

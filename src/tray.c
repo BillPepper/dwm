@@ -176,7 +176,7 @@ void updatesystrayiconstate(Client *client, XPropertyEvent *event) {
   long flags;
   int code = 0;
 
-  if (!systray_enabled || !client || event->atom != xatom[XembedInfo] || !(flags = getatomprop(client, xatom[XembedInfo]))) {
+  if (!systray_enabled || !client || event->atom != xatom[XembedInfo] || !(flags = get_atom_prop(client, xatom[XembedInfo]))) {
     return;
   }
 

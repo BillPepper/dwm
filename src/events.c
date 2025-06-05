@@ -125,12 +125,12 @@ void configurenotify(XEvent *e) {
   int dirty;
   Area area;
 
-  /* TODO: updategeom handling sucks, needs to be simplified */
+  /* TODO: update_geom handling sucks, needs to be simplified */
   if (ev->window == root) {
     dirty = (screen_width != ev->width || screen_height != ev->height);
     screen_width = ev->width;
     screen_height = ev->height;
-    if (updategeom() || dirty) {
+    if (update_geom() || dirty) {
       drw_resize(drw, screen_width, bar_height);
       update_bars();
       for (m = monitors; m; m = m->next) {
