@@ -31,47 +31,47 @@ void monocle(Monitor *monitor){
   }
 }
 
-void tile(Monitor *m) {
+void tile(Monitor *monitor) {
   unsigned int i, n, h, mw, my, ty;
   Client *c;
   Area area;
 
-  for (n = 0, c = next_tiled(m->clients); c; c = next_tiled(c->next), n++);
+  for (n = 0, c = next_tiled(monitor->clients); c; c = next_tiled(c->next), n++);
 
   if (n == 0){
     return;
   }
 
-  if (n > m->master_count){
-    mw = m->master_count ? m->window_area.size.w * m->master_factor : 0;
+  if (n > monitor->master_count){
+    mw = monitor->master_count ? monitor->window_area.size.w * monitor->master_factor : 0;
   } else {
-    mw = m->window_area.size.w - m->gap;
+    mw = monitor->window_area.size.w - monitor->gap;
   }
 
-  for (i = 0, my = ty = m->gap, c = next_tiled(m->clients); c; c = next_tiled(c->next), i++) {
-    if (i < m->master_count) {
-      h = (m->window_area.size.h - my) / (MIN(n, m->master_count) - i) - m->gap;
+  for (i = 0, my = ty = monitor->gap, c = next_tiled(monitor->clients); c; c = next_tiled(c->next), i++) {
+    if (i < monitor->master_count) {
+      h = (monitor->window_area.size.h - my) / (MIN(n, monitor->master_count) - i) - monitor->gap;
 
-      area.position.x = m->window_area.position.x + m->gap;
-      area.position.y = m->window_area.position.y + my;
-      area.size.w = mw - (2 * c->border_width) - m->gap;
+      area.position.x = monitor->window_area.position.x + monitor->gap;
+      area.position.y = monitor->window_area.position.y + my;
+      area.size.w = mw - (2 * c->border_width) - monitor->gap;
       area.size.h = h - (2 * c->border_width);
 
       resize(c, &area, 0);
-      if (my + HEIGHT(c) + m->gap < m->window_area.size.h){
-        my += HEIGHT(c) + m->gap;
+      if (my + HEIGHT(c) + monitor->gap < monitor->window_area.size.h){
+        my += HEIGHT(c) + monitor->gap;
 	    }
     } else {
-      h = (m->window_area.size.h - ty) / (n - i) - m->gap;
+      h = (monitor->window_area.size.h - ty) / (n - i) - monitor->gap;
 
-      area.position.x = m->window_area.position.x + mw + m->gap;
-      area.position.y = m->window_area.position.y + ty;
-      area.size.w = m->window_area.size.w - mw - (2 * c->border_width) - 2 * m->gap;
+      area.position.x = monitor->window_area.position.x + mw + monitor->gap;
+      area.position.y = monitor->window_area.position.y + ty;
+      area.size.w = monitor->window_area.size.w - mw - (2 * c->border_width) - 2 * monitor->gap;
       area.size.h = h - (2 * c->border_width);
 
       resize(c, &area, 0);
-      if (ty + HEIGHT(c) + m->gap < m->window_area.size.h){
-        ty += HEIGHT(c) + m->gap;
+      if (ty + HEIGHT(c) + monitor->gap < monitor->window_area.size.h){
+        ty += HEIGHT(c) + monitor->gap;
 	    }
     }
   }
