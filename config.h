@@ -63,6 +63,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray, "-nf", col_green, "-sb", col_gray, "-sf", col_light_green, NULL };
+static const char *emenucmd[] = { "emenu", NULL};
 static const char *termcmd[]  = { "alacritty", NULL };
 static const char *termaltcmd[]  = { "urxvt", NULL };
 
@@ -71,6 +72,7 @@ static const char *termaltcmd[]  = { "urxvt", NULL };
 static const Key keys[] = {
 	/* modifier                     key        function        argument */
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
+	{ MODKEY,                       XK_e,      spawn,          {.v = emenucmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY|ShiftMask,             XK_BackSpace, spawn,          {.v = termaltcmd } },
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
