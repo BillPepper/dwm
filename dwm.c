@@ -382,11 +382,11 @@ int apply_size_hints(Client *client, int *x, int *y, int *width, int *height, in
   *width = MAX(1, *width);
   *height = MAX(1, *height);
   if (interact) {
-    if (*x > sw){
-      *x = sw - WIDTH(client);
+    if (*x > screen_width){
+      *x = screen_width - WIDTH(client);
 	  }
-    if (*y > sh){
-      *y = sh - HEIGHT(client);
+    if (*y > screen_height){
+      *y = screen_height - HEIGHT(client);
 	  }
     if (*x + *width + 2 * client->bw < 0){
       *x = 0;
@@ -696,11 +696,11 @@ void configure_notify(XEvent *event) {
 
   /* TODO: update_geom handling sucks, needs to be simplified */
   if (ev->window == root) {
-    dirty = (sw != ev->width || sh != ev->height);
-    sw = ev->width;
-    sh = ev->height;
+    dirty = (screen_width != ev->width || screen_height != ev->height);
+    screen_width = ev->width;
+    screen_height = ev->height;
     if (update_geom() || dirty) {
-      drw_resize(drw, sw, bh);
+      drw_resize(drw, screen_width, bh);
       update_bars();
       for (m = mons; m; m = m->next) {
         for (c = m->clients; c; c = c->next){
@@ -1277,7 +1277,7 @@ void manage(Window window, XWindowAttributes *window_attributes) {
   attach(c);
   attach_stack(c);
   XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend, (unsigned char *)&(c->win), 1);
-  XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
+  XMoveResizeWindow(dpy, c->win, c->x + 2 * screen_width, c->y, c->w, c->h); /* some windows require this */
   set_client_state(c, NormalState);
   if (c->mon == selmon) {
     unfocus(selmon->sel, 0);
@@ -1821,15 +1821,15 @@ void set_mfact(const Arg *arg) {
 
 void setup(void) {
   int i;
-  XSetWindowAttributes wa;
+  XSetWindowAttributes window_attributes;
   Atom utf8string;
-  struct sigaction sa;
+  struct sigaction action;
 
   /* do not transform children into zombies when they terminate */
-  sigemptyset(&sa.sa_mask);
-  sa.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
-  sa.sa_handler = SIG_IGN;
-  sigaction(SIGCHLD, &sa, NULL);
+  sigemptyset(&action.sa_mask);
+  action.sa_flags = SA_NOCLDSTOP | SA_NOCLDWAIT | SA_RESTART;
+  action.sa_handler = SIG_IGN;
+  sigaction(SIGCHLD, &action, NULL);
 
   /* clean up any zombies (inherited from .xinitrc etc) immediately */
   while (waitpid(-1, NULL, WNOHANG) > 0);
@@ -1839,10 +1839,10 @@ void setup(void) {
 
   /* init screen */
   screen = DefaultScreen(dpy);
-  sw = DisplayWidth(dpy, screen);
-  sh = DisplayHeight(dpy, screen);
+  screen_width = DisplayWidth(dpy, screen);
+  screen_height = DisplayHeight(dpy, screen);
   root = RootWindow(dpy, screen);
-  drw = drw_create(dpy, screen, root, sw, sh);
+  drw = drw_create(dpy, screen, root, screen_width, screen_height);
 
   if (!drw_fontset_create(drw, fonts, LENGTH(fonts))) {
     die("no fonts could be loaded.");
@@ -1896,10 +1896,10 @@ void setup(void) {
   XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)netatom, NetLast);
   XDeleteProperty(dpy, root, netatom[NetClientList]);
   /* select events */
-  wa.cursor = cursor[CurNormal]->cursor;
-  wa.event_mask = SubstructureRedirectMask | SubstructureNotifyMask | ButtonPressMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PropertyChangeMask;
-  XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &wa);
-  XSelectInput(dpy, root, wa.event_mask);
+  window_attributes.cursor = cursor[CurNormal]->cursor;
+  window_attributes.event_mask = SubstructureRedirectMask | SubstructureNotifyMask | ButtonPressMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PropertyChangeMask;
+  XChangeWindowAttributes(dpy, root, CWEventMask | CWCursor, &window_attributes);
+  XSelectInput(dpy, root, window_attributes.event_mask);
   grab_keys();
   focus(NULL);
 }
@@ -2256,10 +2256,10 @@ int update_geom(void) {
     if (!mons) {
       mons = create_monitor();
 	}
-    if (mons->mw != sw || mons->mh != sh) {
+    if (mons->mw != screen_width || mons->mh != screen_height) {
       dirty = 1;
-      mons->mw = mons->ww = sw;
-      mons->mh = mons->wh = sh;
+      mons->mw = mons->ww = screen_width;
+      mons->mh = mons->wh = screen_height;
       update_bar_pos(mons);
     }
   }
@@ -2652,17 +2652,17 @@ Monitor *systray_to_monitor(Monitor *monitor) {
 }
 
 void zoom(const Arg *arg) {
-  Client *c = selmon->sel;
+  Client *client = selmon->sel;
 
-  if (!selmon->lt[selmon->sellt]->arrange || !c || c->isfloating) {
+  if (!selmon->lt[selmon->sellt]->arrange || !client || client->isfloating) {
     return;
   }
 
-  if (c == next_tiled(selmon->clients) && !(c = next_tiled(c->next))) {
+  if (client == next_tiled(selmon->clients) && !(client = next_tiled(client->next))) {
     return;
   }
 
-  pop(c);
+  pop(client);
 }
 
 int main(int argc, char *argv[]) {
