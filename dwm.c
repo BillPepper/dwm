@@ -2667,7 +2667,7 @@ void zoom(const Arg *arg) {
 
 int main(int argc, char *argv[]) {
   if (argc == 2 && !strcmp("-v", argv[1])) {
-    die("dwm-" VERSION);
+    die("dwm-" VERSION " (pdwm 0.1)");
   }
 
   if (argc != 1) {
