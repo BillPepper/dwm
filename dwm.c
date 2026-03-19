@@ -295,12 +295,12 @@ static int xerrordummy(Display *display, XErrorEvent *ee);
 static int xerrorstart(Display *display, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
-/* variables */
+/* global variables */
 static Systray *systray = NULL;
 static const char broken[] = "broken";
 static char stext[256];
 static int screen;
-static int sw, sh; /* X display screen geometry width, height */
+static int screen_width, screen_height; /* X display screen geometry width, height */
 static int bh;     /* bar height */
 static int lrpad;  /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
@@ -331,7 +331,8 @@ static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
 
-/* configuration, allows nested code to access above variables */
+
+  /* configuration, allows nested code to access above variables */
 #include "config.h"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
@@ -1873,28 +1874,35 @@ void setup(void) {
   xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
   xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
   xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
+
   /* init cursors */
   cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
   cursor[CurResize] = drw_cur_create(drw, XC_sizing);
   cursor[CurMove] = drw_cur_create(drw, XC_fleur);
+
   /* init appearance */
   scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
   for (i = 0; i < LENGTH(colors); i++){
     scheme[i] = drw_scm_create(drw, colors[i], 3);
   }
+
   /* init system tray */
   update_systray();
+
   /* init bars */
   update_bars();
   update_status();
+
   /* supporting window for NetWMCheck */
   wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
   XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
   XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8, PropModeReplace, (unsigned char *)"dwm", 3);
   XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32, PropModeReplace, (unsigned char *)&wmcheckwin, 1);
+
   /* EWMH support per view */
   XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32, PropModeReplace, (unsigned char *)netatom, NetLast);
   XDeleteProperty(dpy, root, netatom[NetClientList]);
+
   /* select events */
   window_attributes.cursor = cursor[CurNormal]->cursor;
   window_attributes.event_mask = SubstructureRedirectMask | SubstructureNotifyMask | ButtonPressMask | PointerMotionMask | EnterWindowMask | LeaveWindowMask | StructureNotifyMask | PropertyChangeMask;
@@ -2666,33 +2674,44 @@ void zoom(const Arg *arg) {
 }
 
 int main(int argc, char *argv[]) {
+
+  // Check '-v' arg
   if (argc == 2 && !strcmp("-v", argv[1])) {
     die("dwm-" VERSION " (pdwm 0.1)");
   }
 
+  // Show usage
   if (argc != 1) {
     die("usage: dwm [-v]");
   }
 
+  // Locale
   if (!setlocale(LC_CTYPE, "") || !XSupportsLocale()) {
     fputs("warning: no locale support\n", stderr);
   }
 
+  // Open display
   if (!(dpy = XOpenDisplay(NULL))) {
     die("dwm: cannot open display");
   }
 
-  check_other_wm(); // check if another wm is running
-  setup();        // init systray, bars, screens, etc.
-  scan();
-  run(); 			    // event loop
+  // check if another wm is running
+  check_other_wm();
 
+  // init systray, bars, screens, etc.
+  setup();
+  scan();
+
+  // event loop
+  run();
+
+  // if restart is set
   if (restart) {
     execvp(argv[0], argv);
   }
 
+  // exit
   cleanup();
   XCloseDisplay(dpy);
-
   return EXIT_SUCCESS;
 }
